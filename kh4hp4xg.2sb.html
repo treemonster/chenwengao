@@ -11,24 +11,24 @@
 <link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
 <link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
 
-<title>css3自定义滚动条样式</title>
+<title>sass变量和继承类写法</title>
 
 <body class="readonly github-io">
 <div class='tabc'>
 <div class='datelist-btn white-btn'>展开目录</div>
 <div class="tabsr">
-  <div class="tabsr-title">css3自定义滚动条样式</div>
-  <div class="tabsr-tags"><span class="tagz" style="background: #67dd64">css3</span><span class="tagz" style="background: #be4e0e">scrollbar</span></div>
+  <div class="tabsr-title">sass变量和继承类写法</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #1f8dc2">sass</span><span class="tagz" style="background: #d711b5">scss</span><span class="tagz" style="background: #c7a628">css</span></div>
 </div>
 <div class='tabs'>
   <input type='text' placeholder='文档标题修改后自动保存' id='curinp' autocomplete='off' />
-  <script>curinp.value="css3自定义滚动条样式"</script>
+  <script>curinp.value="sass变量和继承类写法"</script>
 
   <input type='text' placeholder='每个标签用空字符隔开' id='tags1' autocomplete='off' />
-  <script>tags1.value="css3 scrollbar"</script>
+  <script>tags1.value="sass scss css"</script>
 
-  <span class='dellink' onclick='del(["khalg5ks.g","css3自定义滚动条样式"])'>- 删除</span>
-  <a target='_blank' class='newlink' href='?id=khaqaqaf.nsu'>+ 新建</a>
+  <span class='dellink' onclick='del(["kh4hp4xg.2sb","sass变量和继承类写法"])'>- 删除</span>
+  <a target='_blank' class='newlink' href='?id=khaqaszp.yp6'>+ 新建</a>
   <span id='contentDL'>下载png</span>
 </div>
 </div>
@@ -40,7 +40,7 @@
     
     <div class="inexport text">
       blogs-pi
-      <a class="link-space" href='?id=khalg5ks.g&do=space'>打开文件空间</a>
+      <a class="link-space" href='?id=kh4hp4xg.2sb&do=space'>打开文件空间</a>
     </div>
     <div class="login white-btn">GA-Login</div>
     
@@ -50,44 +50,19 @@
   </div>
 </div>
 <textarea id='inp'>```css
-/*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/  
-::-webkit-scrollbar  
-{  
-    width: 4px;  
-    height: 4px;  
-    background-color: #F5F5F5;  
-}  
-/*定义滚动条轨道 内阴影+圆角*/  
-::-webkit-scrollbar-track  
-{  
-    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);  
-    border-radius: 10px;  
-    background-color: #FFF;  
-}  
-/*定义滑块 内阴影+圆角*/  
-::-webkit-scrollbar-thumb  
-{  
-    border-radius: 10px;  
-    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);  
-    background-color: #AAA;  
-}  /*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/  
-::-webkit-scrollbar  
-{  
-    width: 4px;  
-    height: 4px;  
-    background-color: #F5F5F5;  
-}  /*定义滚动条轨道 内阴影+圆角*/  
-::-webkit-scrollbar-track  
-{  
-    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);  
-    border-radius: 10px;  
-    background-color: #FFF;  
-}  /*定义滑块 内阴影+圆角*/  
-::-webkit-scrollbar-thumb  
-{  
-    border-radius: 10px;  
-    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);  
-    background-color: #AAA;  
+/* 变量写法 */
+$r: #f00;
+.cc{
+  color: $r;
+}
+
+/* 继承类写法 */
+.aa{
+  color: #f00;
+  left: 2px;
+}
+.bb{
+  @extend .aa;
 }
 ```</textarea>
 <div id="content"></div>
@@ -100,7 +75,7 @@
 
 
 <script>
-var qid="khalg5ks.g";
+var qid="kh4hp4xg.2sb";
 var LOGINED=0;
 var IS_FOR_GITHUB_IO=1;
 </script>

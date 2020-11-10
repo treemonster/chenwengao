@@ -649,6 +649,7 @@ body.win-min #contentDL {
   line-height: 1.5;
   color: #000;
   font-size: 14px;
+  cursor: pointer;
 }
 .resetga-div .gaqr {
   width: 100%;
@@ -743,6 +744,7 @@ body.win-min #contentDL {
   line-height: 25px;
   padding-left: 20px;
   word-break: break-all;
+  white-space: normal;
   padding-right: 20px;
   overflow: hidden;
   display: -webkit-box;

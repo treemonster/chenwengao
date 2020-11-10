@@ -719,3 +719,33 @@ body.win-min #contentDL {
 .github-io .login {
   display: none!important;
 }
+.description {
+  color: #ddd;
+  position: absolute;
+  top: 70px;
+  left: 0;
+  text-indent: 20px;
+  right: 10px;
+  overflow: hidden;
+  height: 20px;
+  line-height: 20px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.github-io .description {
+  color: #ddd;
+  position: absolute;
+  top: 50px;
+  left: 0;
+  text-indent: 20px;
+  right: 10px;
+  height: 50px;
+  line-height: 25px;
+  padding-left: 20px;
+  word-break: break-all;
+  padding-right: 20px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}

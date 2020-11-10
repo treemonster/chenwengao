@@ -1,0 +1,210 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>Promise才是javascript的正统队列</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">Promise才是javascript的正统队列</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #a5a3f0">Promise</span><span class="tagz" style="background: #de9b9e">javascript</span><span class="tagz" style="background: #671a0d">nodejs</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>由于ie11不支持Promise，再加上以前没有认真地看过Promise的方法设计，所以我曾经为了解决异步回调嵌套的问题而制造了一些多余的轮子（比如nodejs异步回调的并发控制），现在看来这些东西完全可以用Promise来更好地解决，而且前人已经都解决了。。 </p>
+<p><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a> 的具体说明可以直接参考MDN上的实例代码。为了深刻的理解这些方法的使用，同时也为了能在ie上使用Promise来控制异步流程，我写了一个Promise的实现代码，用来证实我对规范中细节的理解。 </p>
+<ul>
+<li><h3 id="需要注意的细节如下：">需要注意的细节如下：#</h3>
+<ol start="0">
+<li>then方法返回的是距离当前位置最近的一个Promise或者thenable，因此链式调用时 <code>a.then();a.then();</code> 和 <code>a.then().then();</code> 不一定是等价的</li>
+<li>Promise.resolve 和 Promise.reject 接受的参数可以是 value | thenable | Promise，value的情况下会直接把参数传递给then，而thenable或者Promise时，会把他们的处理结果传递给then</li>
+</ol>
+</li>
+</ul>
+<p>理解之后对下面的Promise异步队列执行逻辑就不会感到困惑了： </p>
+<pre><code class="language-javascript">var r=function(a,e){
+  return new Promise(function(resolve,reject){
+    setTimeout(function(){
+      e?reject(e):resolve(a);
+    },500);
+  });
+};
+var s=function(a,e){
+  return function(x){
+    console.log(a,&#39;=&gt;&#39;,x);
+    return r(a,e);
+  };
+};
+
+console.log(&#39; 1* 顺序队列&#39;);
+Promise.reject(1).then(
+  null, s(2,null)
+).then(
+  s(3,true), null
+).then(
+  null, s(4,null)
+).then(function(value){
+  console.log(&#39;&gt;&gt; completed: &#39;,value);
+
+  console.log(&#39; 2* 并发队列&#39;);
+  var o=[];
+  for(var i=0;i&lt;3;i++)
+    for(var j=0;j&lt;5;j++)
+      o[i]=(o[i]||Promise.resolve(j)).then(s(i,null));
+
+});
+</code></pre>
+<p>实现代码： <a href="https://www.xdelve.com/resources/js_modules/polyfill/Promise.js">https://www.xdelve.com/resources/js_modules/polyfill/Promise.js</a> </p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp52g.1h.html">nodejs本地双向代理 端口转发</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hp55s.p7g.html">判断变量是否 0 或者 &#39;0&#39;</a></p>
+</li>
+<li><p><a href="kh4hp569.gcj.html">nodejs俄罗斯方块</a></p>
+</li>
+<li><p><a href="kh4hp58r.537.html">webrtc服务搭建</a></p>
+</li>
+<li><p><a href="kh4hp5eg.y8e.html"> ssl 证书生成方式</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="87823.html">youku电脑版跳过广告代码</a></p>
+</li>
+<li><p><a href="58847.html">解密某个js文件</a></p>
+</li>
+<li><p><a href="58843.html">破解百度云下载链接</a></p>
+</li>
+<li><p><a href="58838.html">nodejs建立多级目录</a></p>
+</li>
+<li><p><a href="58829.html">让js支持带命名的正则表达式</a></p>
+</li>
+<li><p><a href="58822.html">jshtml模板引擎</a></p>
+</li>
+<li><p><a href="58821.html">linux 上配置node路径</a></p>
+</li>
+<li><p><a href="58818.html">json2html源码</a></p>
+</li>
+<li><p><a href="58813.html">nodejs处理gb2312编码</a></p>
+</li>
+<li><p><a href="58798.html">nodejs遍历文件夹</a></p>
+</li>
+<li><p><a href="58793.html">读取Blob的内容实体</a></p>
+</li>
+<li><p><a href="58791.html">nodejs那恶心的stream.Readable</a></p>
+</li>
+<li><p><a href="58787.html">Promise复习，nodejs异步建立多级目录</a></p>
+</li>
+<li><p><a href="58786.html">判断一个object是否HTMLDom</a></p>
+</li>
+<li><p><a href="58783.html">异步并发也要保证原子性</a></p>
+</li>
+<li><p><a href="58781.html">简易命令行解析器</a></p>
+</li>
+<li><p><a href="58780.html">Promise才是javascript的正统队列</a></p>
+</li>
+<li><p><a href="58779.html">callback =&gt; Promise.then</a></p>
+</li>
+<li><p><a href="58778.html">简易转义字符转实体字符方法</a></p>
+</li>
+<li><p><a href="58777.html">nodejs异步回调的并发控制</a></p>
+</li>
+<li><p><a href="58773.html">低版本IE命名函数表达式bug</a></p>
+</li>
+<li><p><a href="58772.html">让重复调用只有第一次生效</a></p>
+</li>
+<li><p><a href="58771.html">简易JSON函数封装</a></p>
+</li>
+<li><p><a href="58770.html">使用eval来修改上下文的变量</a></p>
+</li>
+<li><p><a href="58767.html">seajs同步加载依赖的实现和弊病</a></p>
+</li>
+<li><p><a href="58766.html">html5页面全屏方法</a></p>
+</li>
+<li><p><a href="58765.html">给滚动条置顶添加过渡动画</a></p>
+</li>
+<li><p><a href="58764.html">m秒内最多n次的问题</a></p>
+</li>
+<li><p><a href="58762.html">让代码扁平化</a></p>
+</li>
+<li><p><a href="58760.html">关于自动加载的问题</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="khbe1zve.29n.html">css多行文本超出截断显示省略号</a></p>
+</li>
+<li><p><a href="kh8hr1ki.4fs.html">mac ssh透过代理连接</a></p>
+</li>
+<li><p><a href="kh4hp4u7.5l8.html">react项目webpack打包时拆分异步加载的文件</a></p>
+</li>
+<li><p><a href="kh4hp50h.0q9.html">curl用法</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp569.gcj.html">nodejs俄罗斯方块</a></p>
+</li>
+<li><p><a href="kh4hp57y.fpf.html">npm设置仓库地址和代理</a></p>
+</li>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
+</li>
+<li><p><a href="kh4hp5bk.27.html">cdn资源列表</a></p>
+</li>
+<li><p><a href="kh4hp5by.jnt.html">webpack使用外部资源</a></p>
+</li>
+<li><p><a href="kh4ib7jk.t1.html">mongodb2.4 添加用户</a></p>
+</li>
+<li><p><a href="88328.html">python下载文件，带进度条控制</a></p>
+</li>
+<li><p><a href="88229.html">mysql导出csv文件</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="87999.html">bootstrap modal弹框导致ie无法获取焦点</a></p>
+</li>
+<li><p><a href="81007.html">html表格导出csv文件并下载</a></p>
+</li>
+<li><p><a href="69351.html">缓存才是优化的终极手段</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58780";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

@@ -1,0 +1,120 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>树莓派配置wifi</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">树莓派配置wifi</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #28be9c">wifi配置</span><span class="tagz" style="background: #7fa67b">树莓派</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>树莓派3包含了wifi连接口，可以直接连接wifi，本文介绍配置方法。</p>
+<p>首先打开 <code>/etc/wpa_supplicant/wpa_supplicant.conf</code></p>
+<p>加上这些代码在最后：</p>
+<pre><code>network={
+  ssid= &quot;wifi名称&quot;
+  psk=  &quot;wifi密码&quot;
+}</code></pre>
+<p>然后打开 <code>/etc/network/interfaces</code>，增加以下代码：</p>
+<pre><code>auto wlan0
+allow-hotplug wlan0
+iface wlan0 inet dhcp
+wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf</code></pre>
+<p>以上配置意思是，自动启用wlan0，支持热拔插，自动获取ip，使用第一步的配置文件。</p>
+<p>然后重启network和wlan0:</p>
+<pre><code>/etc/init.d/networking restart
+ifup wlan0</code></pre>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp53u.pjh.html">树莓派实现用pi用户自动登录</a></p>
+</li>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
+</li>
+<li><p><a href="kh4hp5b6.kdr.html">树莓派配置wifi热点</a></p>
+</li>
+<li><p><a href="kh4hp5fb.n3u.html">把树莓派的存储空间拓展到整张TF卡中</a></p>
+</li>
+<li><p><a href="88181.html">树莓派配置收发邮件</a></p>
+</li>
+<li><p><a href="88180.html">树莓派配置wifi</a></p>
+</li>
+<li><p><a href="58826.html">树莓派无源蜂鸣器发声实验</a></p>
+</li>
+<li><p><a href="58825.html">找树莓派的内网ip</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4xg.2sb.html">sass变量和继承类写法</a></p>
+</li>
+<li><p><a href="kh4hp501.g4a.html">npm远程服务器某些配置不兼容代理的解决办法</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp53u.pjh.html">树莓派实现用pi用户自动登录</a></p>
+</li>
+<li><p><a href="kh4hp58r.537.html">webrtc服务搭建</a></p>
+</li>
+<li><p><a href="kh4hp596.lj.html">webrtc泄漏本地ip信息</a></p>
+</li>
+<li><p><a href="kh4hp5as.pb.html">linux自启动/禁止自启动服务</a></p>
+</li>
+<li><p><a href="kh4hp5cd.lmo.html">TIME_WAIT过多</a></p>
+</li>
+<li><p><a href="kh4hp5ct.4ys.html">putty使用http代理连接服务器</a></p>
+</li>
+<li><p><a href="kh4hp5d7.f8n.html">git配置服务端支持http认证</a></p>
+</li>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="88172.html">mysql选取内容导出到文件</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="87991.html">数据库清理优化</a></p>
+</li>
+<li><p><a href="79547.html">前端性能观察器</a></p>
+</li>
+<li><p><a href="79146.html">linux 批量替换文本内容</a></p>
+</li>
+<li><p><a href="75739.html">平面旋转</a></p>
+</li>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="88180";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

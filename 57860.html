@@ -1,0 +1,136 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>nginx 限制访问频率</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">nginx 限制访问频率</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #ee4340">nginx</span><span class="tagz" style="background: #ccc8ea">ngx_http_limit_req_module</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>虽然无法找到合适的方法对付百度云观测的流量攻击，但一个ab命令就把服务器跑崩掉不应该。所以我使用了nginx的<strong>ngx_http_limit_req_module</strong> 模块设置限制频率。</p>
+<p>使用这个模块的流程是：</p>
+<ol start="0">
+<li><p>在http节内定义 req_limit_zone</p>
+<p>ngx_http_limit_req_module模块限制方式语法：</p>
+<pre><code class="language-nginx">limit_req_zone 键值 zone=名称:存储空间大小 rate=多少次/单位时间;</code></pre>
+<p><code>键值</code> 可以是普通字符串或者内置的变量，模块根据此键值统计访问的次数，从而计算出访问频率是否符合预设值。例如用 $binary_remote_addr 作为键值时，可以统计同一个来路ip的访问频率。<code>名称</code> 就是一个变量，用来给<code>limit_req</code>指令使用的。次数是一个整数，单位时间可以是秒<code>s</code>或者分钟<code>m</code>。存储空间用来存放请求访问的状态，一兆字节的区域可以保留约16000个64字节的状态或大约8千128个字节的状态。比如下面这句话限制了一个ip 在 3秒内只能访问2次（因为次数必须是整数，所以这里取1分钟40次）：</p>
+<pre><code class="language-nginx">http{
+ limit_req_zone $binary_remote_addr zone=ip32:10m rate=40r/m;
+ ...
+}</code></pre>
+</li>
+<li><p>在http，server或者location里写 limit_req 命令
+limit_req语法：</p>
+<pre><code class="language-nginx">limit_req zone=已定义的limit_req_zone名称 burst=突发请求数 是否nodelay;</code></pre>
+<p>如果请求频率符合zone的预设值，那么burst和nodelay没有作用。现在假定预设值为 1r/s ，brust=2，未设置nodelay。实际第一秒发生了5个请求，则第一个请求毫无疑问被处理了，第二个和第三个被挂起，等到第二秒处理，最后两个直接返回503错误。<code>nodelay</code> 如果被设置了，那么2和3会在第一秒被处理，4和5同样得到503错误，而第二秒不处理任何请求。如果burst和nodelay都不写的话，那么默认是burst=0，没有nodelay。</p>
+<pre><code class="language-nginx">http{
+  ...
+  server{
+   ...
+   limit_req   zone=ip32 burst=2 nodelay;
+  }
+}</code></pre>
+<p>limit_req写在server里的时候没有什么歧义，而写在location里面时就要注意了，如果后面是rewrite跳转的情况，当前limit_req限制就会无效，必须要写到实际处理的那个location才可以。return也是这样，因为return并没有发生实际的请求，因此nginx不统计访问频率。</p>
+</li>
+</ol>
+<hr>
+<p>参考：
+0. <a href="http://nginx.org/en/docs/varindex.html">内置的nginx变量</a></p>
+<ol start="0">
+<li><a href="http://nginx.org/en/docs/http/ngx_http_limit_req_module.html">nginx限制模块 ngx_http_limit_req_module</a></li>
+</ol>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4wj.uv.html">nginx 子域名对应文件夹</a></p>
+</li>
+<li><p><a href="kh4hp50y.c3p.html">nginx用域名来转发请求</a></p>
+</li>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="57860.html">nginx 限制访问频率</a></p>
+</li>
+<li><p><a href="57859.html">nginx 禁止百度云观测访问</a></p>
+</li>
+<li><p><a href="58848.html">为百度抓取单独开辟http通道</a></p>
+</li>
+<li><p><a href="58842.html">nginx域名跳转配置和禁止ip访问</a></p>
+</li>
+<li><p><a href="58794.html">nginx反向代理模拟本地服务器环境</a></p>
+</li>
+<li><p><a href="58790.html">nginx域名映射目录的配置方法</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4ut.68c.html">华为等国产手机rem宽度超过实际宽度</a></p>
+</li>
+<li><p><a href="kh4hp4vo.i3t.html">word文件命令行打印</a></p>
+</li>
+<li><p><a href="kh4hp4wj.uv.html">nginx 子域名对应文件夹</a></p>
+</li>
+<li><p><a href="kh4hp4z5.bct.html">raw.githubusercontent.com DNS被指向127.0.0.1</a></p>
+</li>
+<li><p><a href="kh4hp53d.49g.html">jxa运动指令脚本</a></p>
+</li>
+<li><p><a href="kh4hp55c.9dm.html">搜索命令整理</a></p>
+</li>
+<li><p><a href="kh4hp569.gcj.html">nodejs俄罗斯方块</a></p>
+</li>
+<li><p><a href="kh4hp58r.537.html">webrtc服务搭建</a></p>
+</li>
+<li><p><a href="kh4hp5as.pb.html">linux自启动/禁止自启动服务</a></p>
+</li>
+<li><p><a href="kh4hp5d7.f8n.html">git配置服务端支持http认证</a></p>
+</li>
+<li><p><a href="88328.html">python下载文件，带进度条控制</a></p>
+</li>
+<li><p><a href="88246.html">centos查看最近一次的开机时间</a></p>
+</li>
+<li><p><a href="88172.html">mysql选取内容导出到文件</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88153.html">猴子选大王算法问题</a></p>
+</li>
+<li><p><a href="79146.html">linux 批量替换文本内容</a></p>
+</li>
+<li><p><a href="75739.html">平面旋转</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="57860";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

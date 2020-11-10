@@ -1,0 +1,94 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>开发时别做多余的代码压缩</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">开发时别做多余的代码压缩</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #1075cc">吐槽</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>我写代码的时候从来都不会把缩进去掉，即使上线对外的版本也是如此。我认为代码压缩纯粹是一件坑爹不利己的事情。 
+想到这个问题是在维护一个由外包公司开发的项目的时候。因为页面改版，需要把其中一块的样式进行调整。原本以为调节样式是一件很轻松地事情，但是当我打开项目里那个样式表的源代码时，我着实被这密密麻麻一整行的压缩代码惊呆了，这特么是人写的东西吗？ 
+虽然最后解决办法有很多，比如先找一个工具把代码格式化，或者直接搜关键字去修改，但是我实在无法认同这种做法。我觉得代码压缩的事情即使要做，也应该交给上层服务去解决，比如在nginx服务器中开启gzip压缩，或者发布版本提交前有一个中间层用于预编译（压缩）原始代码，而在开发过程中这么做只会影响开发效率。 
+除了样式表之外，还有人居然把一些独立模块的js代码去压缩了。我可以想到这种愚蠢的行为背后原因是不想给别人看到自己的代码是怎么写的，但是这种行为却导致了后期维护很困难。并不是每一个人都具备直接读/改压缩后js的能力的，尤其是一些号称前端但是对只会写几个样式的人。 
+还有更多的事例我也懒得吐槽了，我觉得个人项目怎么玩无所谓，反正要坑只会坑自己，但是团队项目必须杜绝，强烈鄙视压缩代码的行为。 </p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><a href="58761.html">开发时别做多余的代码压缩</a></li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="khalg5ks.g.html">css3自定义滚动条样式</a></p>
+</li>
+<li><p><a href="kh8hr1ki.4fs.html">mac ssh透过代理连接</a></p>
+</li>
+<li><p><a href="kh4hp4xw.fuh.html">mac 终端运行后台程序如何在终端关闭时继续运行</a></p>
+</li>
+<li><p><a href="kh4hp4z5.bct.html">raw.githubusercontent.com DNS被指向127.0.0.1</a></p>
+</li>
+<li><p><a href="kh4hp501.g4a.html">npm远程服务器某些配置不兼容代理的解决办法</a></p>
+</li>
+<li><p><a href="kh4hp50y.c3p.html">nginx用域名来转发请求</a></p>
+</li>
+<li><p><a href="kh4hp5a0.gjt.html">单页应用的单向数据流的流程图</a></p>
+</li>
+<li><p><a href="kh4hp5ae.oak.html">dd备份/还原</a></p>
+</li>
+<li><p><a href="kh4hp5as.pb.html">linux自启动/禁止自启动服务</a></p>
+</li>
+<li><p><a href="kh4hp5by.jnt.html">webpack使用外部资源</a></p>
+</li>
+<li><p><a href="kh4hp5eg.y8e.html"> ssl 证书生成方式</a></p>
+</li>
+<li><p><a href="kh4hp5fb.n3u.html">把树莓派的存储空间拓展到整张TF卡中</a></p>
+</li>
+<li><p><a href="88229.html">mysql导出csv文件</a></p>
+</li>
+<li><p><a href="88181.html">树莓派配置收发邮件</a></p>
+</li>
+<li><p><a href="88172.html">mysql选取内容导出到文件</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="83845.html">配置mysql ssl连接</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58761";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

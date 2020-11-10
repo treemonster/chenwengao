@@ -1,0 +1,124 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>ie8上Image.onload不触发问题</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">ie8上Image.onload不触发问题</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #eb75f6">ie8</span><span class="tagz" style="background: #ae0e4b">bug</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>图片延迟加载通常使用<code>Image</code>这个东西来实现，但它的onload特性在各种ie浏览器上的表现都很不正常，尤其是ie8！</p>
+<p>以下是预加载的代码：</p>
+<pre><code class="language-javascript">a=new Image
+a.src=&#39;/a.jpg&#39;
+a.onload=function(){alert(&#39;loaded&#39;)}</code></pre>
+<p>这样写在一部分现代浏览器上会正确运行，但ie浏览器可能就不会触发onload，因为设置了src之后，浏览器就开始加载图片缓存了，如果加载图片缓存比绑定onload之前完成，那么onload就不会被触发。</p>
+<p>所以改了以下变成这样的代码：</p>
+<pre><code class="language-javascript">a=new Image
+a.onload=function(){alert(&#39;loaded&#39;)}
+a.src=&#39;/a.jpg&#39;</code></pre>
+<p>你以为这样就正确了？不，ie8依然<code>可能</code>不触发onload。实测，同时很多个图片进行加载时，ie8有部分图片还是会错过onload时机。</p>
+<p>归根到底还是ie8上触发的时机太早了，写在后面也不管用，最终手段：加定时器</p>
+<pre><code class="language-javascript">a=new Image
+a.onload=function(){alert(&#39;loaded&#39;)}
+setTimeout(function(){
+  a.src=&#39;/a.jpg&#39;
+},navigator.userAgent.match(/msie\s*8/i)?1e2:1)</code></pre>
+<p>这样总算搞定了ie8</p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="88103.html">ie8上Image.onload不触发问题</a></p>
+</li>
+<li><p><a href="87999.html">bootstrap modal弹框导致ie无法获取焦点</a></p>
+</li>
+<li><p><a href="67375.html">jquery获取窗口高度踩坑</a></p>
+</li>
+<li><p><a href="67352.html">bootstrap打开多个模态框的bug</a></p>
+</li>
+<li><p><a href="58841.html">utf8还是utf-8？</a></p>
+</li>
+<li><p><a href="58773.html">低版本IE命名函数表达式bug</a></p>
+</li>
+<li><p><a href="58769.html">生产环境预留调试入口的想法</a></p>
+</li>
+<li><p><a href="58768.html">safari popstate bug</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4wj.uv.html">nginx 子域名对应文件夹</a></p>
+</li>
+<li><p><a href="kh4hp4xw.fuh.html">mac 终端运行后台程序如何在终端关闭时继续运行</a></p>
+</li>
+<li><p><a href="kh4hp50h.0q9.html">curl用法</a></p>
+</li>
+<li><p><a href="kh4hp51g.d79.html">SSL certificate problem: self signed certificate in certificate chain</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp52g.1h.html">nodejs本地双向代理 端口转发</a></p>
+</li>
+<li><p><a href="kh4hp53d.49g.html">jxa运动指令脚本</a></p>
+</li>
+<li><p><a href="kh4hp53u.pjh.html">树莓派实现用pi用户自动登录</a></p>
+</li>
+<li><p><a href="kh4hz03h.xh.html">python 用摄像头拍照并写入文件</a></p>
+</li>
+<li><p><a href="kh4hp57y.fpf.html">npm设置仓库地址和代理</a></p>
+</li>
+<li><p><a href="kh4hp58r.537.html">webrtc服务搭建</a></p>
+</li>
+<li><p><a href="kh4hp5bk.27.html">cdn资源列表</a></p>
+</li>
+<li><p><a href="88229.html">mysql导出csv文件</a></p>
+</li>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="87218.html">感谢beego陪伴我度过那不靠谱的半年</a></p>
+</li>
+<li><p><a href="79146.html">linux 批量替换文本内容</a></p>
+</li>
+<li><p><a href="75739.html">平面旋转</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="88103";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

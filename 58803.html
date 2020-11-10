@@ -1,0 +1,123 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>centos 7安装字体</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">centos 7安装字体</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #cdc872">centos</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>安装完 centos 7 minimal之后，发现中文字居然都不能显示。于是我寻找了安装字体的方法。</p>
+<p>首先在centos系统上建立中文字体目录，并进入此目录</p>
+<pre><code class="language-bash">mkdir /usr/share/fonts/chinese/
+cd /usr/share/fonts/chinese/</code></pre>
+<p>用winscp连接此centos服务器，并进入中文字体目录<code>/usr/share/fonts/chinese/</code>。</p>
+<p>centos 支持ttf字体，因此我打开本地windows系统上的字体目录，<code>c:\windows\fonts</code>，把ttf格式的字体全部弄到中文字体目录下。</p>
+<p>然后执行以下命令</p>
+<pre><code class="language-bash">mkfontscale # 在当前目录下生成fonts.scale文件
+mkfontdir   # 在当前目录下生成fonts.dir文件
+fc-cache -fv # 重新建立字体缓存</code></pre>
+<p>再次打开中文网站</p>
+<pre><code class="language-bash">curl https://xdelve.com</code></pre>
+<p>可以发现已经正常显示了。</p>
+<p>参考资料</p>
+<p><a href="http://www.centoscn.com/image-text/setup/2015/0402/5072.html">http://www.centoscn.com/image-text/setup/2015/0402/5072.html</a></p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="88246.html">centos查看最近一次的开机时间</a></p>
+</li>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="88128.html">centos7 开放或者关闭端口</a></p>
+</li>
+<li><p><a href="58849.html">配置vmbox里的centos7静态ip</a></p>
+</li>
+<li><p><a href="58836.html">centos7 静默复制命令踩坑</a></p>
+</li>
+<li><p><a href="58835.html">centos7 安装7z解压客户端</a></p>
+</li>
+<li><p><a href="58806.html">centos7部署samba服务</a></p>
+</li>
+<li><p><a href="58803.html">centos 7安装字体</a></p>
+</li>
+<li><p><a href="58802.html">centos7 Minimal安装桌面</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4ya.6e.html">ipsec vpn 添加新账号</a></p>
+</li>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp4zl.csd.html">css3 文字渐变色</a></p>
+</li>
+<li><p><a href="kh4hp50h.0q9.html">curl用法</a></p>
+</li>
+<li><p><a href="kh4hp54d.xb.html">git删除远程分支</a></p>
+</li>
+<li><p><a href="kh4hp55s.p7g.html">判断变量是否 0 或者 &#39;0&#39;</a></p>
+</li>
+<li><p><a href="kh4hp574.hum.html">heroku登陆cli</a></p>
+</li>
+<li><p><a href="kh4hp58c.8w7.html">模拟307跳转情况</a></p>
+</li>
+<li><p><a href="kh4hp5dm.5i.html">git记住/删除账号密码</a></p>
+</li>
+<li><p><a href="88246.html">centos查看最近一次的开机时间</a></p>
+</li>
+<li><p><a href="88229.html">mysql导出csv文件</a></p>
+</li>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88128.html">centos7 开放或者关闭端口</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="88094.html">随机取某个概率区间的代码</a></p>
+</li>
+<li><p><a href="79146.html">linux 批量替换文本内容</a></p>
+</li>
+<li><p><a href="75739.html">平面旋转</a></p>
+</li>
+<li><p><a href="72645.html">记一次mysql死锁的教训</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58803";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

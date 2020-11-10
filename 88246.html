@@ -1,0 +1,97 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>centos查看最近一次的开机时间</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">centos查看最近一次的开机时间</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #e33efc">centos开机时间</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>今天早上某个用户的服务器突然打不开，让我查找原因。我登陆ssh一看发现docker进程未启动，于是我启动了，之后发现一切都恢复正常。因此确定是服务器被人为重启了，需要确定重启的时间。</p>
+<p>首先我使用了<code>last</code>命令，查看到的结果如下：</p>
+<p><img src="/uploads/2017/12/14/96//newup-fa43d59ff556d19ccc514de8b96fed9236.png" alt="paste.png"></p>
+<p>一看<code>reboot</code>时间居然是14号下午 4点的记录，现在的时间才上午，发生在未来的事情明显是不可能的。所以last的结果不可信。我又换了一个方法，这次是查看系统开机到现在运行的时间：</p>
+<p><img src="/uploads/2017/12/14/52//newup-fa8ec35782b79431d25fbe9f5733eb5a5a.png" alt="paste.png"></p>
+<p>前一个数字是系统当前已运行的秒数。换算之后大约是2个小时，结合当前时间是10点多，所以推算出重启的时间大约是8点多。</p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><a href="88246.html">centos查看最近一次的开机时间</a></li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="khalg5ks.g.html">css3自定义滚动条样式</a></p>
+</li>
+<li><p><a href="kh4hp4v9.83f.html">安卓文字偏上，文字顶部被遮罩</a></p>
+</li>
+<li><p><a href="kh4hp4xw.fuh.html">mac 终端运行后台程序如何在终端关闭时继续运行</a></p>
+</li>
+<li><p><a href="kh4hp501.g4a.html">npm远程服务器某些配置不兼容代理的解决办法</a></p>
+</li>
+<li><p><a href="kh4hp50y.c3p.html">nginx用域名来转发请求</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hp54u.a47.html">html5 全屏代码</a></p>
+</li>
+<li><p><a href="kh4hp55s.p7g.html">判断变量是否 0 或者 &#39;0&#39;</a></p>
+</li>
+<li><p><a href="kh4hp57y.fpf.html">npm设置仓库地址和代理</a></p>
+</li>
+<li><p><a href="kh4hp596.lj.html">webrtc泄漏本地ip信息</a></p>
+</li>
+<li><p><a href="kh4hp5by.jnt.html">webpack使用外部资源</a></p>
+</li>
+<li><p><a href="kh4hp5cd.lmo.html">TIME_WAIT过多</a></p>
+</li>
+<li><p><a href="kh4ib7jk.t1.html">mongodb2.4 添加用户</a></p>
+</li>
+<li><p><a href="88225.html">mac搜索局域网内的主机</a></p>
+</li>
+<li><p><a href="87999.html">bootstrap modal弹框导致ie无法获取焦点</a></p>
+</li>
+<li><p><a href="81007.html">html表格导出csv文件并下载</a></p>
+</li>
+<li><p><a href="79547.html">前端性能观察器</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="88246";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

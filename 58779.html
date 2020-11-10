@@ -1,0 +1,229 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>callback => Promise.then</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">callback => Promise.then</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #671a0d">nodejs</span><span class="tagz" style="background: #b321de">promise</span><span class="tagz" style="background: #de9b9e">javascript</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>nodejs中的所有异步api都是把最后一个参数作为回调函数。遇到一些开发习惯不好的程序员会把多重异步写成嵌套模式的回调，增加阅读和维护的难度。我觉得，这些api如果可以把回调的形式改成Promise就好了，这样能从根源上解决嵌套回调的作死行为。 </p>
+<p>nodejs的异步api结构通常是这样的： </p>
+<pre><code class="language-javascript">function testAsync(arg1,arg2,callback){
+  // 一些过程
+  ...
+
+  // 如果执行成功
+  callback(null,执行结果);
+
+  // 如果执行失败
+  callback(错误原因,null);
+
+}</code></pre>
+<p>所以封装成Promise时，只需要对callback和callback的第一个参数做特殊对待即可，以下是一个简单的转换封装。 </p>
+<pre><code class="language-javascript">/**
+ * @param {Function} apiHandler , {Array} args for apiHandler , {Object} this
+ * @param {Object} [options.cookie] Options for cookie
+ */
+var ts=(handler,args,_this)=&gt;{
+  return new Promise(function(resolve,reject){
+    (args=args||[]).push((e,...r)=&gt;e?reject(e):resolve(r));
+    return handler.apply(_this || {},args);
+  });
+};</code></pre>
+<p>使用示例如下，供实际使用参考。 </p>
+<pre><code class="language-javascript">
+//----------------------------------------
+var ts=(handler,args,_this)=&gt;{
+  return new Promise(function(resolve,reject){
+    (args=args||[]).push((e,...r)=&gt;e?reject(e):resolve(r));
+    return handler.apply(_this || {},args);
+  });
+};
+//----------------------------------------
+
+// 一个异步的 api
+var r=function(a,callback){
+  console.log(&#39;&gt; &#39;,a);
+  setTimeout(()=&gt;callback(null,{a:a}),500);
+};
+
+// 使用Promise形式的风格
+ts(r,[1]).then(
+  (a)=&gt;ts(r,[2])
+).then(
+  (a)=&gt;ts(r,[3])
+).then(
+  (a)=&gt;ts(r,[4])
+).then(()=&gt;console.log(&#39;done&#39;));
+
+// 回调嵌套模式
+r(1,()=&gt;{
+  r(2,()=&gt;{
+    r(3,()=&gt;{
+      r(4,()=&gt;{
+        console.log(&#39;done&#39;);
+      });
+    });
+  });
+});
+</code></pre>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp52g.1h.html">nodejs本地双向代理 端口转发</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hp55s.p7g.html">判断变量是否 0 或者 &#39;0&#39;</a></p>
+</li>
+<li><p><a href="kh4hp569.gcj.html">nodejs俄罗斯方块</a></p>
+</li>
+<li><p><a href="kh4hp58r.537.html">webrtc服务搭建</a></p>
+</li>
+<li><p><a href="kh4hp5eg.y8e.html"> ssl 证书生成方式</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="87823.html">youku电脑版跳过广告代码</a></p>
+</li>
+<li><p><a href="58847.html">解密某个js文件</a></p>
+</li>
+<li><p><a href="58843.html">破解百度云下载链接</a></p>
+</li>
+<li><p><a href="58838.html">nodejs建立多级目录</a></p>
+</li>
+<li><p><a href="58829.html">让js支持带命名的正则表达式</a></p>
+</li>
+<li><p><a href="58822.html">jshtml模板引擎</a></p>
+</li>
+<li><p><a href="58821.html">linux 上配置node路径</a></p>
+</li>
+<li><p><a href="58818.html">json2html源码</a></p>
+</li>
+<li><p><a href="58813.html">nodejs处理gb2312编码</a></p>
+</li>
+<li><p><a href="58798.html">nodejs遍历文件夹</a></p>
+</li>
+<li><p><a href="58793.html">读取Blob的内容实体</a></p>
+</li>
+<li><p><a href="58791.html">nodejs那恶心的stream.Readable</a></p>
+</li>
+<li><p><a href="58787.html">Promise复习，nodejs异步建立多级目录</a></p>
+</li>
+<li><p><a href="58786.html">判断一个object是否HTMLDom</a></p>
+</li>
+<li><p><a href="58783.html">异步并发也要保证原子性</a></p>
+</li>
+<li><p><a href="58781.html">简易命令行解析器</a></p>
+</li>
+<li><p><a href="58780.html">Promise才是javascript的正统队列</a></p>
+</li>
+<li><p><a href="58779.html">callback =&gt; Promise.then</a></p>
+</li>
+<li><p><a href="58778.html">简易转义字符转实体字符方法</a></p>
+</li>
+<li><p><a href="58777.html">nodejs异步回调的并发控制</a></p>
+</li>
+<li><p><a href="58773.html">低版本IE命名函数表达式bug</a></p>
+</li>
+<li><p><a href="58772.html">让重复调用只有第一次生效</a></p>
+</li>
+<li><p><a href="58771.html">简易JSON函数封装</a></p>
+</li>
+<li><p><a href="58770.html">使用eval来修改上下文的变量</a></p>
+</li>
+<li><p><a href="58767.html">seajs同步加载依赖的实现和弊病</a></p>
+</li>
+<li><p><a href="58766.html">html5页面全屏方法</a></p>
+</li>
+<li><p><a href="58765.html">给滚动条置顶添加过渡动画</a></p>
+</li>
+<li><p><a href="58764.html">m秒内最多n次的问题</a></p>
+</li>
+<li><p><a href="58762.html">让代码扁平化</a></p>
+</li>
+<li><p><a href="58760.html">关于自动加载的问题</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4x0.yw.html">pip安装nltk临时使用国内源</a></p>
+</li>
+<li><p><a href="kh4hp4xg.2sb.html">sass变量和继承类写法</a></p>
+</li>
+<li><p><a href="kh4hp4ya.6e.html">ipsec vpn 添加新账号</a></p>
+</li>
+<li><p><a href="kh4hp4zl.csd.html">css3 文字渐变色</a></p>
+</li>
+<li><p><a href="kh4hp50y.c3p.html">nginx用域名来转发请求</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hp569.gcj.html">nodejs俄罗斯方块</a></p>
+</li>
+<li><p><a href="kh4hp58c.8w7.html">模拟307跳转情况</a></p>
+</li>
+<li><p><a href="kh4hp58r.537.html">webrtc服务搭建</a></p>
+</li>
+<li><p><a href="kh4hp596.lj.html">webrtc泄漏本地ip信息</a></p>
+</li>
+<li><p><a href="88225.html">mac搜索局域网内的主机</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="87991.html">数据库清理优化</a></p>
+</li>
+<li><p><a href="87218.html">感谢beego陪伴我度过那不靠谱的半年</a></p>
+</li>
+<li><p><a href="79146.html">linux 批量替换文本内容</a></p>
+</li>
+<li><p><a href="75739.html">平面旋转</a></p>
+</li>
+<li><p><a href="72645.html">记一次mysql死锁的教训</a></p>
+</li>
+<li><p><a href="69351.html">缓存才是优化的终极手段</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58779";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

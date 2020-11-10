@@ -1,0 +1,176 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>简易转义字符转实体字符方法</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">简易转义字符转实体字符方法</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #671a0d">nodejs</span><span class="tagz" style="background: #7f8f47">转义</span><span class="tagz" style="background: #fc35fd">html</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>用nodejs做采集网站时，需要把内容保存在本地txt中。由于网页中包含一些转义的字符需要解析成实体，而nodejs官方库并没有这个功能的支持。我也不想用第三方库，索性自己写了一个简易版的解析方法。 </p>
+<h4 id="html转义字符有三种形式，以下用正则描述：">html转义字符有三种形式，以下用正则描述：</h4>
+<hr>
+<ol start="0">
+<li>特殊含义的标记，格式为 &quot;&amp;[a-z]+;&quot;，例如&amp;nbsp;，表示空格</li>
+<li>10进制表示的转义字，格式为 &quot;&amp;#\d+;&quot;，例如&amp;#65;，表示&quot;A&quot;</li>
+<li>16进制表示的转义字，格式为 &quot;&amp;#x\d+;&quot;，例如&amp;#x41;，表示&quot;A&quot;</li>
+</ol>
+<p>所以解析的方法需要对以上三种情况进行替换，其他的按照原文返回。最后实现代码如下： </p>
+<pre><code class="language-javascript">&#39;use strict&#39;;
+// 特殊标记和数字对照表
+let sp={
+  &#39;amp&#39;:38,
+  &#39;lt&#39;:60,
+  &#39;gt&#39;:62,
+  &#39;quot&#39;:34,
+  &#39;nbsp&#39;:160,
+  &#39;cent&#39;:162,
+  &#39;pound&#39;:163,
+  &#39;curren&#39;:164,
+  &#39;copy&#39;:169,
+  &#39;reg&#39;:174,
+  &#39;hellip&#39;:8230
+};
+
+// 匹配字符
+let p=/\&amp;(\#*)(x*)([a-z\d]+)\;*/ig;
+
+// 输入参数为可包含转义字符的字符串，返回解析之后的结果
+module.exports=(s)=&gt;{
+  return s.replace(p,(a)=&gt;(()=&gt;a.toLowerCase().replace(
+    p,(...a)=&gt;!a[1]?String.fromCharCode(sp[a[3]])||a[0]:
+    String.fromCharCode(parseInt(a[3],a[2]?16:10))))());
+};
+
+// 调用示例
+console.log(module.exports(&#39;&amp;nbsp;Ab&amp;nbsp;d&amp;#65&amp;nbsp;&#39;));</code></pre>
+<p>代码很简单，唯一需要注意的是不加分号结尾的转义符号，所有浏览器都是识别的，有些网站开发会偷懒这样写，因此匹配时不要忘了这种特殊的情况。 </p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp52g.1h.html">nodejs本地双向代理 端口转发</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hp54u.a47.html">html5 全屏代码</a></p>
+</li>
+<li><p><a href="kh4hp569.gcj.html">nodejs俄罗斯方块</a></p>
+</li>
+<li><p><a href="kh4hp58r.537.html">webrtc服务搭建</a></p>
+</li>
+<li><p><a href="kh4hp5eg.y8e.html"> ssl 证书生成方式</a></p>
+</li>
+<li><p><a href="65958.html">data-*属性慎用</a></p>
+</li>
+<li><p><a href="58838.html">nodejs建立多级目录</a></p>
+</li>
+<li><p><a href="58821.html">linux 上配置node路径</a></p>
+</li>
+<li><p><a href="58818.html">json2html源码</a></p>
+</li>
+<li><p><a href="58813.html">nodejs处理gb2312编码</a></p>
+</li>
+<li><p><a href="58798.html">nodejs遍历文件夹</a></p>
+</li>
+<li><p><a href="58793.html">读取Blob的内容实体</a></p>
+</li>
+<li><p><a href="58791.html">nodejs那恶心的stream.Readable</a></p>
+</li>
+<li><p><a href="58787.html">Promise复习，nodejs异步建立多级目录</a></p>
+</li>
+<li><p><a href="58786.html">判断一个object是否HTMLDom</a></p>
+</li>
+<li><p><a href="58783.html">异步并发也要保证原子性</a></p>
+</li>
+<li><p><a href="58781.html">简易命令行解析器</a></p>
+</li>
+<li><p><a href="58780.html">Promise才是javascript的正统队列</a></p>
+</li>
+<li><p><a href="58779.html">callback =&gt; Promise.then</a></p>
+</li>
+<li><p><a href="58778.html">简易转义字符转实体字符方法</a></p>
+</li>
+<li><p><a href="58766.html">html5页面全屏方法</a></p>
+</li>
+<li><p><a href="58760.html">关于自动加载的问题</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh8hr1ki.4fs.html">mac ssh透过代理连接</a></p>
+</li>
+<li><p><a href="kh4hp4ut.68c.html">华为等国产手机rem宽度超过实际宽度</a></p>
+</li>
+<li><p><a href="kh4hp4zl.csd.html">css3 文字渐变色</a></p>
+</li>
+<li><p><a href="kh4hp501.g4a.html">npm远程服务器某些配置不兼容代理的解决办法</a></p>
+</li>
+<li><p><a href="kh4hp53u.pjh.html">树莓派实现用pi用户自动登录</a></p>
+</li>
+<li><p><a href="kh4hp56p.7c.html">heroku查看app使用时间</a></p>
+</li>
+<li><p><a href="kh4hp57l.nw.html">mongodb 批量修改字段语句</a></p>
+</li>
+<li><p><a href="kh4hp58r.537.html">webrtc服务搭建</a></p>
+</li>
+<li><p><a href="kh4hp5a0.gjt.html">单页应用的单向数据流的流程图</a></p>
+</li>
+<li><p><a href="kh4hp5as.pb.html">linux自启动/禁止自启动服务</a></p>
+</li>
+<li><p><a href="kh4hp5e1.ou.html">git 设置代理服务器</a></p>
+</li>
+<li><p><a href="kh4ib7jk.t1.html">mongodb2.4 添加用户</a></p>
+</li>
+<li><p><a href="88229.html">mysql导出csv文件</a></p>
+</li>
+<li><p><a href="88180.html">树莓派配置wifi</a></p>
+</li>
+<li><p><a href="88094.html">随机取某个概率区间的代码</a></p>
+</li>
+<li><p><a href="87991.html">数据库清理优化</a></p>
+</li>
+<li><p><a href="83845.html">配置mysql ssl连接</a></p>
+</li>
+<li><p><a href="79547.html">前端性能观察器</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58778";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

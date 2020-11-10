@@ -1,0 +1,160 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>利用golang的反射实现类似js中的apply方法</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">利用golang的反射实现类似js中的apply方法</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #21cc28">golang</span><span class="tagz" style="background: #9639e3">Apply</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>在javascript中可以用 <code>func1.apply(this,[...])</code> 的语句实现多个参数调用给func1方法去执行，而golang中似乎没有直接的方法。</p>
+<p>为此我查了一下别人怎么搞得：<a href="http://stackoverflow.com/questions/17555857/go-unpacking-array-as-arguments">http://stackoverflow.com/questions/17555857/go-unpacking-array-as-arguments</a></p>
+<p>看了最靠谱的答案是这个：</p>
+<pre><code>package main
+import &quot;fmt&quot;
+import &quot;reflect&quot;
+
+func my_func(a, b int) (int) {
+    return a + b
+}
+
+func main() {
+    arr := []int{2,4}
+    var args []reflect.Value
+    for _, x := range arr {
+        args = append(args, reflect.ValueOf(x))
+    }
+    fun := reflect.ValueOf(my_func)
+    result := fun.Call(args)
+    sum := result[0].Interface().(int)
+    fmt.Println(&quot;Sum is &quot;, sum)
+}</code></pre>
+<p>然而这个答案没有被采纳。。但这个答案给了我解决问题的关键点，使用反射来实现不定参数的传递。我稍微整理了一下，最后得出以下测试代码：</p>
+<pre><code>package main
+
+import (
+    &quot;fmt&quot;
+    &quot;reflect&quot;
+)
+
+func Apply(handle (interface{}), argv ... interface{}) ([]reflect.Value) {
+    var args []reflect.Value
+    for _, x := range argv {
+        args = append(args, reflect.ValueOf(x))
+    }
+    fun := reflect.ValueOf(handle)
+    result := fun.Call(args)
+    return result
+}
+
+func main() {
+  xy := Apply(func (a, b int) (int,int) {
+    return a + b , a - b
+  },12,34);
+
+  fmt.Println(&quot;Sum is &quot;,xy[0],xy[1])
+}</code></pre>
+<hr>
+<p>参考资料：</p>
+<p><a href="http://stackoverflow.com/questions/17555857/go-unpacking-array-as-arguments">http://stackoverflow.com/questions/17555857/go-unpacking-array-as-arguments</a></p>
+<p><a href="http://xhrwang.me/2014/12/29/golang-fundamentals-8-interface.html">http://xhrwang.me/2014/12/29/golang-fundamentals-8-interface.html</a></p>
+<p><a href="https://www.tiege.me/?p=483">https://www.tiege.me/?p=483</a></p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="87218.html">感谢beego陪伴我度过那不靠谱的半年</a></p>
+</li>
+<li><p><a href="61832.html">golang 实现mysql Quote方法</a></p>
+</li>
+<li><p><a href="60572.html">golang 限制goroutine并行个数</a></p>
+</li>
+<li><p><a href="60427.html">golang 解压zip文件</a></p>
+</li>
+<li><p><a href="59592.html">gb2312字符串转utf-8</a></p>
+</li>
+<li><p><a href="58854.html">otto踩坑：substr()遇到utf8出错</a></p>
+</li>
+<li><p><a href="58853.html">otto踩坑：vm.Interrupt导致goroutine无限增加</a></p>
+</li>
+<li><p><a href="58844.html">http.ResponseWriter.Header().Set()不是线程安全的！</a></p>
+</li>
+<li><p><a href="58839.html">利用golang的反射实现类似js中的apply方法</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4ya.6e.html">ipsec vpn 添加新账号</a></p>
+</li>
+<li><p><a href="kh4hp501.g4a.html">npm远程服务器某些配置不兼容代理的解决办法</a></p>
+</li>
+<li><p><a href="kh4hp51g.d79.html">SSL certificate problem: self signed certificate in certificate chain</a></p>
+</li>
+<li><p><a href="kh4hp57y.fpf.html">npm设置仓库地址和代理</a></p>
+</li>
+<li><p><a href="kh4hp58r.537.html">webrtc服务搭建</a></p>
+</li>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
+</li>
+<li><p><a href="kh4hp5bk.27.html">cdn资源列表</a></p>
+</li>
+<li><p><a href="kh4hp5cd.lmo.html">TIME_WAIT过多</a></p>
+</li>
+<li><p><a href="kh4hp5e1.ou.html">git 设置代理服务器</a></p>
+</li>
+<li><p><a href="kh4hp5eg.y8e.html"> ssl 证书生成方式</a></p>
+</li>
+<li><p><a href="88328.html">python下载文件，带进度条控制</a></p>
+</li>
+<li><p><a href="88246.html">centos查看最近一次的开机时间</a></p>
+</li>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="88180.html">树莓派配置wifi</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88128.html">centos7 开放或者关闭端口</a></p>
+</li>
+<li><p><a href="88103.html">ie8上Image.onload不触发问题</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="79547.html">前端性能观察器</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58839";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

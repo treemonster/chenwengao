@@ -1,0 +1,160 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>判断点是否在多边形内</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">判断点是否在多边形内</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #55c54b">PNPoly</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>最近做的移动文件功能用到了碰撞判断，不过我写的算法只适用于特殊的矩形情况，遇到不规则的多边形就没法用了。之后准备做某个有趣的功能，需要用到更通用的判断算法，于是我选择了 PNPoly 算法。</p>
+<p><a href="https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html">PNPoly原理英文版</a></p>
+<p>这个算法很经典，因为百度上都能搜得到，可以在O(n)的时间复杂度内判断点是否在一个不规则的多边形内部，其中n为多边形的顶点个数，适用于任何情况。</p>
+<h4 id="算法原理">算法原理</h4>
+<p>遍历多边形相邻的每两个顶点（即一条边），假如待判断点满足以下两个条件即改变点是否在多边形内的状态标识c：</p>
+<ol start="0">
+<li>待判断点的Y坐标在点i和点j的Y坐标范围之内</li>
+<li>待判断点的X坐标在点i和点j连线之下</li>
+<li>遍历所有的边之后假如以上两个条件同时满足<strong>奇数次</strong>则该带判断点位于多边形之内，否则位于多边形之外。</li>
+</ol>
+<h4 id="js代码">js代码</h4>
+<pre><code class="language-javascript">let PNPoly=(pts, testpt)=&gt;{
+  let i, j, n=pts.length, c = false;
+  for (i = 0, j = n-1; i &lt; n; j = i++) {
+    if (
+      (( pts[i][1] &gt;testpt[1]) != (pts[j][1] &gt;testpt[1])) &amp;&amp;
+      (testpt[0] &lt; (pts[j][0]-pts[i][0]) * (testpt[1]-pts[i][1]) / (pts[j][1]-pts[i][1]) + pts[i][0])
+    ) c = !c;
+  }
+  return c;
+}</code></pre>
+<hr>
+<p>下面是一个完整的例子：</p>
+<pre><code class="language-html">&lt;canvas id=&#39;c&#39; style=&#39;position:absolute;left:0;top:0;background:#000;&#39; width=&#39;500&#39; height=&#39;400&#39;&gt;&lt;/canvas&gt;
+&lt;script&gt;
+let cvs=c.getContext(&#39;2d&#39;)
+
+let p=[],d=Date.now()
+for(let i=0,b=d%360,n=d%5+4;i&lt;n;i++){
+  let c=b+360/n*i/180*Math.PI
+  p.push([
+    (Math.random()*150+50)*Math.cos(c)+250,
+    (Math.random()*150+50)*Math.sin(c)+200,
+  ])
+}
+
+let PNPoly=(pts, testpt)=&gt;{
+  let i, j, n=pts.length, c = false;
+  for (i = 0, j = n-1; i &lt; n; j = i++) {
+    if (
+      (( pts[i][1] &gt;testpt[1]) != (pts[j][1] &gt;testpt[1])) &amp;&amp;
+      (testpt[0] &lt; (pts[j][0]-pts[i][0]) * (testpt[1]-pts[i][1]) / (pts[j][1]-pts[i][1]) + pts[i][0])
+    ) c = !c;
+  }
+  return c;
+}
+
+c.onmousemove=(e)=&gt;{
+  cvs.fillStyle=&#39;#000&#39;;
+  cvs.fillRect(0,0,500,400)
+  cvs.font=&#39;20px arial&#39;;
+  cvs.fillStyle=&#39;#fff&#39;;
+  cvs.fillText(PNPoly(p,[e.clientX,e.clientY]),10,20)
+
+  cvs.beginPath()
+  p.map((t,i)=&gt;{
+    cvs[i?&#39;lineTo&#39;:&#39;moveTo&#39;](t[0],t[1])
+  })
+  cvs.closePath()
+  cvs.strokeStyle=&#39;#fff&#39;;
+  cvs.stroke()
+
+  cvs.fillRect(e.clientX-3,e.clientY-3,6,6)
+
+}
+
+&lt;/script&gt;
+</code></pre>
+<p><img src="/uploads/2017/09/03/93/newup-facbffd5aa0d5d69f5d63810adf7638a30.gif" alt="/uploads/2017/09/03/93//newup-facbffd5aa0d5d69f5d63810adf7638a30.gif @400x"></p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><a href="75653.html">判断点是否在多边形内</a></li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="khbe1zve.29n.html">css多行文本超出截断显示省略号</a></p>
+</li>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp53d.49g.html">jxa运动指令脚本</a></p>
+</li>
+<li><p><a href="kh4hp53u.pjh.html">树莓派实现用pi用户自动登录</a></p>
+</li>
+<li><p><a href="kh4hp55c.9dm.html">搜索命令整理</a></p>
+</li>
+<li><p><a href="kh4hp574.hum.html">heroku登陆cli</a></p>
+</li>
+<li><p><a href="kh4hp57l.nw.html">mongodb 批量修改字段语句</a></p>
+</li>
+<li><p><a href="kh4hp57y.fpf.html">npm设置仓库地址和代理</a></p>
+</li>
+<li><p><a href="kh4hp58c.8w7.html">模拟307跳转情况</a></p>
+</li>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
+</li>
+<li><p><a href="kh4hp5ae.oak.html">dd备份/还原</a></p>
+</li>
+<li><p><a href="88246.html">centos查看最近一次的开机时间</a></p>
+</li>
+<li><p><a href="88128.html">centos7 开放或者关闭端口</a></p>
+</li>
+<li><p><a href="87218.html">感谢beego陪伴我度过那不靠谱的半年</a></p>
+</li>
+<li><p><a href="79547.html">前端性能观察器</a></p>
+</li>
+<li><p><a href="79146.html">linux 批量替换文本内容</a></p>
+</li>
+<li><p><a href="75739.html">平面旋转</a></p>
+</li>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="75653";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

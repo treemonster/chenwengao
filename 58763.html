@@ -1,0 +1,189 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>垂直居中布局</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">垂直居中布局</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #c7a628">css</span><span class="tagz" style="background: #4117e8">垂直居中</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>html标签中唯一可以实现内容垂直居中的元素只有td，实现原理是使用vertical-align: middle;这个样式，或者valign=&quot;middle&quot;属性。这是因为valign属性只有td上有效果，而vertical-align属性必须作用于非块级元素（即使display:inline-block;都不行）。 </p>
+<p>不过自从ie8支持display:table-cell样式规则后，所有标签都可以通过样式来做到这一点了。 </p>
+<pre><code class="language-html">&lt;head&gt;
+&lt;meta charset=&#39;utf-8&#39;/&gt;
+&lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=8&quot;&gt;  
+&lt;/head&gt;
+&lt;style&gt;
+body,html{
+  width:100%;
+  height:100%;
+  margin:0;
+}
+div{
+  position: relative;
+}
+#a{
+  background: #9f9;
+  vertical-align: middle;
+  display: table-cell;
+  text-align: center;
+}
+#b{
+  background: #f99;
+  margin: 0 auto;
+  display: block;
+}
+&lt;/style&gt;
+  &lt;div id=&#39;a&#39;&gt;
+    &lt;div id=&#39;b&#39;&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;script&gt;
+var o=0,p=Math.PI;
+setInterval(function(){
+  if(o++===360)o=0;
+  with(a.style)
+    width=Math.sin(o/180*p)*100+300+&#39;px&#39;,
+    height=Math.cos(o/180*p)*100+300+&#39;px&#39;;
+  with(b.style)
+    width=Math.cos(o/180*p)*50+100+&#39;px&#39;,
+    height=Math.sin(o/180*p)*50+100+&#39;px&#39;;
+},1);
+&lt;/script&gt;</code></pre>
+<p>效果图： 
+<img src="https://storage.xdelve.com/1.png" alt="效果图"> </p>
+<p>有一个缺点是这种方式的元素不能通过百分比的值来设置有效的宽高，解决办法是在他外面套一个display:table的标签，在这个标签上使用百分比的方式来设置宽高。虽然这样做会增加一个额外标签，但是这是目前唯一的解决办法了。 </p>
+<pre><code class="language-html">&lt;head&gt;
+&lt;meta charset=&#39;utf-8&#39;/&gt;
+&lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=8&quot;&gt;  
+&lt;/head&gt;
+&lt;style&gt;
+body,html{
+  width:100%;
+  height:100%;
+  margin:0;
+}
+div{
+  position: relative;
+}
+#a{
+  background: #9f9;
+  vertical-align: middle;
+  display: table-cell;
+  text-align: center;
+}
+#b{
+  background: #f99;
+  margin: 0 auto;
+  display: block;
+}
+#c{
+  display:table;
+  width:100%;
+  height:100%;
+}
+&lt;/style&gt;
+&lt;div id=&#39;c&#39;&gt;
+  &lt;div id=&#39;a&#39;&gt;
+    &lt;div id=&#39;b&#39;&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var o=0,p=Math.PI;
+setInterval(function(){
+  if(o++===360)o=0;
+  with(a.style)
+    width=Math.sin(o/180*p)*100+300+&#39;px&#39;,
+    height=Math.cos(o/180*p)*100+300+&#39;px&#39;;
+  with(b.style)
+    width=Math.cos(o/180*p)*50+100+&#39;px&#39;,
+    height=Math.sin(o/180*p)*50+100+&#39;px&#39;;
+},1);
+&lt;/script&gt;
+</code></pre>
+<p>效果图： 
+<img src="https://storage.xdelve.com/2.png" alt="效果图">  </p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="khbe1zve.29n.html">css多行文本超出截断显示省略号</a></p>
+</li>
+<li><p><a href="khalg5ks.g.html">css3自定义滚动条样式</a></p>
+</li>
+<li><p><a href="kh4hp4v9.83f.html">安卓文字偏上，文字顶部被遮罩</a></p>
+</li>
+<li><p><a href="kh4hp4xg.2sb.html">sass变量和继承类写法</a></p>
+</li>
+<li><p><a href="kh4hp4zl.csd.html">css3 文字渐变色</a></p>
+</li>
+<li><p><a href="58765.html">给滚动条置顶添加过渡动画</a></p>
+</li>
+<li><p><a href="58763.html">垂直居中布局</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4u7.5l8.html">react项目webpack打包时拆分异步加载的文件</a></p>
+</li>
+<li><p><a href="kh4hp4ut.68c.html">华为等国产手机rem宽度超过实际宽度</a></p>
+</li>
+<li><p><a href="kh4hp4x0.yw.html">pip安装nltk临时使用国内源</a></p>
+</li>
+<li><p><a href="kh4hp4z5.bct.html">raw.githubusercontent.com DNS被指向127.0.0.1</a></p>
+</li>
+<li><p><a href="kh4hp55c.9dm.html">搜索命令整理</a></p>
+</li>
+<li><p><a href="kh4hp5fb.n3u.html">把树莓派的存储空间拓展到整张TF卡中</a></p>
+</li>
+<li><p><a href="88225.html">mac搜索局域网内的主机</a></p>
+</li>
+<li><p><a href="88180.html">树莓派配置wifi</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="87999.html">bootstrap modal弹框导致ie无法获取焦点</a></p>
+</li>
+<li><p><a href="87823.html">youku电脑版跳过广告代码</a></p>
+</li>
+<li><p><a href="81007.html">html表格导出csv文件并下载</a></p>
+</li>
+<li><p><a href="79146.html">linux 批量替换文本内容</a></p>
+</li>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58763";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

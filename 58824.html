@@ -1,0 +1,102 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>linux自动校准时间</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">linux自动校准时间</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #e206a5">linux</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>服务器时间不准会导致很多奇怪问题，比如七牛上传文件校验token失败。因此我写了一个批处理脚本一直在后台运行，每天校准一次时间。</p>
+<p><code>/tmp/date.sh</code></p>
+<pre><code class="language-bash">for((;;))
+do
+  str=`curl -I -s baidu.com|grep Date 2&gt;/dev/null`
+  echo `date -s &quot;${str:5:-1}&quot;`
+  sleep 86400
+done</code></pre>
+<p>启动命令
+nohup /bin/bash /tmp/date.sh &gt; /dev/null&amp;</p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp5cd.lmo.html">TIME_WAIT过多</a></p>
+</li>
+<li><p><a href="79146.html">linux 批量替换文本内容</a></p>
+</li>
+<li><p><a href="58828.html">linux设置系统时区</a></p>
+</li>
+<li><p><a href="58824.html">linux自动校准时间</a></p>
+</li>
+<li><p><a href="58811.html">linux快速搜索文件内容</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh8hr1ki.4fs.html">mac ssh透过代理连接</a></p>
+</li>
+<li><p><a href="kh4hp4v9.83f.html">安卓文字偏上，文字顶部被遮罩</a></p>
+</li>
+<li><p><a href="kh4hp4x0.yw.html">pip安装nltk临时使用国内源</a></p>
+</li>
+<li><p><a href="kh4hp4xw.fuh.html">mac 终端运行后台程序如何在终端关闭时继续运行</a></p>
+</li>
+<li><p><a href="kh4hp4zl.csd.html">css3 文字渐变色</a></p>
+</li>
+<li><p><a href="kh4hp54d.xb.html">git删除远程分支</a></p>
+</li>
+<li><p><a href="kh4hp58c.8w7.html">模拟307跳转情况</a></p>
+</li>
+<li><p><a href="kh4hp5ct.4ys.html">putty使用http代理连接服务器</a></p>
+</li>
+<li><p><a href="kh4hp5d7.f8n.html">git配置服务端支持http认证</a></p>
+</li>
+<li><p><a href="88328.html">python下载文件，带进度条控制</a></p>
+</li>
+<li><p><a href="88229.html">mysql导出csv文件</a></p>
+</li>
+<li><p><a href="88172.html">mysql选取内容导出到文件</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88103.html">ie8上Image.onload不触发问题</a></p>
+</li>
+<li><p><a href="87991.html">数据库清理优化</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58824";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

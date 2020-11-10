@@ -1,0 +1,128 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>感谢beego陪伴我度过那不靠谱的半年</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">感谢beego陪伴我度过那不靠谱的半年</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #21cc28">golang</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>现在终于正式和一泡污一样的beego说再见了，真是可喜可贺~</p>
+<p>标题上提到的<strong>beego</strong>，我的网站有一个核心功能<strong>session</strong>用到了它提供的模块。但这个模块的设计十分反人类：</p>
+<ul>
+<li>搞了一个struct直接写入文件，但偏偏这个struct必须提前用gob声明，否则报错进程崩溃</li>
+<li>使用file模式时特定情况下写入会失败但又得不到任何反馈，导致下一个请求得到的数据是上上次的</li>
+</ul>
+<p>结果，我用这个session模块来做验证码功能时，特定时间段特定用户会一直出现：即时输对了也对不上号，因为特么<strong>上上次</strong>请求生成的验证码才是你需要输入的。</p>
+<p>开始一切都没有，我只能选择用这个不靠谱的session模块。现在有时间了，我直接自己实现了一个session模块替换了它，终于再也不出现这个其妙的问题了。</p>
+<p>初接触golang做网站时，发现上手最大的问题并不是语法点多，而是各种官方模块的缺少，因此我做网站时首先给予自己所掌握的<code>mvc</code>常识实现了一个简单的后台框架，然后一些容易实现的细节就自己写掉了，而较繁琐的点，例如 <strong>formdata表单处理</strong>，<strong>session</strong>，<strong>mysql</strong>，<strong>webdev</strong> 等则用了别人的模块直接装上去。就这样一部拼拼凑凑的破车也挂了个golang的牌挤上了互联网的大桥，开启了漫长而看不到尽头的开发之路。</p>
+<p>做了大半年，用了第三方模块大都是比较靠谱的，mysql可以说是一次差错都没有出现过，结巴分词虽然有几次引起了进程直接崩溃的错误，但后来调整了使用方式，渐渐地这个问题出现频率减少到可以忽略的地步了。</p>
+<p>用golang遇到过最大的问题就是<strong>进程崩溃</strong>。但偏偏这个问题是不可能完美解决的，因为任何一次新功能上线都有可能因某一处差错而产生意外。所以我自己实现了一个守护进程的方法，让跑崩掉的进程崩溃日志写到文件，然后自动重启。</p>
+<p>其实直接用golang而不封装一些基础类型的方法来写一个网站那是不可能的，除非真的有这么多人力可以被挥霍。我从一个javascript工程师的角度来谈这个问题，是因为javascript支持了太多有用的数据类型了，而最有用的 <strong>Array</strong>和<strong>Object</strong>偏偏golang没有提供原生支持，<strong>String</strong>原生支持也有隐藏坑：</p>
+<ul>
+<li>slice不支持泛型，不能把数字，字符串，对象统统放在一个数组里面。并且各种Array类的操作完全不支持，比如<code>pop</code>,<code>slice</code>,<code>splice</code>,<code>concat</code>等。现在我摸索出来golang比较好的实现方式是，定义interface{}类型的鸭子slice，再自己去实现各种需要的<strong>Array</strong>类方法</li>
+<li>string不支持utf8，utf8的字符串必须用 <code>[]rune</code>，这个坑说起来就太大了，因为我用过一个otto的模块，其对字符串处理就是用的<code>string</code>类型，但统计出来的长度又是用的<code>[]rune</code>，结果就导致substr出来的结果是错的。</li>
+<li>map必须给多线程使用加读写锁，否则进程直接崩溃。并且map遍历是无序的，其随机顺序随每一次编译而不一样。</li>
+</ul>
+<p>其他还有一些经历暂时想不到，以后有时间再记录吧。</p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="87218.html">感谢beego陪伴我度过那不靠谱的半年</a></p>
+</li>
+<li><p><a href="61832.html">golang 实现mysql Quote方法</a></p>
+</li>
+<li><p><a href="60572.html">golang 限制goroutine并行个数</a></p>
+</li>
+<li><p><a href="60427.html">golang 解压zip文件</a></p>
+</li>
+<li><p><a href="59592.html">gb2312字符串转utf-8</a></p>
+</li>
+<li><p><a href="58854.html">otto踩坑：substr()遇到utf8出错</a></p>
+</li>
+<li><p><a href="58853.html">otto踩坑：vm.Interrupt导致goroutine无限增加</a></p>
+</li>
+<li><p><a href="58844.html">http.ResponseWriter.Header().Set()不是线程安全的！</a></p>
+</li>
+<li><p><a href="58839.html">利用golang的反射实现类似js中的apply方法</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4wj.uv.html">nginx 子域名对应文件夹</a></p>
+</li>
+<li><p><a href="kh4hp4z5.bct.html">raw.githubusercontent.com DNS被指向127.0.0.1</a></p>
+</li>
+<li><p><a href="kh4hp50y.c3p.html">nginx用域名来转发请求</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hp53d.49g.html">jxa运动指令脚本</a></p>
+</li>
+<li><p><a href="kh4hp56p.7c.html">heroku查看app使用时间</a></p>
+</li>
+<li><p><a href="kh4hp574.hum.html">heroku登陆cli</a></p>
+</li>
+<li><p><a href="kh4hp5d7.f8n.html">git配置服务端支持http认证</a></p>
+</li>
+<li><p><a href="kh4hp5e1.ou.html">git 设置代理服务器</a></p>
+</li>
+<li><p><a href="kh4ib7jk.t1.html">mongodb2.4 添加用户</a></p>
+</li>
+<li><p><a href="88246.html">centos查看最近一次的开机时间</a></p>
+</li>
+<li><p><a href="88181.html">树莓派配置收发邮件</a></p>
+</li>
+<li><p><a href="88180.html">树莓派配置wifi</a></p>
+</li>
+<li><p><a href="88172.html">mysql选取内容导出到文件</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="88094.html">随机取某个概率区间的代码</a></p>
+</li>
+<li><p><a href="83845.html">配置mysql ssl连接</a></p>
+</li>
+<li><p><a href="79146.html">linux 批量替换文本内容</a></p>
+</li>
+<li><p><a href="75739.html">平面旋转</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="87218";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

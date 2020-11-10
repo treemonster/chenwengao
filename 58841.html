@@ -1,0 +1,117 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>utf8还是utf-8？</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">utf8还是utf-8？</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #f2ff8d">ie9</span><span class="tagz" style="background: #ae0e4b">bug</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>调试ie上的问题永远都是噩梦，今天就卡在了ajax返回json却取不到值的情况上。</p>
+<p>一开始服务器端返回的内容如下：</p>
+<p><code>header：</code></p>
+<pre><code>Content-Type: text/json; charset=utf8</code></pre>
+<p><code>body:</code></p>
+<pre><code>{&quot;place&quot;:&quot;上南路123号测试地址&quot;}</code></pre>
+<p>前台调取的js如下：</p>
+<pre><code class="language-javascript">
+$.ajax(&#39;/a&#39;).success(function(x){
+  alert(x) // ie上是undefined，chrome正常[Object object]
+})
+</code></pre>
+<p>这就莫名其妙了。起初怀疑是返回内容包含了中文字符，但一想都加了utf8编码了，没理由还必须转义才生效。</p>
+<p>由于以前见过utf8的写法还有一种是带横线的，因此我试着把<code>utf8</code>改成了<code>utf-8</code>又试了一次。</p>
+<p>这次居然神奇的好了。对这坑爹的ie，我也是无语了。</p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="88103.html">ie8上Image.onload不触发问题</a></p>
+</li>
+<li><p><a href="87999.html">bootstrap modal弹框导致ie无法获取焦点</a></p>
+</li>
+<li><p><a href="67375.html">jquery获取窗口高度踩坑</a></p>
+</li>
+<li><p><a href="67352.html">bootstrap打开多个模态框的bug</a></p>
+</li>
+<li><p><a href="58841.html">utf8还是utf-8？</a></p>
+</li>
+<li><p><a href="58773.html">低版本IE命名函数表达式bug</a></p>
+</li>
+<li><p><a href="58769.html">生产环境预留调试入口的想法</a></p>
+</li>
+<li><p><a href="58768.html">safari popstate bug</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="khbe1zve.29n.html">css多行文本超出截断显示省略号</a></p>
+</li>
+<li><p><a href="khalg5ks.g.html">css3自定义滚动条样式</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hp54u.a47.html">html5 全屏代码</a></p>
+</li>
+<li><p><a href="kh4hp5a0.gjt.html">单页应用的单向数据流的流程图</a></p>
+</li>
+<li><p><a href="88328.html">python下载文件，带进度条控制</a></p>
+</li>
+<li><p><a href="88180.html">树莓派配置wifi</a></p>
+</li>
+<li><p><a href="88172.html">mysql选取内容导出到文件</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88094.html">随机取某个概率区间的代码</a></p>
+</li>
+<li><p><a href="81007.html">html表格导出csv文件并下载</a></p>
+</li>
+<li><p><a href="79547.html">前端性能观察器</a></p>
+</li>
+<li><p><a href="79146.html">linux 批量替换文本内容</a></p>
+</li>
+<li><p><a href="75739.html">平面旋转</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+<li><p><a href="72645.html">记一次mysql死锁的教训</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58841";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

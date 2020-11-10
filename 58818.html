@@ -1,0 +1,228 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>json2html源码</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">json2html源码</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #14dede">json2html</span><span class="tagz" style="background: #de9b9e">javascript</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>自己写的一个轻量级json 转 html的前端工具，因为前端代码也不存在什么加密，索性就公开了，有缘者得之，但希望不要去掉版权信息。。</p>
+<pre><code class="language-javascript">/***********************************************************
+  json to html
+  Author: treemonster &lt;https://treemonster.github.io/&gt;
+  Latest: 2015-12-05
+***********************************************************/
+void function(){
+  var json2html=function(notInherit){
+    var notInherit=notInherit||false; // 如果当前节点没有该属性是否继承父节点的属性
+    var if_unset=function(o,k,r){
+      for(var i=r.length;i--;){
+        if(r[i].hasOwnProperty(k))
+          return r[i][k];
+        if(notInherit)break;
+      }
+      return &#39;&#39;;
+    };
+    var render=function(tpl,data,raw){
+      var tmp=&#39;&#39;;
+      tpl=tpl||&#39;&#39;;
+      raw=raw||[];
+      if(data&amp;&amp;data.constructor!==Array)data=[data];
+      if(!data.length)data=[{&#39;&#39;:null}];
+      for(var i=0;i&lt;data.length;i++){
+        var o=data[i];
+        raw.push(o);
+        tmp+=tpl.replace(
+        /\{\{\#(.+?)\}\}([\s\S]*?)\{\{\/\1\}\}|\{\{(?:([^\.]+?)|(\.))\}\}|([\s\S]+?)(?=\{\{)/g,
+        function(){
+          var a=arguments;
+          if(a[1])return if_unset(o,a[1],raw)?
+            render(a[2],if_unset(o,a[1],raw),raw):&#39;&#39;;
+          if(a[3])return if_unset(o,a[3],raw);
+          if(a[4])return o;
+          if(a[5])return a[5];
+        });
+        raw.pop();
+      }
+      return tmp;
+    }
+    this.render=render;
+  };
+
+  var _global;
+  switch(true){
+    case typeof window!==&#39;undefined&#39;: _global=window; break;
+    case typeof global!==&#39;undefined&#39;: _global=global; break;
+    default: throw new Error(&#39;Unknown javascript environment&#39;);
+  }_global.json2html=json2html;
+
+  if(typeof define!==&#39;undefined&#39; &amp;&amp; define.amd)
+    define(&#39;json2html&#39;,function(){return json2html;});
+  if(typeof module===&#39;object&#39; &amp;&amp; !!module.exports)
+    module.exports=json2html;
+
+}();</code></pre>
+<p>然后调用的简单例子</p>
+<pre><code class="language-html">
+&lt;script id=&#39;tpl&#39;&gt;
+Demo:
+
+String: {{str}}
+
+List: {{#list}}{{.}}{{/list}}
+
+Object: {{#obj}} name={{name}} ; color={{color}} {{/obj}}
+
+Object_Array: {{#obj_array}} {{text}} {{/obj_array}}
+
+&lt;/script&gt;
+
+&lt;script&gt;
+var j=new json2html;
+console.log(j.render(tpl.innerHTML,{
+
+  str: &#39;this is a string&#39;,
+  list: [4,5,6,7],
+  obj: { name: &#39;apple&#39;, color:&#39;red&#39; },
+  obj_array: [ {text: &#39;A&#39; },{text: &#39;B&#39;},{text: &#39;C&#39;} ]
+
+}));
+&lt;/script&gt;</code></pre>
+<p>运行结果：</p>
+<p>Demo:</p>
+<p>String: this is a string</p>
+<p>List: 4567</p>
+<p>Object:  name=apple ; color=red </p>
+<p>Object_Array:  A  B  C </p>
+<hr>
+<p>我的原则一贯是简约至上。因此这个插件的功能非常少，只提供四种基础语法，但已经可以满足大部分的前端需求。</p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp55s.p7g.html">判断变量是否 0 或者 &#39;0&#39;</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="87823.html">youku电脑版跳过广告代码</a></p>
+</li>
+<li><p><a href="58847.html">解密某个js文件</a></p>
+</li>
+<li><p><a href="58843.html">破解百度云下载链接</a></p>
+</li>
+<li><p><a href="58829.html">让js支持带命名的正则表达式</a></p>
+</li>
+<li><p><a href="58822.html">jshtml模板引擎</a></p>
+</li>
+<li><p><a href="58818.html">json2html源码</a></p>
+</li>
+<li><p><a href="58793.html">读取Blob的内容实体</a></p>
+</li>
+<li><p><a href="58786.html">判断一个object是否HTMLDom</a></p>
+</li>
+<li><p><a href="58781.html">简易命令行解析器</a></p>
+</li>
+<li><p><a href="58780.html">Promise才是javascript的正统队列</a></p>
+</li>
+<li><p><a href="58779.html">callback =&gt; Promise.then</a></p>
+</li>
+<li><p><a href="58777.html">nodejs异步回调的并发控制</a></p>
+</li>
+<li><p><a href="58773.html">低版本IE命名函数表达式bug</a></p>
+</li>
+<li><p><a href="58772.html">让重复调用只有第一次生效</a></p>
+</li>
+<li><p><a href="58771.html">简易JSON函数封装</a></p>
+</li>
+<li><p><a href="58770.html">使用eval来修改上下文的变量</a></p>
+</li>
+<li><p><a href="58767.html">seajs同步加载依赖的实现和弊病</a></p>
+</li>
+<li><p><a href="58766.html">html5页面全屏方法</a></p>
+</li>
+<li><p><a href="58765.html">给滚动条置顶添加过渡动画</a></p>
+</li>
+<li><p><a href="58764.html">m秒内最多n次的问题</a></p>
+</li>
+<li><p><a href="58762.html">让代码扁平化</a></p>
+</li>
+<li><p><a href="58760.html">关于自动加载的问题</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4u7.5l8.html">react项目webpack打包时拆分异步加载的文件</a></p>
+</li>
+<li><p><a href="kh4hp4v9.83f.html">安卓文字偏上，文字顶部被遮罩</a></p>
+</li>
+<li><p><a href="kh4hp4xg.2sb.html">sass变量和继承类写法</a></p>
+</li>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp596.lj.html">webrtc泄漏本地ip信息</a></p>
+</li>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
+</li>
+<li><p><a href="kh4hp5ae.oak.html">dd备份/还原</a></p>
+</li>
+<li><p><a href="kh4hp5by.jnt.html">webpack使用外部资源</a></p>
+</li>
+<li><p><a href="kh4hp5eg.y8e.html"> ssl 证书生成方式</a></p>
+</li>
+<li><p><a href="kh4ib7jk.t1.html">mongodb2.4 添加用户</a></p>
+</li>
+<li><p><a href="88225.html">mac搜索局域网内的主机</a></p>
+</li>
+<li><p><a href="88180.html">树莓派配置wifi</a></p>
+</li>
+<li><p><a href="87218.html">感谢beego陪伴我度过那不靠谱的半年</a></p>
+</li>
+<li><p><a href="83845.html">配置mysql ssl连接</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
+</li>
+<li><p><a href="69351.html">缓存才是优化的终极手段</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58818";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

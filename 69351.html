@@ -1,0 +1,148 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>缓存才是优化的终极手段</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">缓存才是优化的终极手段</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #e80c31">缓存</span><span class="tagz" style="background: #aa84ec">优化</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>企业的网站，通常一个页面就会包含各种数据列表，也就需要各种数据库查询。即使是再快的查询，堆积在一起的时间也可能会很长。我遇到过最夸张的情况，已经达到了5秒以上的加载时间。</p>
+<p>优化查询语句是不可能的，这种时候只能牺牲绝对的实时性，复杂的列表段代码启用缓存。</p>
+<p>以下是php的缓存类代码：</p>
+<pre><code class="language-php">&lt;?php
+/**
+ author: treemonster
+ date: 2017-08-16
+ &lt;http://treemonster.github.io/&gt;
+ */
+class Cache {
+
+  private static $_id;
+  private static $_is_begin=false;
+
+  private static function getdir($s){
+    return &#39;/tmp/&#39;.$s;
+  }
+  static function begin($seconds,$id){
+    if(self::$_is_begin)throw new Exception(&quot;must call end() before next cache begin!&quot;);
+    self::$_id=md5($id);
+    $fn=self::getdir(self::$_id.&#39;.cache&#39;);
+    $fd=self::getdir(self::$_id.&#39;.cache.time&#39;);
+    if(file_exists($fn) &amp;&amp; file_get_contents($fd)*1+$seconds&gt;time()){
+      echo file_get_contents($fn);
+      return true;
+    }
+    self::$_is_begin=true;
+    ob_start();
+  }
+  static function end(){
+    if(!self::$_is_begin)throw new Exception(&quot;must call begin() before end cache!&quot;);
+    self::$_is_begin=false;
+    $id=self::$_id;
+    $fn=self::getdir($id.&#39;.cache&#39;);
+    $fd=self::getdir($id.&#39;.cache.time&#39;);
+    $data=ob_get_contents();
+    ob_end_clean();
+    file_put_contents($fn, $data);
+    file_put_contents($fd, time());
+    echo $data;
+  }
+
+}
+</code></pre>
+<p>使用时在需要缓存的内容段前后增加<code>begin()</code>和<code>end()</code>的调用，例如：</p>
+<pre><code class="language-php">其他代码
+
+&lt;?php if(Cache::begin(600,&#39;index.page.cache&#39;)): ?&gt;
+
+&lt;?php
+
+// 一大堆很慢的代码
+sleep(4);
+echo &#39;当前缓存：&#39;.time();
+
+?&gt;
+
+&lt;?php Cache::end(); endif; ?&gt;
+
+其他代码</code></pre>
+<p>这段代码的意义是，第一次运行（无缓存情况下），等待4秒后，输出<code>当前缓存：时间戳</code>，并把输出的结果加入肯德基豪华午餐缓存，缓存名为<strong>index.page.cache</strong>，之后的10分钟内任何访问，都会直接返回缓存中的内容。</p>
+<p>这样一来缓存有效期内的得到的内容就可以输出文件内容，而不需要去运行里面很慢的代码。</p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="87991.html">数据库清理优化</a></p>
+</li>
+<li><p><a href="69351.html">缓存才是优化的终极手段</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh8hr1ki.4fs.html">mac ssh透过代理连接</a></p>
+</li>
+<li><p><a href="kh4hp4wj.uv.html">nginx 子域名对应文件夹</a></p>
+</li>
+<li><p><a href="kh4hp4x0.yw.html">pip安装nltk临时使用国内源</a></p>
+</li>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp50h.0q9.html">curl用法</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp52g.1h.html">nodejs本地双向代理 端口转发</a></p>
+</li>
+<li><p><a href="kh4hp52w.ibe.html">ios13 vpn 能连接但不能传数据问题解决</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hp5a0.gjt.html">单页应用的单向数据流的流程图</a></p>
+</li>
+<li><p><a href="kh4hp5ae.oak.html">dd备份/还原</a></p>
+</li>
+<li><p><a href="88229.html">mysql导出csv文件</a></p>
+</li>
+<li><p><a href="87991.html">数据库清理优化</a></p>
+</li>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
+</li>
+<li><p><a href="72645.html">记一次mysql死锁的教训</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="69351";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

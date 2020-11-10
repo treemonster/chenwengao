@@ -1,0 +1,181 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>让重复调用只有第一次生效</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">让重复调用只有第一次生效</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #de9b9e">javascript</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>通常情况下，方法被调用时会立即执行。现在遇到的问题是，某一个方法在短时间内可能被多次调用，需要只有第一次执行，直到第一次执行完成之前的调用都会被忽略。 </p>
+<p>为了实现这个功能，通常做法是用一个标记变量来记录是否这个方法已被调用。写成代码是这样的： </p>
+<pre><code class="language-javascript">function callee(){
+  if(callee.run)return;
+  callee.run=true;
+  // 实际需要执行的代码
+
+};</code></pre>
+<p>虽然在原始对象上绑定额外属性并不是一个好的做法，但是目前es6的WeakMap还有太多古老的浏览器不支持，所以这个做法也是无奈之举。</p>
+<p>我封装了一个lock方法，以便在项目中使用。实例代码： </p>
+<pre><code class="language-html">
+&lt;meta charset=&#39;utf-8&#39; /&gt;
+&lt;script&gt;
+/* 如果方法未锁定，把args作为参数传递给handler执行，并且锁定handler
+   如果已锁定，则忽略本次调用，并且执行fail方法
+  */
+function lock(handler,args,fail){
+  if(handler.locked)return fail &amp;&amp; fail();
+  handler.locked=true;
+  return handler.apply(this,args);
+}
+// 解除方法锁定
+function unlock(handler){
+  handler.locked=false;
+}
+
+function callee(i){
+  console.log(i);
+  setTimeout(function(){
+    unlock(callee);
+  },0);
+}
+
+for(var i=0;++i&lt;99;)
+  lock(callee,[i],function(){
+    console.warn(&#39;本次执行被忽略&#39;);
+  });
+
+setTimeout(function(){
+  lock(callee,[-1]);
+},1000);
+
+&lt;/script&gt;</code></pre>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp55s.p7g.html">判断变量是否 0 或者 &#39;0&#39;</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="87823.html">youku电脑版跳过广告代码</a></p>
+</li>
+<li><p><a href="58847.html">解密某个js文件</a></p>
+</li>
+<li><p><a href="58843.html">破解百度云下载链接</a></p>
+</li>
+<li><p><a href="58829.html">让js支持带命名的正则表达式</a></p>
+</li>
+<li><p><a href="58822.html">jshtml模板引擎</a></p>
+</li>
+<li><p><a href="58818.html">json2html源码</a></p>
+</li>
+<li><p><a href="58793.html">读取Blob的内容实体</a></p>
+</li>
+<li><p><a href="58786.html">判断一个object是否HTMLDom</a></p>
+</li>
+<li><p><a href="58781.html">简易命令行解析器</a></p>
+</li>
+<li><p><a href="58780.html">Promise才是javascript的正统队列</a></p>
+</li>
+<li><p><a href="58779.html">callback =&gt; Promise.then</a></p>
+</li>
+<li><p><a href="58777.html">nodejs异步回调的并发控制</a></p>
+</li>
+<li><p><a href="58773.html">低版本IE命名函数表达式bug</a></p>
+</li>
+<li><p><a href="58772.html">让重复调用只有第一次生效</a></p>
+</li>
+<li><p><a href="58771.html">简易JSON函数封装</a></p>
+</li>
+<li><p><a href="58770.html">使用eval来修改上下文的变量</a></p>
+</li>
+<li><p><a href="58767.html">seajs同步加载依赖的实现和弊病</a></p>
+</li>
+<li><p><a href="58766.html">html5页面全屏方法</a></p>
+</li>
+<li><p><a href="58765.html">给滚动条置顶添加过渡动画</a></p>
+</li>
+<li><p><a href="58764.html">m秒内最多n次的问题</a></p>
+</li>
+<li><p><a href="58762.html">让代码扁平化</a></p>
+</li>
+<li><p><a href="58760.html">关于自动加载的问题</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh8hr1ki.4fs.html">mac ssh透过代理连接</a></p>
+</li>
+<li><p><a href="kh4hp4xg.2sb.html">sass变量和继承类写法</a></p>
+</li>
+<li><p><a href="kh4hp4z5.bct.html">raw.githubusercontent.com DNS被指向127.0.0.1</a></p>
+</li>
+<li><p><a href="kh4hp50y.c3p.html">nginx用域名来转发请求</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hp53d.49g.html">jxa运动指令脚本</a></p>
+</li>
+<li><p><a href="kh4hz03h.xh.html">python 用摄像头拍照并写入文件</a></p>
+</li>
+<li><p><a href="kh4hp57y.fpf.html">npm设置仓库地址和代理</a></p>
+</li>
+<li><p><a href="kh4hp5fb.n3u.html">把树莓派的存储空间拓展到整张TF卡中</a></p>
+</li>
+<li><p><a href="kh4ib7jk.t1.html">mongodb2.4 添加用户</a></p>
+</li>
+<li><p><a href="88246.html">centos查看最近一次的开机时间</a></p>
+</li>
+<li><p><a href="88229.html">mysql导出csv文件</a></p>
+</li>
+<li><p><a href="88180.html">树莓派配置wifi</a></p>
+</li>
+<li><p><a href="88172.html">mysql选取内容导出到文件</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="87823.html">youku电脑版跳过广告代码</a></p>
+</li>
+<li><p><a href="87218.html">感谢beego陪伴我度过那不靠谱的半年</a></p>
+</li>
+<li><p><a href="72645.html">记一次mysql死锁的教训</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58772";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

@@ -1,0 +1,236 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>异步并发也要保证原子性</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">异步并发也要保证原子性</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #671a0d">nodejs</span><span class="tagz" style="background: #8b5a24">异步</span><span class="tagz" style="background: #c53581">原子性</span><span class="tagz" style="background: #75580f">锁</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>需要用nodejs实现一个临时文件的缓存模块。因为缓存的文件名是用一个自动增长的数字表示的，如果缓存文件的到期时间较短，那么到期之后删掉这个文件就可以继续使用这个名字了。但也可能某个缓存的时间很长，持久的占用这个名字。所以必须要在写进缓存文件之前判断这个缓存文件名是不是存在。 </p>
+<ul>
+<li>写入缓存实际上有三个步骤：<ol start="0">
+<li>判断是否存在</li>
+<li>创建文件</li>
+<li>返回文件句柄</li>
+</ol>
+</li>
+</ul>
+<p>把这三个步骤封装一下可以得到以下方法： </p>
+<pre><code class="language-javascript">var fs=require(&#39;fs&#39;);
+
+// 方便起见我把stat,open都转成Promise的形式，否则写起来太乱了
+[&#39;stat&#39;,&#39;open&#39;].map(function(h){
+  fs[h+&#39;Then&#39;]=function(){
+    var a=Array.prototype.slice.call(arguments);
+    return new Promise(function(resolve,reject){
+      a.push(function(e){
+        e?reject(e):resolve(Array.prototype.slice.call(arguments,1));
+      });
+      fs[h].apply(fs,a);
+    });
+  };
+});
+
+function getTempHandleThen(i){
+  return new Promise(function(resolve,reject){
+    fs.statThen(i).then(
+      function(){
+        reject({err:&#39;already exists&#39;});
+      },function(e){
+        if(e.errno!==-4058)return reject(e);
+        return fs.openThen(i,&#39;w&#39;);
+      }
+    ).then(
+      function(args){
+        resolve(args[0]);
+      },reject
+    );
+  });
+}
+</code></pre>
+<p>理想的调用情况是这样的： </p>
+<pre><code class="language-javascript">getTempHandleThen(&#39;test0&#39;).then(function(fd){
+  console.log(&#39;success&#39;,fd);
+},function(e){
+  console.log(&#39;fail&#39;,e);
+});</code></pre>
+<p>如果test0不存在，则会得到success的结果，否则是fail。 
+但是在并发的情况下，会得到一个错误的结果： </p>
+<pre><code class="language-javascript">// 模拟10并发
+for(var i=0;i&lt;10;i++)
+getTempHandleThen(&#39;test&#39;+i%5).then(function(fd){
+  console.log(&#39;success&#39;,fd);
+},function(e){
+  console.log(&#39;fail&#39;,e);
+});</code></pre>
+<p>运行结果： </p>
+<p>&lt;center&gt; <img src="https://storage.xdelve.com/das.png" alt="错误"> &lt;/center&gt;
+
+</p>
+<p>如果一开始test0不存在的话，会得到10个success的结果。产生这种错误结果的原因是：这三个步骤异步进行，所以多个并行的回调会在第一步同时认为某一个文件不存在，然后对同一个文件进行写入。 </p>
+<p>同步阻塞可以解决问题，但是在单线程的js程序中这么做简直作死。所以解决办法必然是异步的，不难想到加锁然后以顺序队列执行这个办法，实现并不困难。真正的问题在于这个办法的api应该如何设计，必须调用简单，而且通用性强。根据以往的经验，我认为在外部包装一层函数是一个合适的办法。所以最后实现了这样代码： </p>
+<pre><code class="language-javascript">function addLock(fn){
+  // lock是一个hash表，键名为锁的关键字，值为Promise队列。
+  // lock保证了同一个关键字的任务会添加到队列尾部，而不是立即执行。
+  var lock={};
+
+  // count也是一个hash表，键名同上，值为Promise队列中未执行任务的长度。
+  // count是为了当长度为0时对这个队列的引用全部删除，便于垃圾回收。
+  var count={};
+
+  // 返回的是一个新的函数，第一个参数为锁的关键字，第二个参数为调用原始函数时用到的参数数组
+  return function(lockid,args){
+    var dojo=function(){ return fn.apply(this,args); };
+    var clean=function(){
+      if(--count[lockid])return;
+      delete(lock[lockid]);
+      delete(count[lockid]);
+    };
+    lock[lockid]=lock[lockid]||Promise.resolve();
+    count[lockid]=count[lockid]||0;
+    count[lockid]++;
+    // 执行原始任务
+    lock[lockid]=lock[lockid].then(dojo,dojo);
+    // 如果这个锁下所有的任务都完成了，那么从lock中删掉引用
+    lock[lockid].then(clean,clean);
+    // 返回值和原始函数的返回值保持一致
+    return lock[lockid];
+  };
+}</code></pre>
+<p>于是把上面的getTempHandleThen用addLock包装，在执行可以得到正确的结果了： </p>
+<pre><code class="language-javascript">
+// 包装成可加锁的函数
+_getTempHandleThen=addLock(getTempHandleThen);
+
+// 模拟10并发
+for(var i=0;i&lt;10;i++)
+// 用i%5作为锁的关键字
+_getTempHandleThen(i%5,[&#39;test&#39;+i%5]).then(function(fd){
+  console.log(&#39;success&#39;,fd);
+},function(e){
+  console.log(&#39;fail&#39;,e);
+});</code></pre>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp52g.1h.html">nodejs本地双向代理 端口转发</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hp569.gcj.html">nodejs俄罗斯方块</a></p>
+</li>
+<li><p><a href="kh4hp58r.537.html">webrtc服务搭建</a></p>
+</li>
+<li><p><a href="kh4hp5eg.y8e.html"> ssl 证书生成方式</a></p>
+</li>
+<li><p><a href="72645.html">记一次mysql死锁的教训</a></p>
+</li>
+<li><p><a href="58838.html">nodejs建立多级目录</a></p>
+</li>
+<li><p><a href="58821.html">linux 上配置node路径</a></p>
+</li>
+<li><p><a href="58813.html">nodejs处理gb2312编码</a></p>
+</li>
+<li><p><a href="58798.html">nodejs遍历文件夹</a></p>
+</li>
+<li><p><a href="58793.html">读取Blob的内容实体</a></p>
+</li>
+<li><p><a href="58791.html">nodejs那恶心的stream.Readable</a></p>
+</li>
+<li><p><a href="58787.html">Promise复习，nodejs异步建立多级目录</a></p>
+</li>
+<li><p><a href="58783.html">异步并发也要保证原子性</a></p>
+</li>
+<li><p><a href="58781.html">简易命令行解析器</a></p>
+</li>
+<li><p><a href="58780.html">Promise才是javascript的正统队列</a></p>
+</li>
+<li><p><a href="58779.html">callback =&gt; Promise.then</a></p>
+</li>
+<li><p><a href="58778.html">简易转义字符转实体字符方法</a></p>
+</li>
+<li><p><a href="58777.html">nodejs异步回调的并发控制</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh8hr1ki.4fs.html">mac ssh透过代理连接</a></p>
+</li>
+<li><p><a href="kh4hp4wj.uv.html">nginx 子域名对应文件夹</a></p>
+</li>
+<li><p><a href="kh4hp4xw.fuh.html">mac 终端运行后台程序如何在终端关闭时继续运行</a></p>
+</li>
+<li><p><a href="kh4hp4zl.csd.html">css3 文字渐变色</a></p>
+</li>
+<li><p><a href="kh4hp501.g4a.html">npm远程服务器某些配置不兼容代理的解决办法</a></p>
+</li>
+<li><p><a href="kh4hp50y.c3p.html">nginx用域名来转发请求</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hp54d.xb.html">git删除远程分支</a></p>
+</li>
+<li><p><a href="kh4hp55c.9dm.html">搜索命令整理</a></p>
+</li>
+<li><p><a href="kh4hp574.hum.html">heroku登陆cli</a></p>
+</li>
+<li><p><a href="kh4hp58r.537.html">webrtc服务搭建</a></p>
+</li>
+<li><p><a href="kh4hp5by.jnt.html">webpack使用外部资源</a></p>
+</li>
+<li><p><a href="88229.html">mysql导出csv文件</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88103.html">ie8上Image.onload不触发问题</a></p>
+</li>
+<li><p><a href="87999.html">bootstrap modal弹框导致ie无法获取焦点</a></p>
+</li>
+<li><p><a href="79547.html">前端性能观察器</a></p>
+</li>
+<li><p><a href="75739.html">平面旋转</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58783";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

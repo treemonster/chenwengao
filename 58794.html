@@ -1,0 +1,140 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>nginx反向代理模拟本地服务器环境</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">nginx反向代理模拟本地服务器环境</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #ee4340">nginx</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>由于edx服务器环境搭建难度相当变态，而且我只负责前端开发，所以就不想搭建本地的edx环境。但是开发过程难免有需要用到后端服务的情况，以前写过一个前端调试器可以模拟部分行为，但是像有些功能脱离后端用不了，如验证码校验。为了解决这两个矛盾，我使用了nginx反向代理功能。</p>
+<p>我的想法是：
+0. 只要是我能访问到的后端服务器，都能成为我本地服务器后端资源的一部分
+0. 我能够自由选择使用哪一个后端服务器，比如开发服，或者局域网内同事的本地服务器
+0. 本地服务器返回结果前有个判断，如果本地存在静态文件则使用本地文件，否则转发请求到目标服务器返回结果</p>
+<p>基于目前可用的外部服务器资源有三个，开发服，同事steven的本地机器，正服，所以最终我在nginx.conf增加这样一段配置：</p>
+<pre><code>server {
+  listen 80;
+  autoindex on; 
+  server_name ~^(?&lt;domain&gt;steven|develop|publish).edx;
+  charset utf-8;
+  root d:\\xxx\\edxroot\\$domain\\;
+  location / {
+    set $flag 0;
+    # 转发规则：
+    # 1. 本地文件不存在
+    if ( !-e $request_filename){ set $flag 1; }
+    # 2. 访问路径是目录
+    if ( $uri ~ /$ ){ set $flag 1; }
+    if ( $uri = &quot;/forum/2/new&quot; ){ # 特殊地址返回text/html头部
+      add_header Content-Type text/html;
+    }
+    set $flag &quot;${domain}${flag}&quot;;
+    if ( $flag = &quot;steven1&quot; ){
+      proxy_pass  http://10.26.123.33:8000; # steven的机器
+    }
+    if ( $flag = &quot;develop1&quot; ){
+      proxy_pass  http://10.19.119.12; # 开发服
+    }
+    if ( $flag = &quot;publish1&quot; ){
+      proxy_pass  http://www.xxx.cn; # 正服
+    }
+  }
+}</code></pre>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4wj.uv.html">nginx 子域名对应文件夹</a></p>
+</li>
+<li><p><a href="kh4hp50y.c3p.html">nginx用域名来转发请求</a></p>
+</li>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="57860.html">nginx 限制访问频率</a></p>
+</li>
+<li><p><a href="57859.html">nginx 禁止百度云观测访问</a></p>
+</li>
+<li><p><a href="58848.html">为百度抓取单独开辟http通道</a></p>
+</li>
+<li><p><a href="58842.html">nginx域名跳转配置和禁止ip访问</a></p>
+</li>
+<li><p><a href="58794.html">nginx反向代理模拟本地服务器环境</a></p>
+</li>
+<li><p><a href="58790.html">nginx域名映射目录的配置方法</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4x0.yw.html">pip安装nltk临时使用国内源</a></p>
+</li>
+<li><p><a href="kh4hp4xg.2sb.html">sass变量和继承类写法</a></p>
+</li>
+<li><p><a href="kh4hp4xw.fuh.html">mac 终端运行后台程序如何在终端关闭时继续运行</a></p>
+</li>
+<li><p><a href="kh4hp52w.ibe.html">ios13 vpn 能连接但不能传数据问题解决</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hp57l.nw.html">mongodb 批量修改字段语句</a></p>
+</li>
+<li><p><a href="kh4hp58c.8w7.html">模拟307跳转情况</a></p>
+</li>
+<li><p><a href="kh4hp596.lj.html">webrtc泄漏本地ip信息</a></p>
+</li>
+<li><p><a href="kh4hp5as.pb.html">linux自启动/禁止自启动服务</a></p>
+</li>
+<li><p><a href="kh4hp5ct.4ys.html">putty使用http代理连接服务器</a></p>
+</li>
+<li><p><a href="kh4hp5d7.f8n.html">git配置服务端支持http认证</a></p>
+</li>
+<li><p><a href="88328.html">python下载文件，带进度条控制</a></p>
+</li>
+<li><p><a href="88094.html">随机取某个概率区间的代码</a></p>
+</li>
+<li><p><a href="83845.html">配置mysql ssl连接</a></p>
+</li>
+<li><p><a href="81007.html">html表格导出csv文件并下载</a></p>
+</li>
+<li><p><a href="79146.html">linux 批量替换文本内容</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58794";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

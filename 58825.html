@@ -1,0 +1,174 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>找树莓派的内网ip</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">找树莓派的内网ip</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #2e0ccd">arp</span><span class="tagz" style="background: #7fa67b">树莓派</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>本文说的是只有主板情况下找ip。</p>
+<p>使用arp命令：</p>
+<pre><code>arp -a</code></pre>
+<p><img src="/uploads/2017/12/02/98//newup-fa79c1e594f3c84ebffae87c334c8e8597.png" alt="/uploads/2017/12/02/98//newup-fa79c1e594f3c84ebffae87c334c8e8597.png"></p>
+<p>轻而易举就可以找到了。</p>
+<p><strong>如果子网内没有这个记录，而你<code>green; 确定树莓派肯定已经在这个子网内</code>，那么首先使用子网ip扫描工具快速扫一遍在线主机，然后再使用arp命令搜索树莓派的ip。</strong></p>
+<hr>
+<h3 id="red-以下是我以前使用udp的方式寻找的，现在回过头来发现这种方法绕路了，毕竟当年图样。"><code>red; 以下是我以前使用udp的方式寻找的，现在回过头来发现这种方法绕路了，毕竟当年图样。</code></h3>
+<hr>
+<p>我的想法是通过udp广播的方式，流程如下：
+0. 树莓派开机启动后监听udp的某个端口
+0. 让同一个子网内的自己的电脑每隔一秒发出广播消息 &quot;where are you&quot;
+0. 树莓派收到消息&quot;where are you&quot;后，响应&quot;raspberry&quot;
+0. 自己的电脑收到 &quot;raspberry&quot; 后输出发送方的ip，即树莓派ip</p>
+<p>nodejs代码</p>
+<p><strong>树莓派内部回复脚本&lt;需要设为开机启动&gt;</strong></p>
+<pre><code class="language-javascript">/**
+ 树莓派广播接收端
+ 用于外部获取树莓派内网ip
+ */
+
+var dgram=require(dgram);
+var s = dgram.createSocket(udp4);
+s.bind(1234, function(){
+  s.setBroadcast(true);
+});
+s.on(message,function(msg,rinfo){
+  if(msg+!==where are you)return;
+  var buf=new Buffer(raspberry);
+  s.send(buf,0,buf.length,rinfo.port,rinfo.address);
+});
+</code></pre>
+<p><strong>外部广播询问脚本</strong></p>
+<pre><code class="language-javascript">/**
+ 树莓派广播发送端
+ 用于外部获取树莓派内网ip
+ */
+
+var dgram=require(dgram);
+var s = dgram.createSocket(udp4);
+s.bind(1234, function(e) {
+  s.setBroadcast(true);
+  setInterval(function(){
+    var ni=require(os).networkInterfaces();
+    for(var id in ni) ni[id].map(function(nw){
+      if(nw.family===IPv6)return;
+      var ip=nw.address.split(.);
+      var buf=new Buffer(where are you);
+      var mask=nw.netmask.split(.);
+
+      // 网络地址
+      var netaddress=mask.map(function(c,i){
+        return c&amp;ip[i];
+      });
+
+      var broadcast=netaddress.map(function(c,i){
+        return c|(0xff^mask[i]);
+      });
+
+      s.send(buf,0,buf.length,1234,broadcast.join(.));
+    });
+  },1000);
+});
+s.on(message,function(msg,rinfo){
+  if(msg.toString()===raspberry){
+    console.log(找到内网树莓派ip：,rinfo.address);
+    process.exit();
+  }
+});
+</code></pre>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp53u.pjh.html">树莓派实现用pi用户自动登录</a></p>
+</li>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
+</li>
+<li><p><a href="kh4hp5b6.kdr.html">树莓派配置wifi热点</a></p>
+</li>
+<li><p><a href="kh4hp5fb.n3u.html">把树莓派的存储空间拓展到整张TF卡中</a></p>
+</li>
+<li><p><a href="88181.html">树莓派配置收发邮件</a></p>
+</li>
+<li><p><a href="88180.html">树莓派配置wifi</a></p>
+</li>
+<li><p><a href="58845.html">arp欺骗实战</a></p>
+</li>
+<li><p><a href="58826.html">树莓派无源蜂鸣器发声实验</a></p>
+</li>
+<li><p><a href="58825.html">找树莓派的内网ip</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4u7.5l8.html">react项目webpack打包时拆分异步加载的文件</a></p>
+</li>
+<li><p><a href="kh4hp4v9.83f.html">安卓文字偏上，文字顶部被遮罩</a></p>
+</li>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp501.g4a.html">npm远程服务器某些配置不兼容代理的解决办法</a></p>
+</li>
+<li><p><a href="kh4hp50h.0q9.html">curl用法</a></p>
+</li>
+<li><p><a href="kh4hp51g.d79.html">SSL certificate problem: self signed certificate in certificate chain</a></p>
+</li>
+<li><p><a href="kh4hp54d.xb.html">git删除远程分支</a></p>
+</li>
+<li><p><a href="kh4hp55s.p7g.html">判断变量是否 0 或者 &#39;0&#39;</a></p>
+</li>
+<li><p><a href="kh4hp569.gcj.html">nodejs俄罗斯方块</a></p>
+</li>
+<li><p><a href="kh4hp56p.7c.html">heroku查看app使用时间</a></p>
+</li>
+<li><p><a href="kh4hp574.hum.html">heroku登陆cli</a></p>
+</li>
+<li><p><a href="kh4hp5cd.lmo.html">TIME_WAIT过多</a></p>
+</li>
+<li><p><a href="kh4hp5d7.f8n.html">git配置服务端支持http认证</a></p>
+</li>
+<li><p><a href="88328.html">python下载文件，带进度条控制</a></p>
+</li>
+<li><p><a href="88246.html">centos查看最近一次的开机时间</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58825";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

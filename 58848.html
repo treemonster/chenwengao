@@ -1,0 +1,158 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>为百度抓取单独开辟http通道</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">为百度抓取单独开辟http通道</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #ee4340">nginx</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>由于百度的东西大部分对https不怎么支持，比如 <a href="http://union.baidu.com/">百度联盟</a>，百度爬虫（这个我无语了，实践下来确实https收录更新极慢），<a href="http://share.baidu.com">百度分享代码</a> （本站的分享代码是我自己另外改造的），不多举例了。因此有必要为百度提供特殊通道，不做https跳转。</p>
+<p>原本的nginx配置文件是这么写的：</p>
+<pre><code class="language-conf">server
+{
+    listen 80;
+    server_name ~^(.+?).cwgapibook.xdelve.com;
+    return  301 https://$host$request_uri;
+}
+
+server
+{
+    listen 443;
+    ssl on;
+    ssl_certificate /pathto/cwgapibook/xdelve.chained.crt;
+    ssl_certificate_key /pathto/cwgapibook/xdelve.com.key;
+
+    include /pathto/nginx/cwgapibook.detail ;
+}
+</code></pre>
+<p>现在改成了：</p>
+<pre><code class="language-confserver">{
+    listen 80;
+    server_name ~^(.+?).cwgapibook.xdelve.com;
+
+    set $is_baidu 0;
+    if ($http_user_agent ~* baidu) {
+      set $is_baidu 1;
+    }
+    if ($request_uri ~* baidu_verify_) {
+      set $is_baidu 1;
+    }
+
+    if ($is_baidu ~ 0) {
+      return  301 https://$host$request_uri;
+    }
+    include /pathto/nginx/cwgapibook.detail ;
+}
+
+server
+{
+    listen 443;
+    ssl on;
+    ssl_certificate /pathto/cwgapibook/xdelve.chained.crt;
+    ssl_certificate_key /pathto/cwgapibook/xdelve.com.key;
+
+    include /pathto/nginx/cwgapibook.detail ;
+}
+</code></pre>
+<p>重启nginx搞定。</p>
+<h1 id="傻逼百度">傻逼百度</h1>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4wj.uv.html">nginx 子域名对应文件夹</a></p>
+</li>
+<li><p><a href="kh4hp50y.c3p.html">nginx用域名来转发请求</a></p>
+</li>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="57860.html">nginx 限制访问频率</a></p>
+</li>
+<li><p><a href="57859.html">nginx 禁止百度云观测访问</a></p>
+</li>
+<li><p><a href="58848.html">为百度抓取单独开辟http通道</a></p>
+</li>
+<li><p><a href="58842.html">nginx域名跳转配置和禁止ip访问</a></p>
+</li>
+<li><p><a href="58794.html">nginx反向代理模拟本地服务器环境</a></p>
+</li>
+<li><p><a href="58790.html">nginx域名映射目录的配置方法</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="khalg5ks.g.html">css3自定义滚动条样式</a></p>
+</li>
+<li><p><a href="kh8hr1ki.4fs.html">mac ssh透过代理连接</a></p>
+</li>
+<li><p><a href="kh4hp4u7.5l8.html">react项目webpack打包时拆分异步加载的文件</a></p>
+</li>
+<li><p><a href="kh4hp4v9.83f.html">安卓文字偏上，文字顶部被遮罩</a></p>
+</li>
+<li><p><a href="kh4hp4x0.yw.html">pip安装nltk临时使用国内源</a></p>
+</li>
+<li><p><a href="kh4hp50y.c3p.html">nginx用域名来转发请求</a></p>
+</li>
+<li><p><a href="kh4hp55c.9dm.html">搜索命令整理</a></p>
+</li>
+<li><p><a href="kh4hp55s.p7g.html">判断变量是否 0 或者 &#39;0&#39;</a></p>
+</li>
+<li><p><a href="kh4hp57l.nw.html">mongodb 批量修改字段语句</a></p>
+</li>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
+</li>
+<li><p><a href="kh4hp5ae.oak.html">dd备份/还原</a></p>
+</li>
+<li><p><a href="kh4hp5cd.lmo.html">TIME_WAIT过多</a></p>
+</li>
+<li><p><a href="kh4hp5fb.n3u.html">把树莓派的存储空间拓展到整张TF卡中</a></p>
+</li>
+<li><p><a href="88181.html">树莓派配置收发邮件</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88153.html">猴子选大王算法问题</a></p>
+</li>
+<li><p><a href="87218.html">感谢beego陪伴我度过那不靠谱的半年</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58848";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

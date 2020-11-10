@@ -1,0 +1,119 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>让bootstrap轮播图支持触摸操作</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">让bootstrap轮播图支持触摸操作</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #83dd2a">bootsrtap</span><span class="tagz" style="background: #362da1">轮播插件</span><span class="tagz" style="background: #7051dc">笔记</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>应脑残设计师的要求，需要给轮播图加上触摸交互。于是乎网上搜了bootstrap自带轮播图支持触摸的操作，没想到还真找到了，而且还有多个方案。下文稍作整理。</p>
+<p>参考网址：
+<a href="http://www.tuicool.com/articles/7zu6Vj6">http://www.tuicool.com/articles/7zu6Vj6</a></p>
+<hr>
+<h4 id="方案1-jquery-mobile">方案1 <code>jquery mobile</code></h4>
+<p><a href="http://jquerymobile.com/download/">http://jquerymobile.com/download/</a>
+引用jquery.mobile.js后添加以下代码:</p>
+<pre><code class="language-javascript"> $(&quot;#carousel-generic&quot;).swipeleft(function() {
+   $(this).carousel(&#39;next&#39;);
+ }).swiperight(function() {
+   $(this).carousel(&#39;prev&#39;);
+ });</code></pre>
+<hr>
+<h4 id="方案2-touchswipe-jquery-plugin">方案2 <code>TouchSwipe jquery plugin</code></h4>
+<p><a href="https://github.com/mattbryson/TouchSwipe-Jquery-Plugin">https://github.com/mattbryson/TouchSwipe-Jquery-Plugin</a></p>
+<p>引用 jquery.touchSwipe.js ，并添加以下代码片段：</p>
+<pre><code class="language-javascript">$(&quot;#carousel-generic&quot;).swipe({
+   swipeLeft: function() { $(this).carousel(&#39;next&#39;); },
+   swipeRight: function() { $(this).carousel(&#39;prev&#39;); },
+});</code></pre>
+<hr>
+<h4 id="方案3-hammerjs--jqueryhammerjs">方案3 <code>hammer.js &amp; jquery.hammer.js</code></h4>
+<p>hammer.js (<a href="http://eightmedia.github.io/hammer.js/">http://eightmedia.github.io/hammer.js/</a>) +</p>
+<p>jquery.hammer.js (<a href="https://github.com/EightMedia/jquery.hammer.js">https://github.com/EightMedia/jquery.hammer.js</a>)</p>
+<p>非amd情况下需要依次引用hammer.js和jquery.hummer.js。</p>
+<p>然后添加如下代码片段：</p>
+<pre><code class="language-javascript">$(&#39;#carousel-generic&#39;).hammer().on(&#39;swipeleft&#39;, function(){
+  $(this).carousel(&#39;next&#39;);
+}).on(&#39;swiperight&#39;, function(){
+  $(this).carousel(&#39;prev&#39;);
+});</code></pre>
+<hr>
+<p>个人推荐方法2，因为引用代码较少。其次方法3。不推荐方法1，因为jquery mobile部分情况下会与bootstrap冲突。</p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="58804.html">sublime text 换行去掉 &#39;\r&#39;</a></p>
+</li>
+<li><p><a href="58801.html">让bootstrap轮播图支持触摸操作</a></p>
+</li>
+<li><p><a href="58800.html">docker使用说明</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4ut.68c.html">华为等国产手机rem宽度超过实际宽度</a></p>
+</li>
+<li><p><a href="kh4hp4xg.2sb.html">sass变量和继承类写法</a></p>
+</li>
+<li><p><a href="kh4hp4ya.6e.html">ipsec vpn 添加新账号</a></p>
+</li>
+<li><p><a href="kh4hp596.lj.html">webrtc泄漏本地ip信息</a></p>
+</li>
+<li><p><a href="kh4hp5ae.oak.html">dd备份/还原</a></p>
+</li>
+<li><p><a href="kh4hp5as.pb.html">linux自启动/禁止自启动服务</a></p>
+</li>
+<li><p><a href="kh4hp5bk.27.html">cdn资源列表</a></p>
+</li>
+<li><p><a href="kh4hp5ct.4ys.html">putty使用http代理连接服务器</a></p>
+</li>
+<li><p><a href="88172.html">mysql选取内容导出到文件</a></p>
+</li>
+<li><p><a href="88103.html">ie8上Image.onload不触发问题</a></p>
+</li>
+<li><p><a href="87218.html">感谢beego陪伴我度过那不靠谱的半年</a></p>
+</li>
+<li><p><a href="79547.html">前端性能观察器</a></p>
+</li>
+<li><p><a href="75739.html">平面旋转</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58801";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

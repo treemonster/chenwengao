@@ -1,0 +1,110 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>linux 批量替换文本内容</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">linux 批量替换文本内容</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #177544">sed</span><span class="tagz" style="background: #e206a5">linux</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>需要用到批量替换代码文件里的颜色代码，查了一下可以用<code>sed</code>命令。</p>
+<p>代码如下：</p>
+<pre><code class="language-sh">sed -i &quot;s/oldString/newString/g&quot;  `grep &quot;oldString&quot; -rl /path`</code></pre>
+<p><code>oldString</code>表示需要替换的字符串，<code>newString</code>是新的字符串，<code>/path</code>是所有代码文件所在的文件夹。</p>
+<p>grep后面的oldString遇到特殊字符处理方法：</p>
+<ol start="0">
+<li><p>斜杠</p>
+<p>分割字符换成 # 即可，例如：</p>
+<pre><code class="language-sh">sed -i &quot;s#src=\&quot;http://www.yifum.com/style/black/js/rollup.min.js\&quot;#dsrc=\&quot;http://www.yifum.com/style/black/js/rollup.min.js\&quot;#g&quot;  `grep &#39;src=\&quot;http://www.yifum.com/style/black/js/rollup.min.js\&quot;&#39; -rl /website/userdata/site/52.php52/public/www`</code></pre>
+</li>
+<li><p>引号</p>
+<p>加一个反斜杠转义，举例同上</p>
+</li>
+</ol>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp5cd.lmo.html">TIME_WAIT过多</a></p>
+</li>
+<li><p><a href="79146.html">linux 批量替换文本内容</a></p>
+</li>
+<li><p><a href="58828.html">linux设置系统时区</a></p>
+</li>
+<li><p><a href="58824.html">linux自动校准时间</a></p>
+</li>
+<li><p><a href="58811.html">linux快速搜索文件内容</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4vo.i3t.html">word文件命令行打印</a></p>
+</li>
+<li><p><a href="kh4hp54u.a47.html">html5 全屏代码</a></p>
+</li>
+<li><p><a href="kh4hp55c.9dm.html">搜索命令整理</a></p>
+</li>
+<li><p><a href="kh4hp569.gcj.html">nodejs俄罗斯方块</a></p>
+</li>
+<li><p><a href="kh4hp57y.fpf.html">npm设置仓库地址和代理</a></p>
+</li>
+<li><p><a href="kh4hp58c.8w7.html">模拟307跳转情况</a></p>
+</li>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
+</li>
+<li><p><a href="kh4hp5by.jnt.html">webpack使用外部资源</a></p>
+</li>
+<li><p><a href="kh4hp5ct.4ys.html">putty使用http代理连接服务器</a></p>
+</li>
+<li><p><a href="kh4hp5d7.f8n.html">git配置服务端支持http认证</a></p>
+</li>
+<li><p><a href="kh4ib7jk.t1.html">mongodb2.4 添加用户</a></p>
+</li>
+<li><p><a href="88328.html">python下载文件，带进度条控制</a></p>
+</li>
+<li><p><a href="88103.html">ie8上Image.onload不触发问题</a></p>
+</li>
+<li><p><a href="87823.html">youku电脑版跳过广告代码</a></p>
+</li>
+<li><p><a href="81007.html">html表格导出csv文件并下载</a></p>
+</li>
+<li><p><a href="79547.html">前端性能观察器</a></p>
+</li>
+<li><p><a href="69351.html">缓存才是优化的终极手段</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="79146";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

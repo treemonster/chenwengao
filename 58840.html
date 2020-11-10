@@ -1,0 +1,238 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>结巴分词崩溃补丁</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">结巴分词崩溃补丁</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #34d1f9">go</span><span class="tagz" style="background: #6ce809">c++</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>由于我在使用结巴分词组件时需要动态加载词库文件，因此不可避免会出现词库文件无效的问题。而结巴分词官方代码一旦遇到无效的词库会直接退出进程，因此我改了一些代码，让程序出错时返回null，而不时退出进程。</p>
+<p>我目前从git上获取到的版本信息：</p>
+<pre><code>commit 6a24846202b27f47819bf5f7ab21c8629a9e1f4a
+Merge: 6e14c5c 45cec5f
+Author: Yanyi Wu &lt;i@yanyiwu.com&gt;
+Date:   Fri Dec 2 16:59:35 2016 +0800
+
+    Merge pull request #13 from sillydong/master
+
+    完善参数项</code></pre>
+<h4 id="以下是修改方法：">以下是修改方法：</h4>
+<ul>
+<li><p>打开assert.h，我是centos7系统，此文件路径在 /usr/include/assert.h</p>
+<p>修改 assert方法的定义：</p>
+</li>
+</ul>
+<pre><code class="language-c">/*
+// 原始代码
+# define assert(expr)             \
+  ((expr)               \
+   ? __ASSERT_VOID_CAST (0)           \
+   : __assert_fail (__STRING(expr), __FILE__, __LINE__, __ASSERT_FUNCTION))
+*/
+
+// 修改之后的代码
+# define assert(expr)  (expr ? __ASSERT_VOID_CAST(0): throw 0)
+</code></pre>
+<hr>
+<ul>
+<li>修改jieba.cpp文件</li>
+</ul>
+<pre><code>// 原始代码
+/*
+Jieba NewJieba(const char* dict_path,
+      const char* hmm_path, 
+      const char* user_dict,
+      const char* idf_path,
+      const char* stop_words_path) {
+  return (Jieba)(new cppjieba::Jieba(dict_path, hmm_path, user_dict, idf_path, stop_words_path));
+}
+*/
+
+// 修改之后
+
+Jieba NewJieba(const char* dict_path,
+      const char* hmm_path, 
+      const char* user_dict,
+      const char* idf_path,
+      const char* stop_words_path) {
+  try{
+    return (Jieba)(new cppjieba::Jieba(dict_path, hmm_path, user_dict, idf_path, stop_words_path));
+  }catch(...){
+    return NULL;
+  }
+}
+</code></pre>
+<hr>
+<ul>
+<li>打开 Logging.hpp
+找到 abort()，把它改成 assert(false)</li>
+</ul>
+<ul>
+<li>打开 jieba.go文件</li>
+</ul>
+<pre><code>/*
+// 原始代码
+func NewJieba(paths ...string) *Jieba {
+    dictpaths := getDictPaths(paths...)
+    dpath, hpath, upath, ipath, spath := C.CString(dictpaths[0]), C.CString(dictpaths[1]), C.CString(dictpaths[2]), C.CString(dictpaths[3]), C.CString(dictpaths[4])
+    defer C.free(unsafe.Pointer(dpath))
+    defer C.free(unsafe.Pointer(hpath))
+    defer C.free(unsafe.Pointer(upath))
+    defer C.free(unsafe.Pointer(ipath))
+    defer C.free(unsafe.Pointer(spath))
+    return &amp;Jieba{
+        C.NewJieba(
+            dpath,
+            hpath,
+            upath,
+            ipath,
+            spath,
+        ),
+    }
+}
+
+*/
+
+// 修改之后
+func NewJieba(paths ...string) *Jieba {
+    dictpaths := getDictPaths(paths...)
+    dpath, hpath, upath, ipath, spath := C.CString(dictpaths[0]), C.CString(dictpaths[1]), C.CString(dictpaths[2]), C.CString(dictpaths[3]), C.CString(dictpaths[4])
+    defer C.free(unsafe.Pointer(dpath))
+    defer C.free(unsafe.Pointer(hpath))
+    defer C.free(unsafe.Pointer(upath))
+    defer C.free(unsafe.Pointer(ipath))
+    defer C.free(unsafe.Pointer(spath))
+    jb := C.NewJieba(
+            dpath,
+            hpath,
+            upath,
+            ipath,
+            spath,
+        )
+    if jb==nil {return nil}
+    return &amp;Jieba{
+        jb,
+    }
+}</code></pre>
+<p>重新编译即可。</p>
+<p>测试代码：</p>
+<pre><code class="language-go">package main
+import (
+  &quot;fmt&quot;
+  &quot;github.com/yanyiwu/gojieba&quot;
+)
+
+func main(){
+  fmt.Println(
+    gojieba.NewJieba(&quot;exist_file&quot;),
+    gojieba.NewJieba(&quot;not_exist_file&quot;),
+  )
+
+}</code></pre>
+<p>输出结果为：</p>
+<pre><code>&amp;{0xfa4810} &amp;{&lt;nil&gt;}</code></pre>
+<hr>
+<p>前面想着这种改法会影响其他代码的编译，考虑要不要编译完成后改回来。但从使用的角度考虑，assert唯一的用处就是退出程序，至少我遇到的情况绝对不需要程序跑到一半异常退出了。。所以就这样吧，这才是正确的处理方法。</p>
+<h2 id="assert本不应该这么用的-：（">assert本不应该这么用的 ：（</h2>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp57l.nw.html">mongodb 批量修改字段语句</a></p>
+</li>
+<li><p><a href="kh4ib7jk.t1.html">mongodb2.4 添加用户</a></p>
+</li>
+<li><p><a href="87218.html">感谢beego陪伴我度过那不靠谱的半年</a></p>
+</li>
+<li><p><a href="61832.html">golang 实现mysql Quote方法</a></p>
+</li>
+<li><p><a href="60572.html">golang 限制goroutine并行个数</a></p>
+</li>
+<li><p><a href="60427.html">golang 解压zip文件</a></p>
+</li>
+<li><p><a href="59592.html">gb2312字符串转utf-8</a></p>
+</li>
+<li><p><a href="58854.html">otto踩坑：substr()遇到utf8出错</a></p>
+</li>
+<li><p><a href="58853.html">otto踩坑：vm.Interrupt导致goroutine无限增加</a></p>
+</li>
+<li><p><a href="58844.html">http.ResponseWriter.Header().Set()不是线程安全的！</a></p>
+</li>
+<li><p><a href="58840.html">结巴分词崩溃补丁</a></p>
+</li>
+<li><p><a href="58839.html">利用golang的反射实现类似js中的apply方法</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp52g.1h.html">nodejs本地双向代理 端口转发</a></p>
+</li>
+<li><p><a href="kh4hp53u.pjh.html">树莓派实现用pi用户自动登录</a></p>
+</li>
+<li><p><a href="kh4hp54d.xb.html">git删除远程分支</a></p>
+</li>
+<li><p><a href="kh4hp57l.nw.html">mongodb 批量修改字段语句</a></p>
+</li>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
+</li>
+<li><p><a href="kh4hp5as.pb.html">linux自启动/禁止自启动服务</a></p>
+</li>
+<li><p><a href="kh4hp5b6.kdr.html">树莓派配置wifi热点</a></p>
+</li>
+<li><p><a href="kh4hp5eg.y8e.html"> ssl 证书生成方式</a></p>
+</li>
+<li><p><a href="kh4ib7jk.t1.html">mongodb2.4 添加用户</a></p>
+</li>
+<li><p><a href="88246.html">centos查看最近一次的开机时间</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="87999.html">bootstrap modal弹框导致ie无法获取焦点</a></p>
+</li>
+<li><p><a href="83845.html">配置mysql ssl连接</a></p>
+</li>
+<li><p><a href="79547.html">前端性能观察器</a></p>
+</li>
+<li><p><a href="79146.html">linux 批量替换文本内容</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58840";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

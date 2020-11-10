@@ -1,0 +1,228 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>关于自动加载的问题</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">关于自动加载的问题</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #fc35fd">html</span><span class="tagz" style="background: #de9b9e">javascript</span><span class="tagz" style="background: #57083e">单页应用</span><span class="tagz" style="background: #4065a4">自动加载下一页</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>最近在做卖东西的网站时遇到一个需求，浏览商品列表的翻页功能需要做成瀑布流加载模式，滚动条靠近底部时自动开始加载下一页。 一开始我想的办法是在滚动条位置改变的事件上增加一个回调方法，一旦接近底部就触发一次网络请求。这么做在pc上能满足需求，然而在移动端设备上调试的时候却发生了意外情况。。 
+移动端设备浏览器通常带手势操作，上滑隐藏导航条，下滑显示导航条。如果初始内容的高度不够，那么这个设定总是会导致滚动条事件不触发。 
+假设初始内容高度600px，设备高度630px，导航条高度40px，可以计算出窗口高度590px，导航条距离底部10px。在用户进行手势操作后，这些事件将被依次触发：导航条高度变化，窗口高度变化，滚动条位置改变。所以此时窗口高度变为630px，因为内容高度600px&lt;窗口高度630px，所以在滚动条位置改变之前滚动条已经不存在了，所以滚动条事件自然不会被触发。 
+既然事件无法利用，那么用计时器监听滚动条位置变化是解决问题的最快办法了。最终代码如下：</p>
+<pre><code class="language-html">&lt;meta charset=&#39;utf-8&#39; /&gt;
+&lt;script src=&#39;https://blog.xdelve.com/js-lib/plus/jquery.js&#39;&gt;&lt;/script&gt;
+&lt;style&gt;
+div{
+  position: absolute;
+  left:0;
+  top:0;
+  height:300px;
+  width:200px;
+  overflow-x:hidden;
+  overflow-y:scroll;
+  line-height: 3;
+  padding:10px;
+}
+&lt;/style&gt;
+&lt;div id=&#39;c&#39;&gt;&lt;/div&gt;
+&lt;script&gt;
+
+// 滚动条到底部时自动加载下一页
+// 设计要求：
+// 1. 一个实例中最多只可能存在一个网络io等待
+// 2. 如果本次请求失败，则立即重试
+// 3. 如果本次请求超时，应该忽略本次返回结果
+
+var pageloader=function(selector,params,handler){
+  var c=$(selector),page=null,lock=false;
+  params.page=params.page||1;
+  params.distance=params.distance||10;
+  params.timeout=params.timeout||3000;
+  if(!params.handler)throw alert(&#39;业务接口必填&#39;);
+
+  var r=setInterval(function(){
+    if(!lock &amp;&amp; page!==null){
+      lock=true;
+      params.handler(page,function(p,data){
+        if(p!==page)return;
+        handler(page,data);
+        params.page++;
+        page=null;
+        lock=false;
+      },function(p){
+        lock=false;
+        console.log(p+&#39;失败&#39;);
+      });
+      setTimeout(function(){
+        lock=false;
+      },params.timeout);
+    }
+    if(c.scrollTop()+c.outerHeight()+params.distance&lt;c[0].scrollHeight)
+      return;
+    page=params.page;
+  },16);
+
+  // 销毁计时器
+  return {
+    destory:function(){
+      clearInterval(r);
+    }
+  };
+};
+
+var a=pageloader(&#39;div#c&#39;,{
+  // getlist模拟一个封装了网络请求业务接口，接收参数为：页码,成功时回调,失败时回调（失败回调可省）
+  handler:function getlist(page,success,fail){
+    // 模拟网络延时
+    setTimeout(function(){
+      // 以一定概率模拟成功和失败
+      if(Math.random()&lt;.8)
+        success(page,&#39;# &#39;+page+&#39;, &#39;+Math.random());
+        // 模拟传入成功收到的数据
+      else fail &amp;&amp; fail(page); // 模拟失败
+    },500*(1+Math.random()*1|0));
+  }
+},function(page,data){
+  // 页码和此页上的数据
+  c.innerHTML+=&#39;&lt;span&gt;page: &#39;+page+&#39; =&gt; &#39;+data+&#39;&lt;/span&gt;&lt;br/&gt;&#39;;
+});
+
+// 如果需要销毁这个实例，使用此代码
+// a.destory();
+
+&lt;/script&gt;</code></pre>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp54u.a47.html">html5 全屏代码</a></p>
+</li>
+<li><p><a href="kh4hp55s.p7g.html">判断变量是否 0 或者 &#39;0&#39;</a></p>
+</li>
+<li><p><a href="kh4hp5a0.gjt.html">单页应用的单向数据流的流程图</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="87823.html">youku电脑版跳过广告代码</a></p>
+</li>
+<li><p><a href="65958.html">data-*属性慎用</a></p>
+</li>
+<li><p><a href="58847.html">解密某个js文件</a></p>
+</li>
+<li><p><a href="58843.html">破解百度云下载链接</a></p>
+</li>
+<li><p><a href="58829.html">让js支持带命名的正则表达式</a></p>
+</li>
+<li><p><a href="58822.html">jshtml模板引擎</a></p>
+</li>
+<li><p><a href="58818.html">json2html源码</a></p>
+</li>
+<li><p><a href="58793.html">读取Blob的内容实体</a></p>
+</li>
+<li><p><a href="58786.html">判断一个object是否HTMLDom</a></p>
+</li>
+<li><p><a href="58781.html">简易命令行解析器</a></p>
+</li>
+<li><p><a href="58780.html">Promise才是javascript的正统队列</a></p>
+</li>
+<li><p><a href="58779.html">callback =&gt; Promise.then</a></p>
+</li>
+<li><p><a href="58778.html">简易转义字符转实体字符方法</a></p>
+</li>
+<li><p><a href="58777.html">nodejs异步回调的并发控制</a></p>
+</li>
+<li><p><a href="58773.html">低版本IE命名函数表达式bug</a></p>
+</li>
+<li><p><a href="58772.html">让重复调用只有第一次生效</a></p>
+</li>
+<li><p><a href="58771.html">简易JSON函数封装</a></p>
+</li>
+<li><p><a href="58770.html">使用eval来修改上下文的变量</a></p>
+</li>
+<li><p><a href="58767.html">seajs同步加载依赖的实现和弊病</a></p>
+</li>
+<li><p><a href="58766.html">html5页面全屏方法</a></p>
+</li>
+<li><p><a href="58765.html">给滚动条置顶添加过渡动画</a></p>
+</li>
+<li><p><a href="58764.html">m秒内最多n次的问题</a></p>
+</li>
+<li><p><a href="58762.html">让代码扁平化</a></p>
+</li>
+<li><p><a href="58760.html">关于自动加载的问题</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4ut.68c.html">华为等国产手机rem宽度超过实际宽度</a></p>
+</li>
+<li><p><a href="kh4hp4ya.6e.html">ipsec vpn 添加新账号</a></p>
+</li>
+<li><p><a href="kh4hp4zl.csd.html">css3 文字渐变色</a></p>
+</li>
+<li><p><a href="kh4hp52g.1h.html">nodejs本地双向代理 端口转发</a></p>
+</li>
+<li><p><a href="kh4hp54u.a47.html">html5 全屏代码</a></p>
+</li>
+<li><p><a href="kh4hz03h.xh.html">python 用摄像头拍照并写入文件</a></p>
+</li>
+<li><p><a href="kh4hp574.hum.html">heroku登陆cli</a></p>
+</li>
+<li><p><a href="kh4hp596.lj.html">webrtc泄漏本地ip信息</a></p>
+</li>
+<li><p><a href="kh4hp5as.pb.html">linux自启动/禁止自启动服务</a></p>
+</li>
+<li><p><a href="kh4hp5by.jnt.html">webpack使用外部资源</a></p>
+</li>
+<li><p><a href="kh4hp5ct.4ys.html">putty使用http代理连接服务器</a></p>
+</li>
+<li><p><a href="kh4hp5dm.5i.html">git记住/删除账号密码</a></p>
+</li>
+<li><p><a href="kh4ib7jk.t1.html">mongodb2.4 添加用户</a></p>
+</li>
+<li><p><a href="88180.html">树莓派配置wifi</a></p>
+</li>
+<li><p><a href="87999.html">bootstrap modal弹框导致ie无法获取焦点</a></p>
+</li>
+<li><p><a href="79146.html">linux 批量替换文本内容</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58760";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

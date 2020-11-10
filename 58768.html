@@ -1,0 +1,129 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>safari popstate bug</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">safari popstate bug</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #60190c">safari</span><span class="tagz" style="background: #ae0e4b">bug</span><span class="tagz" style="background: #c9557a">popstate</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>今天在调试一个单页应用时发现safari在处理popstate的时机有些问题，如果在onload之前绑定则onload时也会触发一次。 </p>
+<p>为了证实我的猜测，我在其他浏览器上进行测试，代码如下：</p>
+<pre><code class="language-html">&lt;meta charset=&#39;utf-8&#39; /&gt;
+&lt;script&gt;
+onpopstate=function(){
+  alert(&#39;popstate 发生!&#39;);
+};
+&lt;/script&gt;</code></pre>
+<p>其中chrome，ie11，opera，firefox都没有反应，只有safari上出现弹框。 
+所以我确定了这是safari上的bug，为了使业务逻辑改动最小，我使用定时器的办法来解决这个问题。 </p>
+<pre><code class="language-html">&lt;meta charset=&#39;utf-8&#39; /&gt;
+&lt;script&gt;
+onload=function(){
+  setTimeout(function(){
+    onpopstate=function(){
+      alert(&#39;popstate 发生!&#39;);
+    };
+  },0);
+};
+&lt;/script&gt;</code></pre>
+<p>再次测试，一切正常。。</p>
+<p>这个问题我在<a href="https://developer.mozilla.org/zh-CN/docs/Web/Events/popstate">MDN</a>上也找了说明，但是和我的情况不太一样，可能是safari浏览器的版本不同吧。</p>
+<blockquote>
+<p>本地safari UA： </p>
+</blockquote>
+<hr>
+<blockquote>
+<p>Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/534.57.2 (KHTML, like Gecko) Version/5.1.7 Safari/534.57.2</p>
+</blockquote>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="88103.html">ie8上Image.onload不触发问题</a></p>
+</li>
+<li><p><a href="87999.html">bootstrap modal弹框导致ie无法获取焦点</a></p>
+</li>
+<li><p><a href="67375.html">jquery获取窗口高度踩坑</a></p>
+</li>
+<li><p><a href="67352.html">bootstrap打开多个模态框的bug</a></p>
+</li>
+<li><p><a href="58841.html">utf8还是utf-8？</a></p>
+</li>
+<li><p><a href="58773.html">低版本IE命名函数表达式bug</a></p>
+</li>
+<li><p><a href="58769.html">生产环境预留调试入口的想法</a></p>
+</li>
+<li><p><a href="58768.html">safari popstate bug</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4x0.yw.html">pip安装nltk临时使用国内源</a></p>
+</li>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hp5as.pb.html">linux自启动/禁止自启动服务</a></p>
+</li>
+<li><p><a href="kh4hp5cd.lmo.html">TIME_WAIT过多</a></p>
+</li>
+<li><p><a href="kh4hp5fb.n3u.html">把树莓派的存储空间拓展到整张TF卡中</a></p>
+</li>
+<li><p><a href="88246.html">centos查看最近一次的开机时间</a></p>
+</li>
+<li><p><a href="88229.html">mysql导出csv文件</a></p>
+</li>
+<li><p><a href="88181.html">树莓派配置收发邮件</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88153.html">猴子选大王算法问题</a></p>
+</li>
+<li><p><a href="88103.html">ie8上Image.onload不触发问题</a></p>
+</li>
+<li><p><a href="87999.html">bootstrap modal弹框导致ie无法获取焦点</a></p>
+</li>
+<li><p><a href="87991.html">数据库清理优化</a></p>
+</li>
+<li><p><a href="87218.html">感谢beego陪伴我度过那不靠谱的半年</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58768";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

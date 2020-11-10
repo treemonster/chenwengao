@@ -1,0 +1,231 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>前端性能观察器</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">前端性能观察器</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #32981a">js</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>由于手机浏览器的性能往往比较渣，一些电脑上能正常运行的js代码，到了手机上就一卡一卡的，所以不得不对比较慢的代码部分进行优化。为了能找到哪些代码片段是影响性能的，我写了一个前端性能观察器用于统计各个代码片段之间的时间损耗。</p>
+<pre><code class="language-javascript">/**
+ 前端性能观察器
+ 作者：雾海树妖 &lt;http://treemonster.github.io/&gt;
+ */
+let docter_time
+let docter=(loc_kw,slow_ms)=&gt;{
+  let id=`docter_${Date.now()}`
+  if(location.href.indexOf(loc_kw)&lt;0)return ()=&gt;{};
+  document.body.innerHTML+=`&lt;textarea id=&quot;${id}&quot; style=&quot;
+    position:fixed;
+    left:0;
+    top:20%;
+    height:50%;
+    background:#eee;
+    border:1px solid #ccc;
+    width: 50%;
+    min-width: 300px;
+    z-index:999999;
+  &quot;&gt;&lt;/textarea&gt;`
+  return {log:(tag)=&gt;{
+    let n=new Date
+    let m=n-docter_time
+    if(m&gt;=slow_ms){
+      let d=document.getElementById(id)
+      d.value+=`${tag}: ${m}ms\n\n`
+      d.scrollTop=d.scrollHeight
+    }
+    docter_time=n
+  },reset:()=&gt;docter_time=new Date}
+}
+</code></pre>
+<p>使用范例：</p>
+<pre><code class="language-html">&lt;body&gt;
+&lt;script&gt;
+/**
+ 前端性能观察器
+ 作者：雾海树妖 &lt;http://treemonster.github.io/&gt;
+ */
+let docter_time
+let docter=(loc_kw,slow_ms)=&gt;{
+  let id=`docter_${Date.now()}`
+  if(location.href.indexOf(loc_kw)&lt;0)return ()=&gt;{};
+  document.body.innerHTML+=`&lt;textarea id=&quot;${id}&quot; style=&quot;
+    position:fixed;
+    left:0;
+    top:20%;
+    height:50%;
+    background:#eee;
+    border:1px solid #ccc;
+    width: 50%;
+    min-width: 300px;
+    z-index:999999;
+  &quot;&gt;&lt;/textarea&gt;`
+  return {log:(tag)=&gt;{
+    let n=new Date
+    let m=n-docter_time
+    if(m&gt;=slow_ms){
+      let d=document.getElementById(id)
+      d.value+=`${tag}: ${m}ms\n\n`
+      d.scrollTop=d.scrollHeight
+    }
+    docter_time=n
+  },reset:()=&gt;docter_time=new Date}
+}
+
+
+let doc=docter(&#39;my_docter&#39;,100)
+
+// 计时器清零
+doc.reset()
+
+doc.log(&#39;begin&#39;)
+for(i=0;i&lt;3e7;i++);
+doc.log(&#39;step 1 done&#39;)
+for(i=0;i&lt;1e7;i++);
+doc.log(&#39;step 2 done&#39;)
+for(i=0;i&lt;7e7;i++);
+doc.log(&#39;step 3 done&#39;)
+
+
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+<p><img src="/uploads/2017/09/17/66/newup-faca65e8a99ced0be158236fdd6db10131.png" alt="/uploads/2017/09/17/66//newup-faca65e8a99ced0be158236fdd6db10131.png @400x"></p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp52g.1h.html">nodejs本地双向代理 端口转发</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hp569.gcj.html">nodejs俄罗斯方块</a></p>
+</li>
+<li><p><a href="kh4hp58r.537.html">webrtc服务搭建</a></p>
+</li>
+<li><p><a href="kh4hp5eg.y8e.html"> ssl 证书生成方式</a></p>
+</li>
+<li><p><a href="88153.html">猴子选大王算法问题</a></p>
+</li>
+<li><p><a href="81007.html">html表格导出csv文件并下载</a></p>
+</li>
+<li><p><a href="79547.html">前端性能观察器</a></p>
+</li>
+<li><p><a href="63890.html">js日志去重工具</a></p>
+</li>
+<li><p><a href="58838.html">nodejs建立多级目录</a></p>
+</li>
+<li><p><a href="58833.html">用ClosureCompiler混淆代码</a></p>
+</li>
+<li><p><a href="58822.html">jshtml模板引擎</a></p>
+</li>
+<li><p><a href="58821.html">linux 上配置node路径</a></p>
+</li>
+<li><p><a href="58818.html">json2html源码</a></p>
+</li>
+<li><p><a href="58813.html">nodejs处理gb2312编码</a></p>
+</li>
+<li><p><a href="58798.html">nodejs遍历文件夹</a></p>
+</li>
+<li><p><a href="58793.html">读取Blob的内容实体</a></p>
+</li>
+<li><p><a href="58791.html">nodejs那恶心的stream.Readable</a></p>
+</li>
+<li><p><a href="58787.html">Promise复习，nodejs异步建立多级目录</a></p>
+</li>
+<li><p><a href="58785.html">判断javascript运行环境</a></p>
+</li>
+<li><p><a href="58783.html">异步并发也要保证原子性</a></p>
+</li>
+<li><p><a href="58781.html">简易命令行解析器</a></p>
+</li>
+<li><p><a href="58780.html">Promise才是javascript的正统队列</a></p>
+</li>
+<li><p><a href="58779.html">callback =&gt; Promise.then</a></p>
+</li>
+<li><p><a href="58778.html">简易转义字符转实体字符方法</a></p>
+</li>
+<li><p><a href="58771.html">简易JSON函数封装</a></p>
+</li>
+<li><p><a href="58767.html">seajs同步加载依赖的实现和弊病</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh8hr1ki.4fs.html">mac ssh透过代理连接</a></p>
+</li>
+<li><p><a href="kh4hp4v9.83f.html">安卓文字偏上，文字顶部被遮罩</a></p>
+</li>
+<li><p><a href="kh4hp4x0.yw.html">pip安装nltk临时使用国内源</a></p>
+</li>
+<li><p><a href="kh4hp4xw.fuh.html">mac 终端运行后台程序如何在终端关闭时继续运行</a></p>
+</li>
+<li><p><a href="kh4hp4zl.csd.html">css3 文字渐变色</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hp56p.7c.html">heroku查看app使用时间</a></p>
+</li>
+<li><p><a href="kh4hp574.hum.html">heroku登陆cli</a></p>
+</li>
+<li><p><a href="kh4hp58c.8w7.html">模拟307跳转情况</a></p>
+</li>
+<li><p><a href="kh4hp5ae.oak.html">dd备份/还原</a></p>
+</li>
+<li><p><a href="kh4hp5by.jnt.html">webpack使用外部资源</a></p>
+</li>
+<li><p><a href="kh4hp5d7.f8n.html">git配置服务端支持http认证</a></p>
+</li>
+<li><p><a href="kh4hp5eg.y8e.html"> ssl 证书生成方式</a></p>
+</li>
+<li><p><a href="88246.html">centos查看最近一次的开机时间</a></p>
+</li>
+<li><p><a href="88180.html">树莓派配置wifi</a></p>
+</li>
+<li><p><a href="88153.html">猴子选大王算法问题</a></p>
+</li>
+<li><p><a href="88103.html">ie8上Image.onload不触发问题</a></p>
+</li>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="79547";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

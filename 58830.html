@@ -1,0 +1,136 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>yield版文件遍历</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">yield版文件遍历</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #16f10d">yield</span><span class="tagz" style="background: #0c1864">es6</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>之前用Promise的方式写过一个文件遍历的代码 <a href="https://xdelve.com/article/58798.html">查看</a>。但Promise无法避免用回调来处理异步逻辑，作为前端语言使用还好，但后台逻辑复杂的情况下回调太多是很恶心的，yield恰好解决了这个问题。</p>
+<p>先实现一个普通的迭代处理器。</p>
+<pre><code class="language-javascript">const ite=(generator,o)=&gt;function(){
+  const gen=generator.apply(o||{},arguments);
+  var def=Promise.defer();
+  void function next(){
+    with(gen.next(arguments))
+      if(done) def.resolve(value);
+      else if(typeof value===&#39;function&#39;)value(next);
+      else if(value &amp;&amp; value.constructor===Promise) value.then(next);
+  }();
+  return def.promise;
+};</code></pre>
+<p>遍历文件夹的方法</p>
+<pre><code class="language-javascript">function scandir(dir){
+  const [ev,path,fs,dirs]=[new (require(&#39;events&#39;)), require(&#39;path&#39;), require(&#39;fs&#39;), []];
+  const scan=ite(function*(fi){
+    try{
+      fi=path.resolve(fi);
+      var[err,list]=yield(next)=&gt;fs.readdir(fi,next);
+      if(err) throw new Error(&#39;list &#39;+fi+&#39; failed&#39;);
+      yield Promise.all(list.map(ite(function*(fn){
+        const full=path.resolve(fi+path.sep+fn);
+        var[err,stat]=yield(next)=&gt;fs.stat(full,next);
+        if(err) throw new Error(&#39;stat &#39;+full+&#39; failed&#39;);
+        stat.isDirectory()? dirs.push(full): ev.emit(&#39;file&#39;,full);
+      })));
+    }catch(e){
+      ev.emit(&#39;error&#39;,e.message);
+    }
+    ev.emit(&#39;dir&#39;,fi);
+    dirs.length? scan(dirs.shift()): ev.emit(&#39;finish&#39;);
+  });
+  scan(dir);
+  return ev;
+}</code></pre>
+<p>调用实例</p>
+<pre><code class="language-javascript">scandir(&#39;./&#39;).on(&#39;file&#39;,function(file){
+  console.log(&#39;file: &#39;+file)
+}).on(&#39;dir&#39;,function(dir){
+  console.log(&#39;dir: &#39;+dir)
+}).on(&#39;error&#39;,function(fi){
+  console.log(&#39;error: &#39;+fi);
+}).on(&#39;finish&#39;,function(){
+  console.log(&#39;end&#39;)
+});</code></pre>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="58832.html">generator转Promise封装</a></p>
+</li>
+<li><p><a href="58830.html">yield版文件遍历</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="khbe1zve.29n.html">css多行文本超出截断显示省略号</a></p>
+</li>
+<li><p><a href="kh4hp4zl.csd.html">css3 文字渐变色</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp54d.xb.html">git删除远程分支</a></p>
+</li>
+<li><p><a href="kh4hp569.gcj.html">nodejs俄罗斯方块</a></p>
+</li>
+<li><p><a href="kh4hp574.hum.html">heroku登陆cli</a></p>
+</li>
+<li><p><a href="kh4hp596.lj.html">webrtc泄漏本地ip信息</a></p>
+</li>
+<li><p><a href="kh4hp5ae.oak.html">dd备份/还原</a></p>
+</li>
+<li><p><a href="kh4hp5d7.f8n.html">git配置服务端支持http认证</a></p>
+</li>
+<li><p><a href="88225.html">mac搜索局域网内的主机</a></p>
+</li>
+<li><p><a href="88172.html">mysql选取内容导出到文件</a></p>
+</li>
+<li><p><a href="88094.html">随机取某个概率区间的代码</a></p>
+</li>
+<li><p><a href="87999.html">bootstrap modal弹框导致ie无法获取焦点</a></p>
+</li>
+<li><p><a href="87823.html">youku电脑版跳过广告代码</a></p>
+</li>
+<li><p><a href="83845.html">配置mysql ssl连接</a></p>
+</li>
+<li><p><a href="79146.html">linux 批量替换文本内容</a></p>
+</li>
+<li><p><a href="72645.html">记一次mysql死锁的教训</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58830";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

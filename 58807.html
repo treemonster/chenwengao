@@ -1,0 +1,147 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>python 通过命令行参数直接调用方法</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">python 通过命令行参数直接调用方法</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #23eeeb">python</span><span class="tagz" style="background: #dbb0d3">命令行</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>用python编写批处理脚本时，为了方便外部程序调用，我希望把一些交互命令直接从命令行读入方法名和参数，然后执行对应的内部方法。</p>
+<p>设计的目标是输入的参数大于等于1个，第一个参数是方法名，后面的参数是方法对应的参数。</p>
+<p>比如说这样一个命令行：</p>
+<pre><code class="language-bash">x.py add --a=1 --b=2</code></pre>
+<p>对应的python脚本：</p>
+<pre><code class="language-python">def add(a,b): print int(a)+int(b)</code></pre>
+<p>于是我实现了以下方法：</p>
+<pre><code class="language-python">
+try:
+  c={}
+  import sys;
+  argv=sys.argv
+  # sys.argv第一个是自身文件名，第二个开始为命令行参数
+  if len(argv)&lt;2: raise Exception(&quot;command argv too short&quot;)
+  for i in range(2, len(argv)):
+    a=argv[i]
+    # 支持两种额外参数格式
+    # --xx=yy，表示参数xx的值为yy
+    # zz，表示参数zz的值为True
+    a=a[0:2]==&#39;--&#39; and a[2:].split(&#39;=&#39;,1) or [a]
+    c[a[0]]=len(a)&gt;1 and a[1] or True
+  f=argv[1]
+  if not globals().has_key(f):
+    raise Exception(&quot;function `&quot;+f+&quot;` not exists&quot;)
+  apply(globals()[f],(),c)
+except Exception,e: print &#39;Error: &#39;+e.message
+</code></pre>
+<p>完整示例：</p>
+<pre><code class="language-python">
+def add(a,b): print int(a)+int(b)
+def minus(a,b): print int(a)-int(b)
+
+try:
+  c={}
+  import sys;
+  argv=sys.argv
+  if len(argv)&lt;2: raise Exception(&quot;command argv too short&quot;)
+  for i in range(2, len(argv)):
+    a=argv[i]
+    a=a[0:2]==&#39;--&#39; and a[2:].split(&#39;=&#39;,1) or [a]
+    c[a[0]]=len(a)&gt;1 and a[1] or True
+  f=argv[1]
+  if not globals().has_key(f):
+    raise Exception(&quot;function `&quot;+f+&quot;` not exists&quot;)
+  apply(globals()[f],(),c)
+except Exception,e: print &#39;Error: &#39;+e.message
+
+# x.py add --a=10 --b=2
+# x.py minus --a=10 --b=2
+
+</code></pre>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4x0.yw.html">pip安装nltk临时使用国内源</a></p>
+</li>
+<li><p><a href="kh4hz03h.xh.html">python 用摄像头拍照并写入文件</a></p>
+</li>
+<li><p><a href="88328.html">python下载文件，带进度条控制</a></p>
+</li>
+<li><p><a href="58807.html">python 通过命令行参数直接调用方法</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp51g.d79.html">SSL certificate problem: self signed certificate in certificate chain</a></p>
+</li>
+<li><p><a href="kh4hp52g.1h.html">nodejs本地双向代理 端口转发</a></p>
+</li>
+<li><p><a href="kh4hp52w.ibe.html">ios13 vpn 能连接但不能传数据问题解决</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hp54u.a47.html">html5 全屏代码</a></p>
+</li>
+<li><p><a href="kh4hp5a0.gjt.html">单页应用的单向数据流的流程图</a></p>
+</li>
+<li><p><a href="kh4hp5as.pb.html">linux自启动/禁止自启动服务</a></p>
+</li>
+<li><p><a href="kh4ib7jk.t1.html">mongodb2.4 添加用户</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88128.html">centos7 开放或者关闭端口</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="87999.html">bootstrap modal弹框导致ie无法获取焦点</a></p>
+</li>
+<li><p><a href="87218.html">感谢beego陪伴我度过那不靠谱的半年</a></p>
+</li>
+<li><p><a href="83845.html">配置mysql ssl连接</a></p>
+</li>
+<li><p><a href="79547.html">前端性能观察器</a></p>
+</li>
+<li><p><a href="75739.html">平面旋转</a></p>
+</li>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
+</li>
+<li><p><a href="69351.html">缓存才是优化的终极手段</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58807";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

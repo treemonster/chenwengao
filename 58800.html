@@ -1,0 +1,172 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>docker使用说明</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">docker使用说明</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #05b605">docker</span><span class="tagz" style="background: #7051dc">笔记</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>docker是一个运行于linux 64位系统上的虚拟机程序。就虚拟机的性能来说已经非常不错了，完全适合服务器环境使用。本文列举我整理的docker基本使用方法。</p>
+<hr>
+<p>centos使用yum安装docker</p>
+<pre><code class="language-bash">yum install docker-engine</code></pre>
+<p>如果发现没有找到docker包则编辑yum源。</p>
+<p>新建 <code>/etc/yum.repos.d/docker.repo</code>，写入内容并保存：</p>
+<pre><code class="language-plain">[dockerrepo]
+name=Docker Repository
+baseurl=https://yum.dockerproject.org/repo/main/centos/$releasever/
+enabled=1
+gpgcheck=1
+gpgkey=https://yum.dockerproject.org/gpg</code></pre>
+<p>然后重新使用yum安装。</p>
+<p>安装完毕之后启动docker服务</p>
+<pre><code class="language-bash">service docker start</code></pre>
+<p>&lt;font color=red&gt;启动失败？&lt;/font&gt;</p>
+<p>&lt;font color=#f77&gt;运行docker -d，如果提示docker: relocation error: docker: symbol dm_task_get_info_with_deferred_remove, version Base not defined in file libdevmapper.so.1.02 with link time reference...
+&lt;/font&gt;</p>
+<p>则可能是本地库太老了，使用yum update更新</p>
+<pre><code class="language-bash">yum update</code></pre>
+<hr>
+<h4 id="术语说明：">术语说明：</h4>
+<p><strong>镜像</strong>：操作系统的程序包</p>
+<p><strong>容器</strong>：通过docker虚拟机运行的操作系统的实例</p>
+<hr>
+<h3 id="基础命令整理">基础命令整理</h3>
+<hr>
+<h5 id="下载镜像">下载镜像</h5>
+<pre><code class="language-bash">docker pull centos</code></pre>
+<hr>
+<h5 id="运行镜像">运行镜像</h5>
+<pre><code class="language-bash">docker run --net host -ti centos /bin/bash</code></pre>
+<p>--net host 表示虚拟机容器和外部机器公用网卡。</p>
+<p>centos是镜像名称，/bin/bash是运行的命令</p>
+<hr>
+<h5 id="运行镜像，并挂载本地共享目录">运行镜像，并挂载本地共享目录</h5>
+<pre><code class="language-bash">docker run --net host -ti -v /share:/usr/share2  centos /bin/bash</code></pre>
+<p>/share为本地目录，/usr/share2为虚拟机内部目录</p>
+<p>&lt;font color=red&gt;注意：
+虚拟机内部的共享目录/usr/share2千万不要和虚拟机内部的已有目录冲突，否则可能会遇到一些奇怪问题。一开始我是用的/usr/share，结果发现虚拟机内的yum不能用了，究其原因是 /usr/bin/yum里面引用的路径是 /usr/share/yum-cli，而挂在成共享目录后原系统的/usr/share目录就被覆盖了。
+&lt;/font&gt;</p>
+<hr>
+<h5 id="查看当前运行中的容器">查看当前运行中的容器</h5>
+<pre><code class="language-bash">docker ps -a</code></pre>
+<hr>
+<h5 id="保存镜像">保存镜像</h5>
+<pre><code class="language-bash">docker commit b65ec9d59989 my-centos</code></pre>
+<p>在另一个ssh窗口中把当前运行中的容器保存到我的镜像中，b65ec...是上一步中列表的CONTAINER ID</p>
+<p>运行中的镜像的任何操作都是不会保存到镜像中的，只有通过commit操作才会把容器内部的操作持久保存，以便直接给其他机器使用。</p>
+<p>commit操作可以后的IMAGE名称，如果是一个新的名称，则会创建一个新的镜像；如果是已有的镜像名，则会覆盖旧的镜像。</p>
+<hr>
+<h5 id="连接到正在运行中的容器">连接到正在运行中的容器</h5>
+<pre><code class="language-bash">docker attach b65ec9d59989</code></pre>
+<p>attach操作可以得到运行中容器的shell入口，这是在字符界面下唯一得到后台容器管理入口的方法。</p>
+<hr>
+<h5 id="导出正在运行中的容器到一个文件里，通过文件形式分享给其他人用。导出的容器是附带镜像的，因此分享之后可以直接使用。">导出正在运行中的容器到一个文件里，通过文件形式分享给其他人用。导出的容器是附带镜像的，因此分享之后可以直接使用。</h5>
+<pre><code class="language-bash">docker export b65ec9d59989&gt;/docker/test.tar</code></pre>
+<hr>
+<h5 id="导入文件中的容器，10是导入后镜像的tag，tag可不加，默认latest">导入文件中的容器，1.0是导入后镜像的TAG，TAG可不加，默认latest</h5>
+<pre><code class="language-bash">cat /docker/test.tar | docker import - my-centos:1.0</code></pre>
+<p>导入后的镜像运行方法同上。</p>
+<hr>
+<h5 id="恢复容器运行状态">恢复容器运行状态</h5>
+<pre><code class="language-bash">docker start b65ec9d59989</code></pre>
+<p>容器本质是保存了虚拟系统的运行状态，所有在系统中的操作都会同步记录到容器里，而不是记录到镜像中（如果要记录到镜像，则需要使用上述的commit命令）。</p>
+<p>恢复之后，容器就在后台运行了。此时再使用attach命令即可连接此容器进行操作。</p>
+<hr>
+<h3 id="2016-6-21-补充">2016-6-21 补充</h3>
+<p>在尝试挂载vmbox的共享目录时候，使用run命令启动容器后，遇到共享目录无权限访问的情况。</p>
+<p>解决办法如下：</p>
+<pre><code class="language-bash">docker run --net host -ti --privileged=true -v /media/sf_website:/website lnmp /bin/bash</code></pre>
+<hr>
+<h3 id="2016-6-23-补充">2016-6-23 补充</h3>
+<p>服务器环境部署完docker之后通常希望其一直在后台运行。那么attach之后就不能exit方式来退出了，那样会终止容器。</p>
+<p>退出，但继续后台运行的解决办法是组合键：</p>
+<p>&lt;font color=red&gt;<strong>Ctrl+P+Q</strong>&lt;/font&gt;</p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="58823.html">docker-in-docker 折腾笔记</a></p>
+</li>
+<li><p><a href="58804.html">sublime text 换行去掉 &#39;\r&#39;</a></p>
+</li>
+<li><p><a href="58801.html">让bootstrap轮播图支持触摸操作</a></p>
+</li>
+<li><p><a href="58800.html">docker使用说明</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh8hr1ki.4fs.html">mac ssh透过代理连接</a></p>
+</li>
+<li><p><a href="kh4hp4wj.uv.html">nginx 子域名对应文件夹</a></p>
+</li>
+<li><p><a href="kh4hp4x0.yw.html">pip安装nltk临时使用国内源</a></p>
+</li>
+<li><p><a href="kh4hp4xw.fuh.html">mac 终端运行后台程序如何在终端关闭时继续运行</a></p>
+</li>
+<li><p><a href="kh4hp501.g4a.html">npm远程服务器某些配置不兼容代理的解决办法</a></p>
+</li>
+<li><p><a href="kh4hp51g.d79.html">SSL certificate problem: self signed certificate in certificate chain</a></p>
+</li>
+<li><p><a href="kh4hp52w.ibe.html">ios13 vpn 能连接但不能传数据问题解决</a></p>
+</li>
+<li><p><a href="kh4hp5ae.oak.html">dd备份/还原</a></p>
+</li>
+<li><p><a href="kh4hp5by.jnt.html">webpack使用外部资源</a></p>
+</li>
+<li><p><a href="kh4hp5d7.f8n.html">git配置服务端支持http认证</a></p>
+</li>
+<li><p><a href="88328.html">python下载文件，带进度条控制</a></p>
+</li>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="88181.html">树莓派配置收发邮件</a></p>
+</li>
+<li><p><a href="88172.html">mysql选取内容导出到文件</a></p>
+</li>
+<li><p><a href="88153.html">猴子选大王算法问题</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="79547.html">前端性能观察器</a></p>
+</li>
+<li><p><a href="69351.html">缓存才是优化的终极手段</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58800";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

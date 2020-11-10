@@ -1,0 +1,298 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>改写zend_language_scanner.c实现加密</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">改写zend_language_scanner.c实现加密</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #8f3a01">zend</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p><strong>注：本文仅适用php5.6的代码，php6没测试过，php7需要修改读取用户输入部分的代码。因为zval结构和php5不一样。</strong></p>
+<hr>
+<p>由于php本身做不到隐藏执行的代码，而在插件中hook接口也可以被编译方式的php环境dump出运行时的代码，因此我最终决定直接在zend基础上进行改写实现代码加密。当然也不是说这种方法就绝对找不到源代码了，比如反编译二进制文件到汇编代码，改写部分汇编指令，再dump出运行时代码。但这种方法对开发者要求比较高，已经足以拦掉大部分人的破解了。</p>
+<p>php的执行流程是：php文件代码-&gt;编译成opcode-&gt;zend虚拟机执行opcode</p>
+<p>由于在opcode基础上加密需要先序列化zend_op_array比较复杂，所以以后再考虑升级直接加密opcode，目前我只是加密了php原始代码。</p>
+<p>虽然可实现目的内部函数有很多，比如compile_file，zend_stream_fixup等，但并不是任何一个都可以利用的。因为zend的代码中有一种指针函数，这类函数可被外部插件进行hook，在此类函数基础上修改代码，若传入参数包含了解密后的内容的，那么结果都不用想了。</p>
+<p>最终实现分两部分，产生加密文件和解密运行。产生加密文件的代码用php来写，而解密运行则编译进zend内核。</p>
+<hr>
+<h4 id="我选择以下-font-colorff00003处font-进行修改：">我选择以下 &lt;font color=&#39;#ff0000&#39;&gt;3处&lt;/font&gt; 进行修改：</h4>
+<h5 id="1-自定义加密解密算法">1. 自定义加密解密算法</h5>
+<p>写在 open_file_for_scanning 方法之上</p>
+<pre><code>
+// myencrypt********
+#include &lt;string.h&gt;
+// --------------------------------
+// 以下代码每次编译前可按情况修改
+// 密码字符串生成函数，可操作参数为方法上下文变量i，返回一个对应下标i的密码数字
+// 注意：1. 尽量避免大数字运算，比如 (i^7)%16 , 需要写成 i%16^7
+//      2. 计算结果不要太大, 参与运算的数字不要太大，以免内存占用过多程序崩溃
+#define PWD_MAKE (-53) - (i%43) + (i&amp;119) + ((i&amp;89)^45) - (52^(i%9)) - 17*(i%4)%17 + code_len % 73
+// 加密校验字符串
+#define ENCRYPT_CODE &quot;ukgi76kNgj6r6VRHY5J6Gb5vD5Ev5&quot;
+#define ENCRYPT_EXT &quot;$x20&quot;
+// 需要修改的部分结束
+// -------------------------------------
+void xor_string(char* code){
+  int i;
+  char c;
+  int code_len=strlen(code);
+  for(i=0;i&lt;code_len;i++){
+    c= code[i] ^ (int)( abs(PWD_MAKE) &amp; 127 );
+    if( c != &#39;\0&#39; ) code[i]=c;
+  }
+}void trans_string(char* code,int j){
+  int i;
+  char c;
+  int code_len=strlen(code);
+  for(i=0;i&lt;code_len-j;i+=j*2){
+    c=code[i];
+    code[i]=code[i+j];
+    code[i+j]=c;
+  }
+}
+void myencrypt_string(char* code){
+  trans_string(code,1);
+  xor_string(code);
+  trans_string(code,3);
+  xor_string(code);
+}
+void mydecrypt_string(char* code){
+  xor_string(code);
+  trans_string(code,3);
+  xor_string(code);
+  trans_string(code,1);
+}
+</code></pre>
+<h5 id="2-如果存在加密的文件，则把当前读取目标改成这个加密的文件，而不是php中定义的文件名">2. 如果存在加密的文件，则把当前读取目标改成这个加密的文件，而不是php中定义的文件名</h5>
+<p>写在 open_file_for_scanning 方法内，zend_stream_fixup调用之上</p>
+<pre><code>
+  // myencrypt********
+  int filename_len=strlen(file_handle-&gt;filename),_fi;
+  char* filename=malloc(sizeof(char)*(filename_len+1));
+  char* old_filename=NULL;
+  int _len=filename_len - strlen(ENCRYPT_EXT);
+  for(_fi=0;_fi&lt; filename_len;_fi++)
+      if(_fi &lt; _len) filename[_fi]=file_handle-&gt;filename[_fi];
+    else filename[_fi]=ENCRYPT_EXT[_fi-_len];
+  filename[filename_len]=&#39;\0&#39;;
+  int is_encrypted=access(filename,0)==0 ;
+  if(strstr(filename,&quot;phar://@&quot;)!=NULL)is_encrypted=2;
+  if(is_encrypted){
+      old_filename=file_handle-&gt;filename;
+      file_handle-&gt;filename=filename;
+      if(is_encrypted==2) strcpy(filename+7,filename+8);
+  }
+</code></pre>
+<p>写在 open_file_for_scanning 方法内，zend_stream_fixup调用之下</p>
+<pre><code>  // myencrypt********
+  if(is_encrypted){
+    char *bbuf=malloc(sizeof(char)*strlen(buf));
+    strcpy(bbuf,buf);
+    mydecrypt_string(bbuf);
+    buf=bbuf;
+    file_handle-&gt;filename=old_filename;
+  }free(filename);</code></pre>
+<h5 id="3-给php调用的加密输出">3. 给php调用的加密输出</h5>
+<p>写在zend_prepare_string_for_scanning方法开头</p>
+<pre><code>    // myencrypt********
+    // 加密处理
+    int code_len=strlen(ENCRYPT_CODE);
+    char* rawstr=str-&gt;value.str.val;
+    if(strstr(rawstr,ENCRYPT_CODE)==rawstr){
+        char *userinput=rawstr+code_len;
+        myencrypt_string(userinput);
+        php_write(userinput,str-&gt;value.str.len-code_len);
+        return FAILURE;
+    }</code></pre>
+<p>然后编译php源代码，即可得到一个能执行加密代码的php环境。</p>
+<hr>
+<p>外部php生成加密文件的代码：</p>
+<pre><code class="language-php">&lt;?php
+
+if(substr(PHP_SAPI_NAME(),0,3) !== &#39;cli&#39;){
+  die(&quot;该程序只能在CLI模式下运行！&quot;);
+}
+
+class MyEncrypt{
+  const N_DEL_FILE=1; // 删除原始文件
+  const N_EXPORT_PHAR=2; // 导出到phar文件
+  const N_DEL_ENC_FILE=4; // 删除加密后的文件
+  const N_RENAME_FILE_BAK=8; // 重命名原始文件名后面加bak后缀
+
+  const E_NOT_EXIST=1;
+  const E_IGNORE_FILE=2;
+  const E_ENCRYPTED_FILE=4;
+  const E_OLDFILE_FAIL=8;
+
+  const E_SUCCESS=16;
+
+  private $_encryptkey;
+  private $_ext;
+  private $_phar;
+  private $_list=[];
+
+  function __construct($encryptkey,$ext,$phar=&#39;pack.lib&#39;){
+    $this-&gt;_encryptkey=$encryptkey;
+    $this-&gt;_ext=$ext;
+    $this-&gt;_phar=$phar;
+  }
+
+  private function _encryptname($filename){
+    return substr($filename,0,-strlen($this-&gt;_ext)).$this-&gt;_ext;
+  }
+
+  function encryptfile($filename,$n_code=0){
+    if(!file_exists($filename))return self::E_NOT_EXIST;
+    if(substr($filename,-strlen($this-&gt;_ext))==$this-&gt;_ext)return self::E_ENCRYPTED_FILE;
+    ob_start();
+    eval($this-&gt;_encryptkey.file_get_contents($filename));
+    file_put_contents($this-&gt;_encryptname($filename),ob_get_contents());
+    ob_clean();
+    if($n_code &amp; self::N_DEL_FILE)@unlink($filename);
+    if($n_code &amp; self::N_RENAME_FILE_BAK)@rename($filename, $filename.&#39;.bak&#39;);
+    if((self::N_DEL_FILE|self::N_RENAME_FILE_BAK) &amp; $n_code &amp;&amp; file_exists($filename))
+      return self::E_OLDFILE_FAIL;
+    return self::E_SUCCESS;
+  }
+
+  function _encryptdir($dir,$ignorestrregex,$n_code=0,&amp;$_list){
+    if($ignorestrregex==null)$ignorestrregex=&#39;/$^/&#39;;
+    if(preg_match($ignorestrregex,$dir))return;
+    $files=scandir($dir);
+    foreach ($files as $name){
+      if($name==&#39;.&#39; || $name==&#39;..&#39;)continue;
+      $fn=$dir.&#39;/&#39;.$name;
+      if(is_dir($fn))$this-&gt;_encryptdir($fn,$ignorestrregex,$n_code,$_list);
+      else{
+        if(preg_match($ignorestrregex,$fn))$ms=self::E_IGNORE_FILE;
+        else $ms=$this-&gt;encryptfile($fn,$n_code);
+        if($ms &amp; (self::E_SUCCESS|self::E_ENCRYPTED_FILE))
+          $_list[$this-&gt;_encryptname($fn)]=1;
+      }
+    }
+  }
+
+  function encryptdir($dir,$ignorestrregex,$n_code=0){
+    $_list=[];
+    $this-&gt;_encryptdir($dir,$ignorestrregex,$n_code,$_list);
+    if($n_code &amp; self::N_EXPORT_PHAR){
+      $a = new Phar($dir.&#39;.phar&#39;);
+      $len=strlen($dir);
+      foreach($_list as $file=&gt;$want){
+        $a-&gt;addFile($file,substr($file,$len));
+        if($n_code &amp; self::N_DEL_ENC_FILE)@unlink($file);
+      }
+      @rename($dir.&#39;.phar&#39;,$dir.&#39;/&#39;.$this-&gt;_phar);
+    }
+  }
+}
+
+$e=new MyEncrypt(&#39;ukgi76kNgj6r6VRHY5J6Gb5vD5Ev5&#39;,&#39;$x20&#39;,&#39;xdelve.lib&#39;);
+$e-&gt;encryptdir(&#39;/website/php/lib&#39;,null,
+  MyEncrypt::N_EXPORT_PHAR | MyEncrypt::N_DEL_FILE | MyEncrypt::N_DEL_ENC_FILE
+);
+</code></pre>
+<p>上述加密文件生成后，require(&#39;/tmp/test.php&#39;); 实际执行的就是 /tmp/test$fun，从而达到解密运行的目的。</p>
+<p>此版本的加密运行支持phar中的内容，提供autoload示例：</p>
+<pre><code class="language-php">&lt;?php
+class Bootstrap{
+  private function __myautoload($classname){
+    $dir=__DIR__.&#39;/lib&#39;;
+    $fn=&#39;/&#39;.str_replace(&#39;_&#39;,&#39;/&#39;,$classname).&#39;.php&#39;;
+    if(file_exists($dir.$fn))return require($dir.$fn);
+    Phar::loadPhar($dir.&#39;/xdelve.lib&#39;, &#39;lib&#39;);
+    require(&#39;phar://@lib&#39;.$fn);
+  }
+  function _initAutoload(){
+    spl_autoload_register([$this,&#39;__myautoload&#39;]);
+  }
+}
+
+$b=new Bootstrap;$b-&gt;_initAutoload();
+
+    $r=new Food_Apple;
+    $r-&gt;y();
+
+$j=new Json2html;
+echo $j-&gt;render(&#39;{{a}}x{{b}}&#39;,[&#39;a&#39;=&gt;&#39;A&#39;,&#39;b&#39;=&gt;&#39;BB&#39;]);
+</code></pre>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><a href="58810.html">改写zend_language_scanner.c实现加密</a></li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="khbe1zve.29n.html">css多行文本超出截断显示省略号</a></p>
+</li>
+<li><p><a href="khalg5ks.g.html">css3自定义滚动条样式</a></p>
+</li>
+<li><p><a href="kh8hr1ki.4fs.html">mac ssh透过代理连接</a></p>
+</li>
+<li><p><a href="kh4hp4wj.uv.html">nginx 子域名对应文件夹</a></p>
+</li>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp4zl.csd.html">css3 文字渐变色</a></p>
+</li>
+<li><p><a href="kh4hp501.g4a.html">npm远程服务器某些配置不兼容代理的解决办法</a></p>
+</li>
+<li><p><a href="kh4hp51g.d79.html">SSL certificate problem: self signed certificate in certificate chain</a></p>
+</li>
+<li><p><a href="kh4hp53d.49g.html">jxa运动指令脚本</a></p>
+</li>
+<li><p><a href="kh4hp54d.xb.html">git删除远程分支</a></p>
+</li>
+<li><p><a href="kh4hp5a0.gjt.html">单页应用的单向数据流的流程图</a></p>
+</li>
+<li><p><a href="kh4hp5b6.kdr.html">树莓派配置wifi热点</a></p>
+</li>
+<li><p><a href="kh4hp5ct.4ys.html">putty使用http代理连接服务器</a></p>
+</li>
+<li><p><a href="kh4hp5d7.f8n.html">git配置服务端支持http认证</a></p>
+</li>
+<li><p><a href="kh4hp5fb.n3u.html">把树莓派的存储空间拓展到整张TF卡中</a></p>
+</li>
+<li><p><a href="88328.html">python下载文件，带进度条控制</a></p>
+</li>
+<li><p><a href="88180.html">树莓派配置wifi</a></p>
+</li>
+<li><p><a href="87218.html">感谢beego陪伴我度过那不靠谱的半年</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58810";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

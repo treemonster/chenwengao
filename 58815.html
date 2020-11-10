@@ -1,0 +1,148 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>php解析ini文件</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">php解析ini文件</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #e1bfd7">php</span><span class="tagz" style="background: #4d9036">ini</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>php自带的parse_ini_file提供的功能不方便处理多级命名空间的写法，因此我自己实现了类似 <a href="http://www.laruence.com/manual/yaf.class.config.html#yaf.class.config.ini">Yaf_Config</a> 的功能。</p>
+<p><code>a.ini</code></p>
+<pre><code class="language-ini">widget.paths[] = APP_PATH &quot;/application/widget/&quot;
+
+upload.dir = APP_PATH &quot;/public/uploads/&quot;
+upload.pub_dir = &quot;/newpages/public/uploads/&quot;</code></pre>
+<p><code>parse.php</code></p>
+<pre><code class="language-php">define(&#39;APP_PATH&#39;,dirname(__FILE__).&#39;/&#39;);
+function my_parse_ini($filename,$dir=null){
+  $a=parse_ini_file(($dir===null?APP_PATH.&#39;/conf/&#39;:$dir).$filename,true);
+  $o=(object)array();
+  foreach($a as $key=&gt;$value){
+    $w=explode(&#39;.&#39;,$key);
+    for($i=0,$n=count($w);$i&lt;$n;$i++){
+      $t=&#39;$o-&gt;&#39;.join(&#39;-&gt;&#39;,array_slice($w,0,$i+1));
+      eval(&#39;if(!@&#39;.$t.&#39;)&#39;.$t.&#39;=$i&lt;$n-1?(object)array():json_decode(\&#39;&#39;.json_encode($value).&#39;\&#39;,true);&#39;);
+    }
+  }
+  return $o;
+}
+
+// 解析a.ini
+var_dump(my_parse_ini(&#39;a.ini&#39;);</code></pre>
+<p>输出结果为</p>
+<pre><code class="language-plain">object(stdClass)#12 (2) {
+  [&quot;widget&quot;]=&gt;
+  object(stdClass)#13 (1) {
+    [&quot;paths&quot;]=&gt;
+    array(1) {
+      [0]=&gt;
+      string(48) &quot;/alidata/www/shop2/newpages//application/widget/&quot;
+    }
+  }
+  [&quot;upload&quot;]=&gt;
+  object(stdClass)#14 (2) {
+    [&quot;dir&quot;]=&gt;
+    string(44) &quot;/alidata/www/shop2/newpages//public/uploads/&quot;
+    [&quot;pub_dir&quot;]=&gt;
+    string(25) &quot;/newpages/public/uploads/&quot;
+  }
+}</code></pre>
+<p>兼容php5.2和更新的版本</p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="88094.html">随机取某个概率区间的代码</a></p>
+</li>
+<li><p><a href="58846.html">php session文件过多的问题</a></p>
+</li>
+<li><p><a href="58834.html">php5.2.17 curl openssl的配置踩坑</a></p>
+</li>
+<li><p><a href="58827.html">x64系统编译php5.3报错</a></p>
+</li>
+<li><p><a href="58817.html">无脑破解phpjm加密</a></p>
+</li>
+<li><p><a href="58815.html">php解析ini文件</a></p>
+</li>
+<li><p><a href="58812.html">无聊的刷屏</a></p>
+</li>
+<li><p><a href="58784.html">php switch的问题</a></p>
+</li>
+<li><p><a href="58774.html">PHP使用SMTP发送邮件</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="khbe1zve.29n.html">css多行文本超出截断显示省略号</a></p>
+</li>
+<li><p><a href="kh4hp4ut.68c.html">华为等国产手机rem宽度超过实际宽度</a></p>
+</li>
+<li><p><a href="kh4hp4vo.i3t.html">word文件命令行打印</a></p>
+</li>
+<li><p><a href="kh4hp4z5.bct.html">raw.githubusercontent.com DNS被指向127.0.0.1</a></p>
+</li>
+<li><p><a href="kh4hp501.g4a.html">npm远程服务器某些配置不兼容代理的解决办法</a></p>
+</li>
+<li><p><a href="kh4hp54d.xb.html">git删除远程分支</a></p>
+</li>
+<li><p><a href="kh4hp56p.7c.html">heroku查看app使用时间</a></p>
+</li>
+<li><p><a href="kh4hp58r.537.html">webrtc服务搭建</a></p>
+</li>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
+</li>
+<li><p><a href="kh4hp5a0.gjt.html">单页应用的单向数据流的流程图</a></p>
+</li>
+<li><p><a href="kh4hp5b6.kdr.html">树莓派配置wifi热点</a></p>
+</li>
+<li><p><a href="kh4hp5by.jnt.html">webpack使用外部资源</a></p>
+</li>
+<li><p><a href="kh4hp5eg.y8e.html"> ssl 证书生成方式</a></p>
+</li>
+<li><p><a href="88229.html">mysql导出csv文件</a></p>
+</li>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="88180.html">树莓派配置wifi</a></p>
+</li>
+<li><p><a href="87999.html">bootstrap modal弹框导致ie无法获取焦点</a></p>
+</li>
+<li><p><a href="69351.html">缓存才是优化的终极手段</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58815";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

@@ -1,0 +1,111 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>linux快速搜索文件内容</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">linux快速搜索文件内容</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #e206a5">linux</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>修改别人写的模板代码，为了快速定位相关代码位置，最直接的方法就是搜文件内容。</p>
+<p>使用以下命令：</p>
+<p>find &lt;font color=red&gt;/wwwroot&lt;/font&gt; -type f -print0 | xargs -0 grep  &lt;font color=red&gt;ecshop&lt;/font&gt; | grep &#39;^[^:]*&#39;</p>
+<p>这句命令遍历输出/wwwroot下的文件名，并使用null字符作为每个文件名之间的间隔符。（默认的分隔符是whitespace，因此文件名包含空格就会出错）</p>
+<p>将find的输出流作为xargs的输入流，-0参数告诉xrgas分割文件名的间隔符为null，grep ecshop是对此文件名需要执行的的命令，搜索内容中的ecshop关键字</p>
+<p>高亮显示文件名，如果文件名带冒号就会出错，虽然linux支持文件名中带冒号，但应该不会有人起这种文件名。</p>
+<hr>
+<p>2016年10月21日补充</p>
+<p>上面的方式有时候会搜出文件不存在的报错，可能是没有权限或者其他原因导致的，因此改良之后的搜索语句如下：</p>
+<p>find . -type f -print0|xargs -0 grep ^ 2&gt;/dev/null|grep -v cache|grep xxx</p>
+<p>这里2&gt;/dev/null用于去掉报错的输出，grep -v 忽略不需要查找的关键字，最后再从余下的结果中搜索。</p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp5cd.lmo.html">TIME_WAIT过多</a></p>
+</li>
+<li><p><a href="79146.html">linux 批量替换文本内容</a></p>
+</li>
+<li><p><a href="58828.html">linux设置系统时区</a></p>
+</li>
+<li><p><a href="58824.html">linux自动校准时间</a></p>
+</li>
+<li><p><a href="58811.html">linux快速搜索文件内容</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh8hr1ki.4fs.html">mac ssh透过代理连接</a></p>
+</li>
+<li><p><a href="kh4hp4vo.i3t.html">word文件命令行打印</a></p>
+</li>
+<li><p><a href="kh4hp4xw.fuh.html">mac 终端运行后台程序如何在终端关闭时继续运行</a></p>
+</li>
+<li><p><a href="kh4hp4zl.csd.html">css3 文字渐变色</a></p>
+</li>
+<li><p><a href="kh4hp50h.0q9.html">curl用法</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp52w.ibe.html">ios13 vpn 能连接但不能传数据问题解决</a></p>
+</li>
+<li><p><a href="kh4hp53d.49g.html">jxa运动指令脚本</a></p>
+</li>
+<li><p><a href="kh4hp53u.pjh.html">树莓派实现用pi用户自动登录</a></p>
+</li>
+<li><p><a href="kh4hp54u.a47.html">html5 全屏代码</a></p>
+</li>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
+</li>
+<li><p><a href="kh4hp5ae.oak.html">dd备份/还原</a></p>
+</li>
+<li><p><a href="kh4hp5as.pb.html">linux自启动/禁止自启动服务</a></p>
+</li>
+<li><p><a href="kh4hp5ct.4ys.html">putty使用http代理连接服务器</a></p>
+</li>
+<li><p><a href="kh4hp5fb.n3u.html">把树莓派的存储空间拓展到整张TF卡中</a></p>
+</li>
+<li><p><a href="88180.html">树莓派配置wifi</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88128.html">centos7 开放或者关闭端口</a></p>
+</li>
+<li><p><a href="87991.html">数据库清理优化</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58811";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

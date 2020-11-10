@@ -1,0 +1,103 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>用ClosureCompiler混淆代码</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">用ClosureCompiler混淆代码</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #62df3f">js压缩</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>上午写了一个转格式的服务，为了不让客户直接得到我写的js原始代码，所以试着用compiler.jar进行了压缩和混淆。</p>
+<p>我以前使用的压缩的命令行是：</p>
+<pre><code class="language-bash">java -jar compiler.jar code.js&gt;code.min.js</code></pre>
+<p>但是在压缩es6的文件时遇到语法报错：</p>
+<pre><code class="language-plain"> ERROR - this language feature is only supported in es6 mode: destructuring. Use --language_in=ECMASCRIPT6 or ECMASCRIPT6_STRICT to enable ES6 features.</code></pre>
+<p>看来需要增加es6的参数。增加之后转换正常了，但是我突然想到，如果可以把es6的代码转成es3的写法，那么混淆程度不就更高了吗？！！</p>
+<p>于是乎上google搜了一下，结果找到了这个页面。</p>
+<p><a href="http://qiita.com/fernet/items/87fe70ddb5f2011c9c4f">仕事で使うJavaScriptにClosureCompilerを推してみる</a></p>
+<p>我注意到了这行：
+ClosureCompilerにいつの間にかES6→ES3/ES5というトランスパイル機能が増えてるようで、babel.js的AltJSとしての側面もありそうだったので今回取り上げてみました。</p>
+<pre><code>java -jar compiler.jar --js mylogger.es6.js --js_output_file mylogger.es5.js --language_in ECMASCRIPT6 --language_out ECMASCRIPT5 --formatting pretty_print</code></pre>
+<p>增加参数 --language_out ECMASCRIPT5就可以实现输出ECMASCRIPT5的语法，--formatting pretty_print则是格式化输出的代码，加上缩进和换行。不过es5还不是我想要的，因为ie8或者更早的浏览器不支持，所以我把ECMASCRIPT5换成了ES3，最终得到了es3规范的代码。</p>
+<hr>
+<h4 id="附：">附：</h4>
+<p>ClosureCompiler目前还在持续更新中，git链接：</p>
+<p><a href="https://github.com/google/closure-compiler">https://github.com/google/closure-compiler</a></p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><a href="58833.html">用ClosureCompiler混淆代码</a></li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4ut.68c.html">华为等国产手机rem宽度超过实际宽度</a></p>
+</li>
+<li><p><a href="kh4hp4vo.i3t.html">word文件命令行打印</a></p>
+</li>
+<li><p><a href="kh4hp4x0.yw.html">pip安装nltk临时使用国内源</a></p>
+</li>
+<li><p><a href="kh4hp4xg.2sb.html">sass变量和继承类写法</a></p>
+</li>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp52w.ibe.html">ios13 vpn 能连接但不能传数据问题解决</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hp53d.49g.html">jxa运动指令脚本</a></p>
+</li>
+<li><p><a href="kh4hp55s.p7g.html">判断变量是否 0 或者 &#39;0&#39;</a></p>
+</li>
+<li><p><a href="kh4hp569.gcj.html">nodejs俄罗斯方块</a></p>
+</li>
+<li><p><a href="kh4hp574.hum.html">heroku登陆cli</a></p>
+</li>
+<li><p><a href="kh4hp5cd.lmo.html">TIME_WAIT过多</a></p>
+</li>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="88181.html">树莓派配置收发邮件</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="87999.html">bootstrap modal弹框导致ie无法获取焦点</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58833";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

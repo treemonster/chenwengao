@@ -1,0 +1,152 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>http.ResponseWriter.Header().Set()不是线程安全的！</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">http.ResponseWriter.Header().Set()不是线程安全的！</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #21cc28">golang</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>用golang做项目有一段时间了，然而正式环境有时会遇到程序异常崩溃的问题。查看日志发现错误原因是：<code>fatal error: concurrent map writes</code></p>
+<p>详细错误日志如下：</p>
+<pre><code>fatal error: concurrent map writes
+
+goroutine 9884217 [running]:
+runtime.throw(0xb997f3, 0x15)
+    /website/xdelve/plug/go/src/runtime/panic.go:596 +0x95 fp=0xc4204a9c48 sp=0xc4204a9c28
+runtime.mapassign(0xb03220, 0xc420325470, 0xc4204a9d18, 0xc)
+    /website/xdelve/plug/go/src/runtime/hashmap.go:499 +0x667 fp=0xc4204a9ce8 sp=0xc4204a9c48
+net/textproto.MIMEHeader.Set(0xc420325470, 0xb91a44, 0xc, 0xb9b828, 0x18)
+    /website/xdelve/plug/go/src/net/textproto/header.go:22 +0x71 fp=0xc4204a9d38 sp=0xc4204a9ce8
+net/http.Header.Set(0xc420325470, 0xb91a44, 0xc, 0xb9b828, 0x18)
+    /website/xdelve/plug/go/src/net/http/header.go:31 +0x53 fp=0xc4204a9d70 sp=0xc4204a9d38
+treemonster/server.(*T_Response).SetHeader(0xc420325e90, 0xb91a44, 0xc, 0xb9b828, 0x18)
+    /website/other/golang/src/treemonster/server/response.go:41 +0x69 fp=0xc4204a9da8 sp=0xc4204a9d70
+treemonster/server.(*T_Response).JSONSuccess(0xc420325e90, 0xaa2f00, 0xc4201ae1a8, 0xaa2f00, 0xc4201ae1a8)
+    /website/other/golang/src/treemonster/server/response.go:49 +0x61 fp=0xc4204a9de0 sp=0xc4204a9da8
+_/website/other/golang/go/app/controller.(*ApiController).Proxy.func1(0xc4201ae0b0, 0xc4201ae040)
+    /website/other/golang/go/app/controller/Api.go:31 +0x3a8 fp=0xc4204a9f10 sp=0xc4204a9de0
+treemonster/js.(*T_Promise).getnew.func2.1()
+    /website/other/golang/src/treemonster/js/Promise.go:102 +0x91 fp=0xc4204a9f50 sp=0xc4204a9f10
+treemonster/js.Try(0xc42037a7b0, 0xc42037a7a8, 0x1, 0x1)
+    /website/other/golang/src/treemonster/js/Try.go:11 +0x61 fp=0xc4204a9f88 sp=0xc4204a9f50
+treemonster/js.(*T_Promise).getnew.func2()
+    /website/other/golang/src/treemonster/js/Promise.go:103 +0x89 fp=0xc4204a9fe0 sp=0xc4204a9f88
+runtime.goexit()
+    /website/xdelve/plug/go/src/runtime/asm_amd64.s:2197 +0x1 fp=0xc4204a9fe8 sp=0xc4204a9fe0
+created by treemonster/js.SetImmediate
+    /website/other/golang/src/treemonster/js/Timer.go:56 +0x33
+
+......</code></pre>
+<p>concurrent map writes实际原因是多个线程同时操作了map类型的变量。</p>
+<p>通过日志信息我确定了出错的代码为：</p>
+<pre><code class="language-go">  r.Raw.Header().Set(key, value)</code></pre>
+<p>这里的<code>r.Raw</code>返回的是<code>http.ResponseWriter</code>，<code>Header()</code> 即 http.Header。由于Set方法是官方代码的，因此我此前从未考虑过可能会出现线程安全的错误。但现在必须要确认其逻辑是否真的有问题。</p>
+<p>我查看了其定义出的代码：</p>
+<p><a href="https://golang.org/src/net/http/header.go?s=349:380#L9">https://golang.org/src/net/http/header.go?s=349:380#L9</a></p>
+<pre><code>func (h Header) Set(key, value string) {
+      textproto.MIMEHeader(h).Set(key, value)
+  }
+</code></pre>
+<p><a href="https://golang.org/src/net/textproto/header.go?s=657:699#L11">https://golang.org/src/net/textproto/header.go?s=657:699#L11</a></p>
+<pre><code>func (h MIMEHeader) Set(key, value string) {
+      h[CanonicalMIMEHeaderKey(key)] = []string{value}
+  }
+</code></pre>
+<p>结果上看到确实是直接写这个map的，没有加锁。Fuck。。。。</p>
+<p>确认原因之后我很无奈，但只能自己做一个读写锁来处理，希望以后官方代码能修复这个问题吧。</p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="87218.html">感谢beego陪伴我度过那不靠谱的半年</a></p>
+</li>
+<li><p><a href="61832.html">golang 实现mysql Quote方法</a></p>
+</li>
+<li><p><a href="60572.html">golang 限制goroutine并行个数</a></p>
+</li>
+<li><p><a href="60427.html">golang 解压zip文件</a></p>
+</li>
+<li><p><a href="59592.html">gb2312字符串转utf-8</a></p>
+</li>
+<li><p><a href="58854.html">otto踩坑：substr()遇到utf8出错</a></p>
+</li>
+<li><p><a href="58853.html">otto踩坑：vm.Interrupt导致goroutine无限增加</a></p>
+</li>
+<li><p><a href="58844.html">http.ResponseWriter.Header().Set()不是线程安全的！</a></p>
+</li>
+<li><p><a href="58839.html">利用golang的反射实现类似js中的apply方法</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="khalg5ks.g.html">css3自定义滚动条样式</a></p>
+</li>
+<li><p><a href="kh4hp4xw.fuh.html">mac 终端运行后台程序如何在终端关闭时继续运行</a></p>
+</li>
+<li><p><a href="kh4hp51g.d79.html">SSL certificate problem: self signed certificate in certificate chain</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp53u.pjh.html">树莓派实现用pi用户自动登录</a></p>
+</li>
+<li><p><a href="kh4hp55c.9dm.html">搜索命令整理</a></p>
+</li>
+<li><p><a href="kh4hp56p.7c.html">heroku查看app使用时间</a></p>
+</li>
+<li><p><a href="kh4hp574.hum.html">heroku登陆cli</a></p>
+</li>
+<li><p><a href="kh4hp57l.nw.html">mongodb 批量修改字段语句</a></p>
+</li>
+<li><p><a href="kh4hp5ae.oak.html">dd备份/还原</a></p>
+</li>
+<li><p><a href="88246.html">centos查看最近一次的开机时间</a></p>
+</li>
+<li><p><a href="88103.html">ie8上Image.onload不触发问题</a></p>
+</li>
+<li><p><a href="87823.html">youku电脑版跳过广告代码</a></p>
+</li>
+<li><p><a href="83845.html">配置mysql ssl连接</a></p>
+</li>
+<li><p><a href="79146.html">linux 批量替换文本内容</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+<li><p><a href="69351.html">缓存才是优化的终极手段</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58844";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

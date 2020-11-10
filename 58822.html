@@ -1,0 +1,351 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>jshtml模板引擎</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">jshtml模板引擎</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #de9b9e">javascript</span><span class="tagz" style="background: #2ad4ef">jsh</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>之前我写过一个插件 <a href="https://xdelve.com/article/75.html">Json2html</a> 用于把json数据填充进html模板。但实际使用时有一个情况让我感觉相当蛋疼：amdjs规范的模块没办法把html模板和js同时加载。也就是说，如果一个一步模块带界面，那么必须再走一个获取界面的ajax请求，增加异步逻辑复杂度，而事实上这两块并没必要分开加载。</p>
+<p>所以这次我写了一个插件用于解决合并html和js的问题，这个插件名为jsh。</p>
+<h3 id="原理">原理</h3>
+<p>让js支持 &lt;b&gt;多行字符串&lt;/b&gt;，我仿照了php的多行字符串语法，避免了需要增加额外引号的麻烦。比如有一个多行字符串：</p>
+<pre><code class="language-plain">test line &quot;cdsacac&quot; 这里有双引号
+cmwefnieurgn &#39;dqdwdwed&#39; 这里有单引号
+gvererferfffffwefqwef /dcsdcsdc/ 这里有正则标记
+</code></pre>
+<p>那么原生js要这样写：</p>
+<pre><code class="language-javascript">var a=&quot;test line \&quot;cdsacac\&quot; 这里有双引号\n&quot;+
+&quot;cmwefnieurgn &#39;dqdwdwed&#39; 这里有单引号\n&quot;+
+&quot;gvererferfffffwefqwef /dcsdcsdc/ 这里有正则标记&quot;;
+
+// ****************
+//
+//
+// 其他表示方法不列举了，仅说做法
+// 1. 用单引号括起来然后转义单引号，和上述方法原理相同
+// 2. 用正则标记括起来然后转义各种相关符号，此方法比较蛋疼用的人很少
+// 3. 用一个function包裹注释段，然后提取注释内容，这种方法用的还是挺多的，但是毕竟属于黑魔法，不建议正式项目用
+//
+//
+
+</code></pre>
+<p>换成我的新语法则可以这样写：</p>
+<pre><code class="language-jsh">
+var a=&lt;&lt;&lt;str
+test line &quot;cdsacac&quot; 这里有双引号
+cmwefnieurgn &#39;dqdwdwed&#39; 这里有单引号
+gvererferfffffwefqwef /dcsdcsdc/ 这里有正则标记
+str;
+</code></pre>
+<p>这样写看上去非常简介，完全没有多余的描述符干扰视线，而且再也不用为了转义里面的字符串浪费时间了。</p>
+<h3 id="设计思想">设计思想</h3>
+<ul>
+<li><p>jsh插件仅支持两个接口：</p>
+<ol start="0">
+<li><p>string parse(jsh,data,justParse)</p>
+<p>用于把带html的jsh字符串解析成正常的js，返回结果或执行。参数jsh为原始js字符串，data为需要使用的json数据，justParse为true时仅解析不执行</p>
+</li>
+<li><p>string parseHTML(jshtml,data,justParse)</p>
+<p>用于把带jsh标记的html字符串解析成正常html，第一个参数是原始html，后面的和parse方法里的一样</p>
+</li>
+</ol>
+</li>
+<li><p>jsh内部提供3种额外语法</p>
+<ol start="0">
+<li><p>多行字符串 &lt;&lt;&lt;t ... \nt</p>
+<p>和php里的差不多，不做解释了</p>
+</li>
+<li><p>echo方法</p>
+<p>用于输出到插件的返回值</p>
+</li>
+<li><p>${变量}</p>
+<p>用于多行字符串内直接取上下文的变量，省去了用引号隔开字符串和变量的步骤</p>
+</li>
+</ol>
+</li>
+</ul>
+<h3 id="实例">实例</h3>
+<pre><code class="language-html">&lt;script type=&quot;text/javascript&quot;&gt;
+/*!
+ * jsh library v1.0
+ * https://xdelve.com/
+ * author: treemonster
+ * email: &lt;admin@xdelve.com&gt;
+ *
+ * Copyright treemonster
+ * Released under the MIT license
+ *
+ * Date: 2016-12-13T19:56Z
+ */
+function Jsh(global){
+  function _jsh2js(str,data,justParse){
+    str=&#39;(function(){\n\
+      /* global is allowed here*/\n\
+      var echo=function(str){\n\
+        echo._str+=str;\n\
+      };\n\
+      echo._str=&quot;&quot;;echo._res=function(){&#39;+
+    (function(){
+      var ret=[];
+      for(var k in data) ret.push(&#39; var &#39;+k+&#39;=&#39;+JSON.stringify(data[k])+&#39;;&#39;);
+      if(justParse)
+        ret.unshift(&#39;\n/** when using justParse , data here is not effective \n *  please replace this block before use&#39;),
+        ret.push(&#39; */&#39;);
+      ret.unshift(&#39;&#39;),ret.concat(&#39;&#39;);
+      return ret.concat(&#39;&#39;).join(&#39;\n&#39;);
+    })()+
+    str.replace(/\&lt;\&lt;\&lt;([a-z\d]+)(?:(\n[\s\S]+?|.*?))\n[\x20\x09]*\1\b/gi,function(){
+      var a=arguments;
+      var html=a[2].substr(1);
+      var er=&#39;&quot;&#39;+html.replace(/\$\{([^\}]+)\}|&quot;|\n/g,function(){
+        var a=arguments;
+        switch(true){
+          case a[0]===&#39;&quot;&#39;: return &#39;\\&quot;&#39;;
+          case a[0]===&#39;\n&#39;: return &#39;\\n&#39;;
+          case !!a[1]: return &#39;&quot;+&#39;+a[1]+&#39;+&quot;&#39;;
+        }
+      })+&#39;&quot;&#39;;
+      return er;
+    })+
+    &#39;;}();return echo._res &amp;&amp; typeof echo._res.then===&quot;function&quot; ? echo._res.then(function(a){return echo._str+(a||&quot;&quot;);}) :echo._str;})()&#39;;
+    return str;
+  }
+  this.parse=function(jsh,data,justParse){
+    var res=_jsh2js(jsh,data,justParse);
+    try{
+      return justParse?res:eval(res);
+    }catch(e){
+      return e;
+    }
+  };
+
+  this.parseHTML=function(jshtml,data,justParse){
+    if(typeof Promise===&#39;undefined&#39; || typeof JSON===&#39;undefined&#39;)
+      throw new Error(&#39;the javascript environment must support `Promise` and `JSON`&#39;);
+
+    var _parse=this.parse;
+    var htm=jshtml.split(/\&lt;\?jshtml[\s\S]+?(?:\?\&gt;|$)/g);
+    var par=function(str){
+      return justParse?JSON.stringify(str):str;
+    };
+    var jshs=[];
+    jshtml.replace(/\&lt;\?jshtml([\s\S]+?)(?:\?\&gt;|$)/g,function(){
+      jshs.push(par(htm.shift()),_parse(arguments[1],data,justParse));
+    });
+    jshs=jshs.concat(htm.map(par));
+    return Promise.all(jshs).then(function(res){
+      return justParse?&#39;Promise.all([&#39;+res.join(&#39;,&#39;)+&#39;]).then(function(res){return res.join(&quot;&quot;);})&#39;:res.join(&#39;&#39;);
+    });
+  };
+}
+// for amd
+if(typeof define!==&#39;undefined&#39; &amp;&amp; define.amd)
+  define(&#39;Jsh&#39;,function(){return Jsh;});
+// for nodejs
+else if(typeof module!==&#39;undefined&#39;)
+  module.exports=Jsh;
+
+
+
+
+&lt;/script&gt;
+
+
+&lt;!-- jsh demo --&gt;
+&lt;script type=&quot;text/jsh&quot; id=&#39;a&#39;&gt;
+// print multiLine html
+echo(&lt;&lt;&lt;tpl
+&lt;ul&gt;
+  &lt;li&gt;aaaa&lt;/li&gt;
+  &lt;li&gt;bbbb&lt;/li&gt;
+  &lt;li&gt;cccc&lt;/li&gt;
+&lt;/ul&gt;
+
+tpl);
+
+// print extern data
+echo(&quot;code by &quot;+ author +&quot;\n&quot;);
+
+// you can also write this way
+var list=[&#39;x&#39;,&#39;y&#39;,&#39;zzz&#39;];
+for(var i=0;i&lt;list.length;i++){
+  echo(&lt;&lt;&lt;tpl
+&lt;div&gt;${list[i]}&lt;/div&gt;
+
+  tpl);
+}
+
+&lt;/script&gt;
+&lt;script type=&quot;text/javascript&quot;&gt;
+console.log(_jsh.parse(a.innerText.trim(),{author:&#39;treemonster&#39;}));
+
+&lt;/script&gt;
+
+&lt;!-- jshtml demo --&gt;
+&lt;script type=&quot;text/jshtml&quot; id=&#39;b&#39;&gt;
+
+&lt;!DOCTYPE html&gt;
+&lt;head&gt;&lt;title&gt;jshtml&lt;/title&gt;&lt;/head&gt;
+
+&lt;div&gt;
+  &lt;h4&gt;list:&lt;/h4&gt;
+&lt;?jshtml
+
+for(var i=0;i&lt;divs.length;i++)echo(&lt;&lt;&lt;t
+  &lt;div&gt;${divs[i]}&lt;/div&gt;
+
+t);
+
+?&gt;
+&lt;/div&gt;
+&lt;/script&gt;
+&lt;script type=&quot;text/javascript&quot;&gt;
+
+// print the html 
+console.log(_jsh.parseHTML(b.innerText.trim(),{
+  divs:[&#39;x1&#39;,&#39;x2&#39;,&#39;x3&#39;]
+}));
+
+&lt;/script&gt;</code></pre>
+<p>justParse的唯一目的就是缓存，纯前端使用不考虑这个问题，之后我会在nodejs版本里补充缓存的代码，要不然每次都正则替换开销是很大的。</p>
+<p>写这个插件并不是说Json2html废了，实际上这两个东西用于处理不同的情况。我个人比较讨厌把一堆方法强行塞进一个插件里，搞得那个插件大到恶心。反正不论Json2html还是Jsh，我始终坚持：一个插件只做一件事。</p>
+<hr>
+<p>2016/12/13更新</p>
+<p>增加全局变量调用。</p>
+<hr>
+<p>2016/12/15更新</p>
+<p>代码上git</p>
+<p><a href="https://github.com/treemonster/Jsh">https://github.com/treemonster/Jsh</a></p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp55s.p7g.html">判断变量是否 0 或者 &#39;0&#39;</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="87823.html">youku电脑版跳过广告代码</a></p>
+</li>
+<li><p><a href="58847.html">解密某个js文件</a></p>
+</li>
+<li><p><a href="58843.html">破解百度云下载链接</a></p>
+</li>
+<li><p><a href="58829.html">让js支持带命名的正则表达式</a></p>
+</li>
+<li><p><a href="58822.html">jshtml模板引擎</a></p>
+</li>
+<li><p><a href="58818.html">json2html源码</a></p>
+</li>
+<li><p><a href="58793.html">读取Blob的内容实体</a></p>
+</li>
+<li><p><a href="58786.html">判断一个object是否HTMLDom</a></p>
+</li>
+<li><p><a href="58781.html">简易命令行解析器</a></p>
+</li>
+<li><p><a href="58780.html">Promise才是javascript的正统队列</a></p>
+</li>
+<li><p><a href="58779.html">callback =&gt; Promise.then</a></p>
+</li>
+<li><p><a href="58777.html">nodejs异步回调的并发控制</a></p>
+</li>
+<li><p><a href="58773.html">低版本IE命名函数表达式bug</a></p>
+</li>
+<li><p><a href="58772.html">让重复调用只有第一次生效</a></p>
+</li>
+<li><p><a href="58771.html">简易JSON函数封装</a></p>
+</li>
+<li><p><a href="58770.html">使用eval来修改上下文的变量</a></p>
+</li>
+<li><p><a href="58767.html">seajs同步加载依赖的实现和弊病</a></p>
+</li>
+<li><p><a href="58766.html">html5页面全屏方法</a></p>
+</li>
+<li><p><a href="58765.html">给滚动条置顶添加过渡动画</a></p>
+</li>
+<li><p><a href="58764.html">m秒内最多n次的问题</a></p>
+</li>
+<li><p><a href="58762.html">让代码扁平化</a></p>
+</li>
+<li><p><a href="58760.html">关于自动加载的问题</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="khalg5ks.g.html">css3自定义滚动条样式</a></p>
+</li>
+<li><p><a href="kh8hr1ki.4fs.html">mac ssh透过代理连接</a></p>
+</li>
+<li><p><a href="kh4hp4v9.83f.html">安卓文字偏上，文字顶部被遮罩</a></p>
+</li>
+<li><p><a href="kh4hp4vo.i3t.html">word文件命令行打印</a></p>
+</li>
+<li><p><a href="kh4hp4wj.uv.html">nginx 子域名对应文件夹</a></p>
+</li>
+<li><p><a href="kh4hp4xw.fuh.html">mac 终端运行后台程序如何在终端关闭时继续运行</a></p>
+</li>
+<li><p><a href="kh4hp4ya.6e.html">ipsec vpn 添加新账号</a></p>
+</li>
+<li><p><a href="kh4hp52g.1h.html">nodejs本地双向代理 端口转发</a></p>
+</li>
+<li><p><a href="kh4hp53d.49g.html">jxa运动指令脚本</a></p>
+</li>
+<li><p><a href="kh4hp54d.xb.html">git删除远程分支</a></p>
+</li>
+<li><p><a href="kh4hp58c.8w7.html">模拟307跳转情况</a></p>
+</li>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
+</li>
+<li><p><a href="kh4hp5a0.gjt.html">单页应用的单向数据流的流程图</a></p>
+</li>
+<li><p><a href="kh4hp5dm.5i.html">git记住/删除账号密码</a></p>
+</li>
+<li><p><a href="kh4hp5e1.ou.html">git 设置代理服务器</a></p>
+</li>
+<li><p><a href="88246.html">centos查看最近一次的开机时间</a></p>
+</li>
+<li><p><a href="88180.html">树莓派配置wifi</a></p>
+</li>
+<li><p><a href="88153.html">猴子选大王算法问题</a></p>
+</li>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58822";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

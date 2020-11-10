@@ -1,0 +1,231 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>简易命令行解析器</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">简易命令行解析器</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #671a0d">nodejs</span><span class="tagz" style="background: #de9b9e">javascript</span><span class="tagz" style="background: #dfff0a">cmd</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>nodejs写工具时，需要用命令函参数来控制程序的行为。由于不想用npm上的解析器，因为他们的api设计不符合我的要求，所以准备自己实现一个。 </p>
+<p>这个模块的主要功能是把字符串形式的命令行参数解析成 <code>json</code> 给程序调用，因此设计api时必然要把规则和对应的回调函数注册到一个列表中，之后以循环的方式取出匹配的回调函数并执行。此外最重要的是保持api的干净简洁，绝对不添加多余的接口名称。 因为多一个名称对于使用者就是增加学习成本。 </p>
+<p>这个模块我命名为cmd-args，调用形式如下： </p>
+<pre><code class="language-javascript">var c=require(&#39;cmd-args&#39;);
+ // 用户输入的命令行
+ // 命令行的格式为：
+ // 命令名称 --开关=值|--开关数组[]=值|目标
+c.resolve(&#39;X --a=1 --b=&quot;  21&quot; &quot;target 1&quot; --c --d=&quot;&quot; --e[]=e1 --e[]=e2 target2 &#39;,
+// 解析之后回调函数，参数def用来定义解析规则，参数effectAll用来设置是否只对第一条匹配的规则生效
+function(def,effectAll){
+  // def的回调函数接收的参数顺序和定义的一致，最后的target为命令行中的目标
+  // 此处的e是开关数组，所以需要用[]标记，取出的时候也是一个数组
+  def(&#39;X --a --b --c --d --e[]&#39;,function(a,b,c,d,e,target1,target2){
+    console.log(a,b,c,d,e,target1,target2);
+  });
+})
+// 返回的是Promise，所以可以很方便的用then处理结果
+.then(function(o){
+  console.log(&#39;success&#39;,o);
+},function(){
+  console.log(&#39;fail, no matches&#39;);
+});</code></pre>
+<p><code>cmd-args.js</code> 模块代码： </p>
+<pre><code class="language-javascript">exports.resolve=function(line,callback){
+  var result={ id:null, target:[], list:{}};
+  var trim=function(s){return s.replace(/^&quot;|&quot;$/g,&#39;&#39;);};
+  var matches={ count:0, lines:[], effectAll:false };
+  (line||&#39;&#39;).replace(
+    /(^\S+)|(?:\-\-([^\=\s\[]+(\[\s*\]){0,1}))(?:\=(&quot;[^&quot;]*&quot;|\S+)){0,1}|(&quot;[^&quot;]*&quot;|\S+)/g,
+    function(a,id,key,isArray,value,target){
+    switch(false){
+      case !id: return result.id=id.toLowerCase();
+      case !target: return result.target.push(trim(target));
+      default:
+      value=trim(value||&#39;&#39;)||true;
+      if(!isArray)return result.list[key]=value;
+      result.list[key]=result.list[key]||[];
+      result.list[key].push(value);
+    }
+  });
+  callback(function callee(key,beside,handler){
+    if(!handler)return callee(key,&#39;&#39;,beside);
+    key=key.toLowerCase().split(/\s+\-+/);
+    beside=beside.toLowerCase().split(/\s+/);
+    if(result.id!==key.shift())return;
+    if(!key.every(function(k,i){
+      key[i]=result.list[k];
+      return k &amp;&amp; result.list.hasOwnProperty(k);
+    }))return;
+    if(!beside.every(function(k){
+      k=k.replace(/^\-+/,&#39;&#39;);
+      return !k || !result.list.hasOwnProperty(k);
+    }))return;
+    handler.apply({},key.concat(result.target));
+    matches.count++;
+    matches.lines.push(line);
+    return true;
+  },function(){ matches.effectAll=true; });
+  return new Promise(function(resolve,reject){
+    matches.count&gt;0?resolve(matches):reject();
+  });
+};
+</code></pre>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp52g.1h.html">nodejs本地双向代理 端口转发</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hp55s.p7g.html">判断变量是否 0 或者 &#39;0&#39;</a></p>
+</li>
+<li><p><a href="kh4hp569.gcj.html">nodejs俄罗斯方块</a></p>
+</li>
+<li><p><a href="kh4hp58r.537.html">webrtc服务搭建</a></p>
+</li>
+<li><p><a href="kh4hp5eg.y8e.html"> ssl 证书生成方式</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="87823.html">youku电脑版跳过广告代码</a></p>
+</li>
+<li><p><a href="58847.html">解密某个js文件</a></p>
+</li>
+<li><p><a href="58843.html">破解百度云下载链接</a></p>
+</li>
+<li><p><a href="58838.html">nodejs建立多级目录</a></p>
+</li>
+<li><p><a href="58829.html">让js支持带命名的正则表达式</a></p>
+</li>
+<li><p><a href="58822.html">jshtml模板引擎</a></p>
+</li>
+<li><p><a href="58821.html">linux 上配置node路径</a></p>
+</li>
+<li><p><a href="58818.html">json2html源码</a></p>
+</li>
+<li><p><a href="58813.html">nodejs处理gb2312编码</a></p>
+</li>
+<li><p><a href="58798.html">nodejs遍历文件夹</a></p>
+</li>
+<li><p><a href="58793.html">读取Blob的内容实体</a></p>
+</li>
+<li><p><a href="58791.html">nodejs那恶心的stream.Readable</a></p>
+</li>
+<li><p><a href="58787.html">Promise复习，nodejs异步建立多级目录</a></p>
+</li>
+<li><p><a href="58786.html">判断一个object是否HTMLDom</a></p>
+</li>
+<li><p><a href="58783.html">异步并发也要保证原子性</a></p>
+</li>
+<li><p><a href="58781.html">简易命令行解析器</a></p>
+</li>
+<li><p><a href="58780.html">Promise才是javascript的正统队列</a></p>
+</li>
+<li><p><a href="58779.html">callback =&gt; Promise.then</a></p>
+</li>
+<li><p><a href="58778.html">简易转义字符转实体字符方法</a></p>
+</li>
+<li><p><a href="58777.html">nodejs异步回调的并发控制</a></p>
+</li>
+<li><p><a href="58773.html">低版本IE命名函数表达式bug</a></p>
+</li>
+<li><p><a href="58772.html">让重复调用只有第一次生效</a></p>
+</li>
+<li><p><a href="58771.html">简易JSON函数封装</a></p>
+</li>
+<li><p><a href="58770.html">使用eval来修改上下文的变量</a></p>
+</li>
+<li><p><a href="58767.html">seajs同步加载依赖的实现和弊病</a></p>
+</li>
+<li><p><a href="58766.html">html5页面全屏方法</a></p>
+</li>
+<li><p><a href="58765.html">给滚动条置顶添加过渡动画</a></p>
+</li>
+<li><p><a href="58764.html">m秒内最多n次的问题</a></p>
+</li>
+<li><p><a href="58762.html">让代码扁平化</a></p>
+</li>
+<li><p><a href="58760.html">关于自动加载的问题</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="khbe1zve.29n.html">css多行文本超出截断显示省略号</a></p>
+</li>
+<li><p><a href="kh4hp4wj.uv.html">nginx 子域名对应文件夹</a></p>
+</li>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp4zl.csd.html">css3 文字渐变色</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp53d.49g.html">jxa运动指令脚本</a></p>
+</li>
+<li><p><a href="kh4hz03h.xh.html">python 用摄像头拍照并写入文件</a></p>
+</li>
+<li><p><a href="kh4hp55s.p7g.html">判断变量是否 0 或者 &#39;0&#39;</a></p>
+</li>
+<li><p><a href="kh4hp57y.fpf.html">npm设置仓库地址和代理</a></p>
+</li>
+<li><p><a href="kh4hp5ae.oak.html">dd备份/还原</a></p>
+</li>
+<li><p><a href="kh4hp5b6.kdr.html">树莓派配置wifi热点</a></p>
+</li>
+<li><p><a href="kh4hp5cd.lmo.html">TIME_WAIT过多</a></p>
+</li>
+<li><p><a href="kh4hp5dm.5i.html">git记住/删除账号密码</a></p>
+</li>
+<li><p><a href="88225.html">mac搜索局域网内的主机</a></p>
+</li>
+<li><p><a href="88181.html">树莓派配置收发邮件</a></p>
+</li>
+<li><p><a href="87218.html">感谢beego陪伴我度过那不靠谱的半年</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+<li><p><a href="72645.html">记一次mysql死锁的教训</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58781";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

@@ -1,0 +1,132 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>随机取某个概率区间的代码</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">随机取某个概率区间的代码</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #e1bfd7">php</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>上班需要做一个抽奖券的功能，需要人为设置中奖概率，因此我写了一个按照预设概率随机获取奖品下标的代码。功能是：给定几个正整数或者0，标记为各个商品被抽中的概率，然后随机选取抽到的商品。</p>
+<pre><code class="language-php">&lt;?php
+  function rnd($r){
+    $s=0;
+    for($i=count($r);$i--&gt;0; ){
+      $s+=$r[$i];
+      if($r[$i]&lt;0 || $r[$i]!==(int)$r[$i])throw new Exception(&#39;概率数字必须是正整数或0&#39;);
+    }
+    if(!$s)throw new Exception(&#39;至少一个商品概率大于0&#39;);
+    $a=rand()%$s;
+    $i=0;
+    for(;$i&lt;count($r)-1;$i++){
+      $a-=$r[$i];
+      if($a&lt;=0 &amp;&amp; $r[$i])break;
+    }
+    return $i;
+  }
+
+var_dump(rnd(array(1,0,0,0)));
+var_dump(rnd(array(0,100,0,0)));
+var_dump(rnd(array(0,0,2,0,3)));
+?&gt;</code></pre>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="88094.html">随机取某个概率区间的代码</a></p>
+</li>
+<li><p><a href="58846.html">php session文件过多的问题</a></p>
+</li>
+<li><p><a href="58834.html">php5.2.17 curl openssl的配置踩坑</a></p>
+</li>
+<li><p><a href="58827.html">x64系统编译php5.3报错</a></p>
+</li>
+<li><p><a href="58817.html">无脑破解phpjm加密</a></p>
+</li>
+<li><p><a href="58815.html">php解析ini文件</a></p>
+</li>
+<li><p><a href="58812.html">无聊的刷屏</a></p>
+</li>
+<li><p><a href="58784.html">php switch的问题</a></p>
+</li>
+<li><p><a href="58774.html">PHP使用SMTP发送邮件</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4u7.5l8.html">react项目webpack打包时拆分异步加载的文件</a></p>
+</li>
+<li><p><a href="kh4hp4xg.2sb.html">sass变量和继承类写法</a></p>
+</li>
+<li><p><a href="kh4hp51g.d79.html">SSL certificate problem: self signed certificate in certificate chain</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp52g.1h.html">nodejs本地双向代理 端口转发</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hz03h.xh.html">python 用摄像头拍照并写入文件</a></p>
+</li>
+<li><p><a href="kh4hp574.hum.html">heroku登陆cli</a></p>
+</li>
+<li><p><a href="kh4hp57l.nw.html">mongodb 批量修改字段语句</a></p>
+</li>
+<li><p><a href="kh4hp5d7.f8n.html">git配置服务端支持http认证</a></p>
+</li>
+<li><p><a href="kh4hp5dm.5i.html">git记住/删除账号密码</a></p>
+</li>
+<li><p><a href="88229.html">mysql导出csv文件</a></p>
+</li>
+<li><p><a href="88172.html">mysql选取内容导出到文件</a></p>
+</li>
+<li><p><a href="88128.html">centos7 开放或者关闭端口</a></p>
+</li>
+<li><p><a href="87218.html">感谢beego陪伴我度过那不靠谱的半年</a></p>
+</li>
+<li><p><a href="83845.html">配置mysql ssl连接</a></p>
+</li>
+<li><p><a href="79146.html">linux 批量替换文本内容</a></p>
+</li>
+<li><p><a href="75739.html">平面旋转</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="88094";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

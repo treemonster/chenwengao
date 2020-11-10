@@ -1,0 +1,118 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>python下载文件，带进度条控制</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">python下载文件，带进度条控制</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #3e7de4">python下载文件</span><span class="tagz" style="background: #a5f28d">下载文件进度条</span><span class="tagz" style="background: #05b245">python下载进度</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>我在做服务器自动更新代码需要下载远程文件，但是没有进度条的等待会让人觉得不耐烦，所以封装了一个下载进度的代码。</p>
+<pre><code class="language-py">import sys,time,urllib2
+def progressbar(cur,total):
+  percent = &#39;{:.2%}&#39;.format(cur / total)
+  sys.stdout.write(&#39;\r&#39;)
+  sys.stdout.write(&#39;[%-50s] %s&#39; % ( &#39;=&#39; * int(cur * 50 /total),percent))
+  sys.stdout.flush()
+  if cur == total:
+    sys.stdout.write(&#39;\n&#39;)
+
+def down_file(url,saveto):
+  progressbar(0,100)
+  u = urllib2.urlopen(url)  
+  f = open(saveto,&#39;wb&#39;)
+  meta = u.info()
+  file_size = int(meta.getheaders(&quot;Content-Length&quot;)[0])
+
+  file_size_dl = 0
+  block_sz = 1024*2
+  while True:
+    buffer = u.read(block_sz)
+    if not buffer:
+      break
+
+    file_size_dl += len(buffer)
+    f.write(buffer)
+    progressbar(file_size_dl*100.0/file_size,100)
+  f.close()
+
+down_file(&quot;https://www.xdelve.com/widgetpack3.min.js&quot;,&quot;down.js&quot;)
+</code></pre>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><a href="88328.html">python下载文件，带进度条控制</a></li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4u7.5l8.html">react项目webpack打包时拆分异步加载的文件</a></p>
+</li>
+<li><p><a href="kh4hp50h.0q9.html">curl用法</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hp57y.fpf.html">npm设置仓库地址和代理</a></p>
+</li>
+<li><p><a href="kh4hp58r.537.html">webrtc服务搭建</a></p>
+</li>
+<li><p><a href="kh4hp5b6.kdr.html">树莓派配置wifi热点</a></p>
+</li>
+<li><p><a href="kh4hp5bk.27.html">cdn资源列表</a></p>
+</li>
+<li><p><a href="kh4hp5by.jnt.html">webpack使用外部资源</a></p>
+</li>
+<li><p><a href="kh4hp5eg.y8e.html"> ssl 证书生成方式</a></p>
+</li>
+<li><p><a href="kh4ib7jk.t1.html">mongodb2.4 添加用户</a></p>
+</li>
+<li><p><a href="88229.html">mysql导出csv文件</a></p>
+</li>
+<li><p><a href="88180.html">树莓派配置wifi</a></p>
+</li>
+<li><p><a href="88153.html">猴子选大王算法问题</a></p>
+</li>
+<li><p><a href="88094.html">随机取某个概率区间的代码</a></p>
+</li>
+<li><p><a href="79146.html">linux 批量替换文本内容</a></p>
+</li>
+<li><p><a href="75739.html">平面旋转</a></p>
+</li>
+<li><p><a href="72645.html">记一次mysql死锁的教训</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="88328";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

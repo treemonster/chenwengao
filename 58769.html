@@ -1,0 +1,107 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>生产环境预留调试入口的想法</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">生产环境预留调试入口的想法</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #ad42f6">debug</span><span class="tagz" style="background: #b7c0bf">调试</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>遇到紧急的线上错误需要修复时，可能会直接去修改生产环境的源代码。如果问题很复杂，修改过程中可能会对其他模块产生影响。对用户而言，把调试中的错误状态暴露给他们看显然是不合理的，因此有必要想一个办法让调试模式和正常使用可以同时存在。</p>
+<blockquote>
+<h4 id="实际上需要解决三个问题：">实际上需要解决三个问题：</h4>
+</blockquote>
+<hr>
+<ol start="0">
+<li>用什么去判断当前访问者是开发人员还是普通用户</li>
+<li>调试的代码即使包含语法错误也不会导致整个程序中止</li>
+<li>如何让开发人员调试的代码不用更新服务器上的原始程序就能即时生效</li>
+</ol>
+<p>因为这三个问题之间没有关联，所以我以顺序的方式列举解决办法。</p>
+<blockquote>
+<ol start="0">
+<li>考虑在提交参数中增加一个标识符。比如请求地址或者cookie中包含参数 <code>debugging=debug_mode</code>则认为当前访问者是开发人员。这里需要保证的是调试参数的名称必须是独一无二的，即所有的业务逻辑内部都不允许使用这个参数。 </li>
+<li>引入外部代码文件而不是直接修改原始文件是比较好的解决办法。</li>
+<li>需要从前后端两个角度来讨论。</li>
+</ol>
+</blockquote>
+<ul>
+<li>前端：引用调试者的本地代码文件路径。 调试者需要在本地建立一个目录 <strong>debug</strong>用于放置调试代码文件，开启本地服务器，映射根目录到 <strong>debug</strong>, 调试模式下的页面通过引用本地代码  <code>http://127.0.0.1/debug.js</code>，即可实现调试代码立即生效，确认调试完成后再把这个文件更新到服务器。 </li>
+<li>后端：因为后端的代码需要服务器端读取执行，所以调试者的本地文件的修改无法直接生效到服务器。以前我曾想使用POST提交代码到服务器然后在服务器上eval，但是这种做法的坑太多。所以考虑在服务器上建立一个用与存放调试代码的目录，需要调试的文件放在这个目录中，如果捕捉到调试参数则动态引入并解析这里的代码。</li>
+</ul>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><a href="58769.html">生产环境预留调试入口的想法</a></li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4u7.5l8.html">react项目webpack打包时拆分异步加载的文件</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp52g.1h.html">nodejs本地双向代理 端口转发</a></p>
+</li>
+<li><p><a href="kh4hp53d.49g.html">jxa运动指令脚本</a></p>
+</li>
+<li><p><a href="kh4hp53u.pjh.html">树莓派实现用pi用户自动登录</a></p>
+</li>
+<li><p><a href="kh4hp55c.9dm.html">搜索命令整理</a></p>
+</li>
+<li><p><a href="kh4hp569.gcj.html">nodejs俄罗斯方块</a></p>
+</li>
+<li><p><a href="kh4hp56p.7c.html">heroku查看app使用时间</a></p>
+</li>
+<li><p><a href="kh4hp57l.nw.html">mongodb 批量修改字段语句</a></p>
+</li>
+<li><p><a href="kh4hp5ae.oak.html">dd备份/还原</a></p>
+</li>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="88153.html">猴子选大王算法问题</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="87991.html">数据库清理优化</a></p>
+</li>
+<li><p><a href="79146.html">linux 批量替换文本内容</a></p>
+</li>
+<li><p><a href="69351.html">缓存才是优化的终极手段</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58769";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

@@ -1,0 +1,128 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>data-*属性慎用</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">data-*属性慎用</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #65e232">html5</span><span class="tagz" style="background: #8d777f">data</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>虽然把dom相关的属性直接用 *<em>data-**</em> 写在标签上使用时会比较方便，但如果数据内部包含了引号，如果不能做到全部都转义，那么浏览器就会解析错误。</p>
+<p>比如说：</p>
+<pre><code class="language-html">&lt;div data-a=&quot;ccc&quot;&gt;&lt;/div&gt;</code></pre>
+<p>这样是没什么问题的。但我想把<strong>data-a</strong>填入一个带引号的内容：</p>
+<pre><code class="language-html">&lt;div data-a=&quot;x&#39;y&quot;z&quot;&gt;&lt;/div&gt;</code></pre>
+<p>就会解析错误。</p>
+<p>正确的做法是把双引号转义成 &#34;</p>
+<pre><code class="language-html">&lt;div data-a=&quot;x&#39;y&amp;#34;z&quot;&gt;&lt;/div&gt;</code></pre>
+<hr>
+<p>其实我觉得更好的做法还是把数据存在js的内存中，dom上仅保留一个uuid指向内存的数据。因为dom上绑定的东西越多浏览器响应就会越慢，且序列化与反序列化的过程也有一定的时间损耗，而且还不可以绑定太复杂的数据，比如说<strong>function</strong>是无法被序列化的，也就不能绑定上去了。</p>
+<p>因此我写了一个uuid.js，对外提供接口两个 <code>setData</code>和<code>getData</code>，用于关联对象和数据信息。</p>
+<pre><code class="language-js">let UUID=(()=&gt;{
+  let _n=0;
+  let _uuid_map={}
+  let _us=(s,n)=&gt;(s.length&lt;n)?_us(s+String.fromCharCode(Math.random()*100|1),n):s
+  let _uuid_sign=_us(&#39;xdelve&#39;,32)
+  let _get_uuid=(obj)=&gt;{
+    return obj[_uuid_sign]=obj[_uuid_sign]||(&#39;u&#39;+_n++)
+  }
+  let e={}
+  e.setData=(obj,key,data)=&gt;{
+    _uuid_map[_get_uuid(obj)]=data
+  }
+  e.getData=(obj,key)=&gt;{
+    return _uuid_map[_get_uuid(obj)]
+  }
+  return e
+})()</code></pre>
+<p>使用时：</p>
+<pre><code class="language-html">&lt;div id=&quot;a&quot;&gt;xx&lt;/div&gt;
+&lt;script&gt;
+UUID.setData(a,&#39;z&#39;,{a:&#39;xx&#39;,b:function(){return 2}})
+alert((UUID.getData(a,&#39;z&#39;).b()))
+&lt;/script&gt;</code></pre>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp54u.a47.html">html5 全屏代码</a></p>
+</li>
+<li><p><a href="65958.html">data-*属性慎用</a></p>
+</li>
+<li><p><a href="58766.html">html5页面全屏方法</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="khbe1zve.29n.html">css多行文本超出截断显示省略号</a></p>
+</li>
+<li><p><a href="kh4hp4wj.uv.html">nginx 子域名对应文件夹</a></p>
+</li>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp4zl.csd.html">css3 文字渐变色</a></p>
+</li>
+<li><p><a href="kh4hp51g.d79.html">SSL certificate problem: self signed certificate in certificate chain</a></p>
+</li>
+<li><p><a href="kh4hp53d.49g.html">jxa运动指令脚本</a></p>
+</li>
+<li><p><a href="kh4hp574.hum.html">heroku登陆cli</a></p>
+</li>
+<li><p><a href="kh4hp58c.8w7.html">模拟307跳转情况</a></p>
+</li>
+<li><p><a href="kh4hp5ae.oak.html">dd备份/还原</a></p>
+</li>
+<li><p><a href="kh4hp5b6.kdr.html">树莓派配置wifi热点</a></p>
+</li>
+<li><p><a href="kh4hp5by.jnt.html">webpack使用外部资源</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="87999.html">bootstrap modal弹框导致ie无法获取焦点</a></p>
+</li>
+<li><p><a href="83845.html">配置mysql ssl连接</a></p>
+</li>
+<li><p><a href="81007.html">html表格导出csv文件并下载</a></p>
+</li>
+<li><p><a href="75739.html">平面旋转</a></p>
+</li>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="65958";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

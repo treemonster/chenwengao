@@ -1,0 +1,121 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>nginx 禁止百度云观测访问</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">nginx 禁止百度云观测访问</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #ee4340">nginx</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>早上起来想看看机器人采集了哪些新闻，然而却发现网站都打不开了。起初以为是机器人采集进程内存泄漏导致的，不过我重启了服务后没多久又出现了内存爆满的情况，于是我查看了nginx日志，发现同一时间内有超多来自百度云观测的请求，并且是多个ip分开刷各种网址。。。</p>
+<p>初步怀疑是百度云观测访问太快导致服务器吃不消了，因此我给nginx加了一个屏蔽百度云观测的代码：</p>
+<pre><code class="language-nginx">
+server{
+  ...
+
+  if ($http_user_agent ~* &quot;Baidu-YunGuanCe-ScanBot&quot;) {
+     return 403 &quot;go die! baidu yun guance&quot;;
+  }
+
+  ...
+}
+</code></pre>
+<p>然后重启nginx和服务进程。</p>
+<p>。。。</p>
+<p>等待差不多1分钟，再用top命令查看服务占用的内存还是正常的值。</p>
+<p>暂时就这么处理了。由于从nginx日志看到百度云观测来的请求规律是，同一个ip差不多一秒访问两次，多个ip不断的轮流上服务器，跟ddos差不多，nginx限制也比较难写，索性直接干掉永绝后患。</p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4wj.uv.html">nginx 子域名对应文件夹</a></p>
+</li>
+<li><p><a href="kh4hp50y.c3p.html">nginx用域名来转发请求</a></p>
+</li>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="57860.html">nginx 限制访问频率</a></p>
+</li>
+<li><p><a href="57859.html">nginx 禁止百度云观测访问</a></p>
+</li>
+<li><p><a href="58848.html">为百度抓取单独开辟http通道</a></p>
+</li>
+<li><p><a href="58842.html">nginx域名跳转配置和禁止ip访问</a></p>
+</li>
+<li><p><a href="58794.html">nginx反向代理模拟本地服务器环境</a></p>
+</li>
+<li><p><a href="58790.html">nginx域名映射目录的配置方法</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="khalg5ks.g.html">css3自定义滚动条样式</a></p>
+</li>
+<li><p><a href="kh4hp4u7.5l8.html">react项目webpack打包时拆分异步加载的文件</a></p>
+</li>
+<li><p><a href="kh4hp4zl.csd.html">css3 文字渐变色</a></p>
+</li>
+<li><p><a href="kh4hp50y.c3p.html">nginx用域名来转发请求</a></p>
+</li>
+<li><p><a href="kh4hp52w.ibe.html">ios13 vpn 能连接但不能传数据问题解决</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hp54d.xb.html">git删除远程分支</a></p>
+</li>
+<li><p><a href="kh4hz03h.xh.html">python 用摄像头拍照并写入文件</a></p>
+</li>
+<li><p><a href="kh4hp56p.7c.html">heroku查看app使用时间</a></p>
+</li>
+<li><p><a href="kh4hp58c.8w7.html">模拟307跳转情况</a></p>
+</li>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
+</li>
+<li><p><a href="kh4hp5as.pb.html">linux自启动/禁止自启动服务</a></p>
+</li>
+<li><p><a href="kh4hp5fb.n3u.html">把树莓派的存储空间拓展到整张TF卡中</a></p>
+</li>
+<li><p><a href="88328.html">python下载文件，带进度条控制</a></p>
+</li>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="88181.html">树莓派配置收发邮件</a></p>
+</li>
+<li><p><a href="88153.html">猴子选大王算法问题</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="57859";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

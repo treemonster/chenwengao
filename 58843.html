@@ -1,0 +1,187 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>破解百度云下载链接</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">破解百度云下载链接</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #de9b9e">javascript</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>由于百度云客户端下载速度跟便秘似的，因此我试着破解了下载文件链接，没想到还真的找到了入口。great～</p>
+<hr>
+<h5 id="电脑配置：">电脑配置：</h5>
+<pre><code>系统：Mac OS X 10_11_6
+浏览器：Chrome 58.0.3029.110</code></pre>
+<hr>
+<p>虽然可以确定百度云的所有信息都是异步加载的，但并不能立刻确定下载包含在哪一个请求中，所以我尝试随便点了一个比较小的文件，看网络请求。</p>
+<p>点下载会发出2个请求：<code>/api/sharedownload </code>和<code>/share/autoincre</code>
+查看其返回内容明显确定了是/api/sharedownload这个接口返回了包含下载信息的数据，dlink即为下载的链接。</p>
+<p>于是乎我对一个大的文件进行下载过程检测。然额，很明显其返回的数据字段变化了。没有dlink字段，反而多出一个莫名其妙的list字段，看来这一步需要绕个弯子。不过我依然确定这个接口是解开的关键。</p>
+<p>我尝试查看调取此接口的js代码，发现了一些可疑的名词：</p>
+<pre><code>send    @    base_2b5a80b.js:5
+ajax    @    base_2b5a80b.js:5
+s.ajaxGetDlinkShare    @    widget-sync_28bad21.js:4
+s.getDlinkShare    @    widget-sync_28bad21.js:4
+u._serverCallGuanjia    @    widget-sync_28bad21.js:7
+(anonymous)    @    widget-sync_28bad21.js:7
+success    @    widget-sync_28bad21.js:9
+l    @    base_2b5a80b.js:4
+fireWith    @    base_2b5a80b.js:4
+r    @    base_2b5a80b.js:5
+n    @    base_2b5a80b.js:5</code></pre>
+<p>明显看到此处 <em>getDlinkShare 出现了两次，</em>Guanjia出现过一次，看到这里只要不是傻子都能大致猜到这两个方法代表的含义了。</p>
+<p>getDlinkShare多半是获取下载链接的方法，而Guanjia则是唤起百度云管家的方法。没错，我验证了一次的确如此。</p>
+<p>既然找到了关键突破点，那么联想到百度云下载大文件的逻辑，我基本可以确定在唤起云管家客户端这一步之前已经得到了实际的下载地址。</p>
+<p>所以我认为有必要在_serverCallGuanjia中间加点料，把真实下载地址duang出来。</p>
+<p>代码如下：</p>
+<pre><code class="language-javascript">   ....
+    u.prototype._serverCallGuanjia = function(i) {
+
+      // 插入代码开始
+      console.warn(unescape(`正在分析下载文件地址：${this._mOpts.list[0].server_filename}`))
+      l.getDlinkShare(this._mOpts, (i)=&gt;{
+        try{
+          with(i.list[0]) console.log(`${server_filename}: ${dlink}`)
+        }catch(e){
+          console.error(unescape(&#39;获取失败&#39;),e.message)
+        }
+      })
+      return;
+      // 插入代码结束
+
+        var t = this;
+      ...</code></pre>
+<p>这样下次点击下载的时候，就会直接在控制台输出下载的文件地址，贴到迅雷里下载就好了。</p>
+<pre><code>正在分析下载文件地址：0200_港中_PCSD00071_杀戮地带佣兵_0112.VPK
+
+0200_港中_PCSD00071_杀戮地带佣兵_0112.VPK: https://d.pcs.baidu.com/file/906ed86dbd4499697fa2bf59cd8ad264?fid=4128995152-250528-469636608296533&amp;time=1496494085&amp;rt=sh&amp;sign=FDTAERV-DCb740ccc5511e5e8fedcff06b081203-UKVTQzfWQ3pW1%2FZ6g1Rm0ESgNy4%3D&amp;expires=8h&amp;chkv=1&amp;chkbd=0&amp;chkpc=&amp;dp-logid=3568603884836824082&amp;dp-callid=0&amp;r=703837631
+</code></pre>
+<p>这速度咔咔咔的就上去了，500k的感觉就是爽。用客户端就他妈的没上过60k。</p>
+<hr>
+<h4 id="附录：">附录：</h4>
+<p>替换js文件内容的行为，需要使用我写的chrome插件：<a href="https://github.com/treemonster/chrome-jshooker">https://github.com/treemonster/chrome-jshooker</a></p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp55s.p7g.html">判断变量是否 0 或者 &#39;0&#39;</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="87823.html">youku电脑版跳过广告代码</a></p>
+</li>
+<li><p><a href="58847.html">解密某个js文件</a></p>
+</li>
+<li><p><a href="58843.html">破解百度云下载链接</a></p>
+</li>
+<li><p><a href="58829.html">让js支持带命名的正则表达式</a></p>
+</li>
+<li><p><a href="58822.html">jshtml模板引擎</a></p>
+</li>
+<li><p><a href="58818.html">json2html源码</a></p>
+</li>
+<li><p><a href="58793.html">读取Blob的内容实体</a></p>
+</li>
+<li><p><a href="58786.html">判断一个object是否HTMLDom</a></p>
+</li>
+<li><p><a href="58781.html">简易命令行解析器</a></p>
+</li>
+<li><p><a href="58780.html">Promise才是javascript的正统队列</a></p>
+</li>
+<li><p><a href="58779.html">callback =&gt; Promise.then</a></p>
+</li>
+<li><p><a href="58777.html">nodejs异步回调的并发控制</a></p>
+</li>
+<li><p><a href="58773.html">低版本IE命名函数表达式bug</a></p>
+</li>
+<li><p><a href="58772.html">让重复调用只有第一次生效</a></p>
+</li>
+<li><p><a href="58771.html">简易JSON函数封装</a></p>
+</li>
+<li><p><a href="58770.html">使用eval来修改上下文的变量</a></p>
+</li>
+<li><p><a href="58767.html">seajs同步加载依赖的实现和弊病</a></p>
+</li>
+<li><p><a href="58766.html">html5页面全屏方法</a></p>
+</li>
+<li><p><a href="58765.html">给滚动条置顶添加过渡动画</a></p>
+</li>
+<li><p><a href="58764.html">m秒内最多n次的问题</a></p>
+</li>
+<li><p><a href="58762.html">让代码扁平化</a></p>
+</li>
+<li><p><a href="58760.html">关于自动加载的问题</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh8hr1ki.4fs.html">mac ssh透过代理连接</a></p>
+</li>
+<li><p><a href="kh4hp4vo.i3t.html">word文件命令行打印</a></p>
+</li>
+<li><p><a href="kh4hp4xw.fuh.html">mac 终端运行后台程序如何在终端关闭时继续运行</a></p>
+</li>
+<li><p><a href="kh4hp4ya.6e.html">ipsec vpn 添加新账号</a></p>
+</li>
+<li><p><a href="kh4hp4zl.csd.html">css3 文字渐变色</a></p>
+</li>
+<li><p><a href="kh4hp54u.a47.html">html5 全屏代码</a></p>
+</li>
+<li><p><a href="kh4hp574.hum.html">heroku登陆cli</a></p>
+</li>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
+</li>
+<li><p><a href="kh4hp5b6.kdr.html">树莓派配置wifi热点</a></p>
+</li>
+<li><p><a href="kh4hp5ct.4ys.html">putty使用http代理连接服务器</a></p>
+</li>
+<li><p><a href="kh4hp5fb.n3u.html">把树莓派的存储空间拓展到整张TF卡中</a></p>
+</li>
+<li><p><a href="88225.html">mac搜索局域网内的主机</a></p>
+</li>
+<li><p><a href="87999.html">bootstrap modal弹框导致ie无法获取焦点</a></p>
+</li>
+<li><p><a href="87991.html">数据库清理优化</a></p>
+</li>
+<li><p><a href="79146.html">linux 批量替换文本内容</a></p>
+</li>
+<li><p><a href="75739.html">平面旋转</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58843";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

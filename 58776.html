@@ -1,0 +1,95 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>文本模板解析器的api设计</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">文本模板解析器的api设计</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #59cf15">模板</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>文本模板是用来定义数据的显示格式，而解析器则是把原始数据填充到文本模板中，并且拼接出最终给用户看到的形式。目前开源的文本模板解析器花样很多，但是却没有一个是我觉得满意的。究其根本，并不是他们支持的功能太少，而是功能太多。 </p>
+<p>我认为一个文本模板应该只具备定义数据结构的功能，而逻辑判断（比如ifelse之类的语法，这种很常见，几乎所有的模板解析器都会附带）、模板继承（后端解析器中比较常见）、直接调用编程代码（这种奇葩的语法支持在后端也是挺常见的，比如smarty），等完全不应该作为基本功能进行支持。因为在模板中嵌入这些奇怪的结构会让模板的结构变得晦涩难懂，而且无法让数据完全从视图里抽象出来。 </p>
+<p>这里摘录一段比较差的模板代码： 
+<img src="https://storage.xdelve.com/fe.png" alt="a.png"></p>
+<p>客观的说，这种模板解析器的语法规则已经相当于一个被阉割掉计算功能的编程语言了。它有自己一套完整的逻辑api，能对数据进行二次处理，而不是直接渲染出结果。有些人会认为这么做很方便，但是他们一定没想到这么写的代价是后期维护会很蛋疼。打个比方，结果出问题时，根本无法确定是哪一层导致的，也许是原始数据错了，也可能是模板里的逻辑判断不对。因为这个例子的功能太简单，所以代码结构再垃圾也能用较少的时间来弥补。然而更多时候生产环境的情况不会如此径情直遂，奇怪的问题堆积之后会突变成更庞大的麻烦。 </p>
+<p>我倾向于数据和视图完全分离的代码结构，模板是视图的一种表现形式，因此也应该遵守这个规则。在程序开发中，json已经作为一个通用的结构化数据定义标准了，所以解析器应该能做到把json填充进模板的功能。而其他的事情，统统丢到上层去解决才是正确的做法。 </p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><a href="58776.html">文本模板解析器的api设计</a></li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4x0.yw.html">pip安装nltk临时使用国内源</a></p>
+</li>
+<li><p><a href="kh4hp501.g4a.html">npm远程服务器某些配置不兼容代理的解决办法</a></p>
+</li>
+<li><p><a href="kh4hp50h.0q9.html">curl用法</a></p>
+</li>
+<li><p><a href="kh4hp51g.d79.html">SSL certificate problem: self signed certificate in certificate chain</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp569.gcj.html">nodejs俄罗斯方块</a></p>
+</li>
+<li><p><a href="kh4hp57l.nw.html">mongodb 批量修改字段语句</a></p>
+</li>
+<li><p><a href="kh4hp58c.8w7.html">模拟307跳转情况</a></p>
+</li>
+<li><p><a href="kh4hp58r.537.html">webrtc服务搭建</a></p>
+</li>
+<li><p><a href="kh4hp5ae.oak.html">dd备份/还原</a></p>
+</li>
+<li><p><a href="kh4hp5by.jnt.html">webpack使用外部资源</a></p>
+</li>
+<li><p><a href="kh4hp5ct.4ys.html">putty使用http代理连接服务器</a></p>
+</li>
+<li><p><a href="88328.html">python下载文件，带进度条控制</a></p>
+</li>
+<li><p><a href="88246.html">centos查看最近一次的开机时间</a></p>
+</li>
+<li><p><a href="88225.html">mac搜索局域网内的主机</a></p>
+</li>
+<li><p><a href="88103.html">ie8上Image.onload不触发问题</a></p>
+</li>
+<li><p><a href="88094.html">随机取某个概率区间的代码</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58776";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

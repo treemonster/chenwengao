@@ -1,0 +1,133 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>树莓派配置收发邮件</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">树莓派配置收发邮件</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #7fa67b">树莓派</span><span class="tagz" style="background: #193555">发邮件</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>本文介绍树莓派3上邮件发送和接收配置。</p>
+<p>首先安装mutt。</p>
+<pre><code>apt install mutt </code></pre>
+<p>编辑<code>/etc/.muttrc</code>文件，填写以下内容设置发邮件信息：</p>
+<pre><code>set crypt_use_gpgme = no
+set use_from=yes
+set realname=admin
+set from=admin@raspi.xdelve.com
+set envelope_from=yes</code></pre>
+<p>启动sendmail</p>
+<pre><code>sendmail -bd</code></pre>
+<p>查看进程应该是这样的：</p>
+<p><img src="/uploads/2017/12/02/89//newup-fa55731a86704e2d607c437305c2585c95.png" alt="/uploads/2017/12/02/89//newup-fa55731a86704e2d607c437305c2585c95.png"></p>
+<p>此时已经可以发送邮件，测试发邮件命令：</p>
+<pre><code>echo &quot;test mail&quot; |mutt -s &quot;test title&quot; 1696292264@qq.com</code></pre>
+<p>这时发出邮件有可能会很慢，把发送方的域名指向127.0.0.1，即可做到秒发。</p>
+<p>编辑<code>/etc/hosts</code>：</p>
+<p>添加</p>
+<pre><code>127.0.0.1    raspberrypi raspberrypi-chenwengao raspi.xdelve.com</code></pre>
+<hr>
+<p>mutt命令还可以查看收件。</p>
+<p>首先给自己发一个邮件，然后使用<code>mutt -f 收件箱文件</code>查看邮件列表：</p>
+<p><img src="/uploads/2017/12/02/80//newup-fab9f6d77e1f23835265b6d77e3f9239bc.png" alt="/uploads/2017/12/02/80//newup-fab9f6d77e1f23835265b6d77e3f9239bc.png"></p>
+<p><img src="/uploads/2017/12/02/78//newup-fa07bd0b20e63d17b14ce25ddcf1ef0a15.png" alt="/uploads/2017/12/02/78//newup-fa07bd0b20e63d17b14ce25ddcf1ef0a15.png"></p>
+<p>回车查看具体内容，其他操作按照顶部提示即可操作。</p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp53u.pjh.html">树莓派实现用pi用户自动登录</a></p>
+</li>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
+</li>
+<li><p><a href="kh4hp5b6.kdr.html">树莓派配置wifi热点</a></p>
+</li>
+<li><p><a href="kh4hp5fb.n3u.html">把树莓派的存储空间拓展到整张TF卡中</a></p>
+</li>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="88181.html">树莓派配置收发邮件</a></p>
+</li>
+<li><p><a href="88180.html">树莓派配置wifi</a></p>
+</li>
+<li><p><a href="58826.html">树莓派无源蜂鸣器发声实验</a></p>
+</li>
+<li><p><a href="58825.html">找树莓派的内网ip</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="khbe1zve.29n.html">css多行文本超出截断显示省略号</a></p>
+</li>
+<li><p><a href="khalg5ks.g.html">css3自定义滚动条样式</a></p>
+</li>
+<li><p><a href="kh4hp4ut.68c.html">华为等国产手机rem宽度超过实际宽度</a></p>
+</li>
+<li><p><a href="kh4hp4xw.fuh.html">mac 终端运行后台程序如何在终端关闭时继续运行</a></p>
+</li>
+<li><p><a href="kh4hp52g.1h.html">nodejs本地双向代理 端口转发</a></p>
+</li>
+<li><p><a href="kh4hp52w.ibe.html">ios13 vpn 能连接但不能传数据问题解决</a></p>
+</li>
+<li><p><a href="kh4hp53u.pjh.html">树莓派实现用pi用户自动登录</a></p>
+</li>
+<li><p><a href="kh4hp54u.a47.html">html5 全屏代码</a></p>
+</li>
+<li><p><a href="kh4hp574.hum.html">heroku登陆cli</a></p>
+</li>
+<li><p><a href="kh4hp596.lj.html">webrtc泄漏本地ip信息</a></p>
+</li>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
+</li>
+<li><p><a href="kh4hp5by.jnt.html">webpack使用外部资源</a></p>
+</li>
+<li><p><a href="kh4hp5e1.ou.html">git 设置代理服务器</a></p>
+</li>
+<li><p><a href="kh4hp5eg.y8e.html"> ssl 证书生成方式</a></p>
+</li>
+<li><p><a href="88153.html">猴子选大王算法问题</a></p>
+</li>
+<li><p><a href="88103.html">ie8上Image.onload不触发问题</a></p>
+</li>
+<li><p><a href="87218.html">感谢beego陪伴我度过那不靠谱的半年</a></p>
+</li>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
+</li>
+<li><p><a href="72645.html">记一次mysql死锁的教训</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="88181";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

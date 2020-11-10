@@ -1,0 +1,173 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>平面旋转</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">平面旋转</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #970055">向量</span><span class="tagz" style="background: #f739e5">矩阵</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>平面上的一个多边形ABCDE绕点F旋转theta弧度，转化成程序实现需要用到向量和矩阵的运算规则。</p>
+<h4 id="思路是：">思路是：</h4>
+<ol start="0">
+<li><p>设O为原点</p>
+</li>
+<li><p>所有点先平移FO向量，然后从O出发，计算出 向量 OA, OB, OC, OD, OE 这五个</p>
+</li>
+<li><p>把这五个向量各自转换成矩阵，依次与旋转向量做乘法</p>
+</li>
+<li><p>得出的结果平移OF向量，即可得到最后答案</p>
+</li>
+</ol>
+<hr>
+<p>现在假设点F坐标 (x1,y1)，点A坐标 （x2,y2），则计算出 FA向量是 (x2-x1,y2-y1)</p>
+<p>逆时针旋转theta弧度的矩阵:</p>
+<p><img src="/uploads/2017/09/03/81/newup-fae99b5ab56aca0537da361690c79ded8e.png" alt="/uploads/2017/09/03/81//newup-fae99b5ab56aca0537da361690c79ded8e.png @100x"></p>
+<p>然后做矩阵乘法：</p>
+<p><img src="/uploads/2017/09/03/85/newup-fac4d45797893f4d1d16c8cf3787e2aa5d.png" alt="/uploads/2017/09/03/85//newup-fac4d45797893f4d1d16c8cf3787e2aa5d.png @600x"></p>
+<p>得到的结果平移[x1 y1]即最终答案，因此可以转化为程序代码如下：</p>
+<pre><code class="language-javascript">let transform2d=(deg,F,A)=&gt;{
+  let [x1,y1]=F,[x2,y2]=A
+  let rad=deg/180*Math.PI
+  let sin=Math.sin(rad),cos=Math.cos(rad)
+  return [
+    (x2-x1)*cos+(y2-y1)*sin+x1,
+    -(x2-x1)*sin+(y2-y1)*cos+y1,
+  ]
+}</code></pre>
+<p>完整实例：</p>
+<pre><code class="language-html">&lt;canvas id=&#39;c&#39; style=&#39;position:absolute;left:0;top:0;background:#000;&#39; width=&#39;500&#39; height=&#39;400&#39;&gt;&lt;/canvas&gt;
+&lt;script&gt;
+let cvs=c.getContext(&#39;2d&#39;)
+
+let p=[],d=Date.now()
+for(let i=0,b=d%360,n=d%5+4;i&lt;n;i++){
+  let c=b+360/n*i/180*Math.PI
+  p.push([
+    (Math.random()*150+50)*Math.cos(c)+250,
+    (Math.random()*150+50)*Math.sin(c)+200,
+  ])
+}
+
+
+let transform2d=(deg,F,A)=&gt;{
+  let [x1,y1]=F,[x2,y2]=A
+  let rad=deg/180*Math.PI
+  let sin=Math.sin(rad),cos=Math.cos(rad)
+  return [
+    (x2-x1)*cos+(y2-y1)*sin+x1,
+    -(x2-x1)*sin+(y2-y1)*cos+y1,
+  ]
+}
+
+
+let drawpts=(pts)=&gt;{
+  cvs.clearRect(0,0,500,400)
+  cvs.beginPath()
+  pts.map((t,i)=&gt;{
+    cvs[i?&#39;lineTo&#39;:&#39;moveTo&#39;](t[0],t[1])
+  })
+  cvs.closePath()
+  cvs.strokeStyle=&#39;#fff&#39;;
+  cvs.stroke()
+}
+
+setInterval(()=&gt;{
+
+  p=p.map((t)=&gt;{
+    return transform2d(1,[250,200],t)
+  })
+
+  drawpts(p)
+},10)
+
+&lt;/script&gt;
+</code></pre>
+<p><img src="/uploads/2017/09/03/78/newup-fa72d3bcb9eecbbfa1b0174e148a7577e4.gif" alt="/uploads/2017/09/03/78//newup-fa72d3bcb9eecbbfa1b0174e148a7577e4.gif @400x"></p>
+<p>参考：</p>
+<p><a href="https://zh.wikipedia.org/wiki/%E7%9F%A9%E9%98%B5#.E7.BA.BF.E6.80.A7.E6.96.B9.E7.A8.8B.E7.BB.84">矩阵</a>
+<a href="https://zh.wikipedia.org/wiki/%E5%90%91%E9%87%8F#.E5.8F.8D.E5.90.91.E9.87.8F">向量</a></p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><a href="75739.html">平面旋转</a></li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="khalg5ks.g.html">css3自定义滚动条样式</a></p>
+</li>
+<li><p><a href="kh4hp4ut.68c.html">华为等国产手机rem宽度超过实际宽度</a></p>
+</li>
+<li><p><a href="kh4hp4vo.i3t.html">word文件命令行打印</a></p>
+</li>
+<li><p><a href="kh4hp4ya.6e.html">ipsec vpn 添加新账号</a></p>
+</li>
+<li><p><a href="kh4hp4z5.bct.html">raw.githubusercontent.com DNS被指向127.0.0.1</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp52w.ibe.html">ios13 vpn 能连接但不能传数据问题解决</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hz03h.xh.html">python 用摄像头拍照并写入文件</a></p>
+</li>
+<li><p><a href="kh4hp596.lj.html">webrtc泄漏本地ip信息</a></p>
+</li>
+<li><p><a href="kh4hp5ct.4ys.html">putty使用http代理连接服务器</a></p>
+</li>
+<li><p><a href="kh4hp5fb.n3u.html">把树莓派的存储空间拓展到整张TF卡中</a></p>
+</li>
+<li><p><a href="88181.html">树莓派配置收发邮件</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88103.html">ie8上Image.onload不触发问题</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="87999.html">bootstrap modal弹框导致ie无法获取焦点</a></p>
+</li>
+<li><p><a href="79547.html">前端性能观察器</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="75739";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

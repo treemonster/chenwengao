@@ -1,0 +1,115 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>sendmail 配置</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">sendmail 配置</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #d0c8b4">sendmail</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>配置自己的邮箱服务器，我使用的方法是yum直接安装sendmail。</p>
+<p>安装sendmail
+<code>yum install sendmail mailx -y</code></p>
+<p>然后启动sendmail守护进程：
+<code>sendmail -bd</code></p>
+<p>此时已经可以使用mail命令发送邮件了：</p>
+<p><code>echo &quot;hello&quot;|mail -s testmail admin@xdelve.com</code></p>
+<p>指定发送方发送邮件</p>
+<p><code>echo &quot;&lt;h1&gt;hello&lt;/h1&gt;&quot;|mail -s testmail -r admin@xdelve.com 1696292264@qq.com</code></p>
+<p>如果仅用于局域网内的邮件收发，那么到这一步已经可以正常工作了。其他人要发邮件，目标邮箱 user@ip 就可以发出去了。</p>
+<p>如果需要作为外网的接收邮件服务器使用，则还需要配置dns的MX记录。因为sendmail本身只负责监听端口收发邮件，未添加MX记录时，其他邮件服务器无法解析域名对应的服务器了。（不过直接用ip发是可以的，但应该没人会这么做）</p>
+<p>添加MX记录在买域名的网站上可以在线编辑，如果不支持在线搞么也不要买了他们家的域名了。</p>
+<p><img src="/uploads/2017/12/04/55//newup-fa0f2401daf681960752887d0d74e111c2.png" alt="/uploads/2017/12/04/55//newup-fa0f2401daf681960752887d0d74e111c2.png"></p>
+<p>修改/etc/mail/sendmail.mc，把下面这两行之前的dnl去掉</p>
+<pre><code>DAEMON_OPTIONS(`Port=smtp,Addr=0.0.0.0, Name=MTA)dnl
+
+DAEMON_OPTIONS(`Port=submission, Name=MSA, M=Ea)dnl</code></pre>
+<p>执行
+<code>m4 /etc/mail/sendmail.mc&gt;/etc/mail/sendmail.cf</code>
+然后重启sendmail。ps -ef|grep sendmail找到pid然后kill，再sendmail -bd。</p>
+<hr>
+<h4 id="2017-12-04补充">2017-12-04补充</h4>
+<p>如果遇到启动慢或者发送慢的情况，多半是<code>sendmail</code>解析发送方域名的问题，可以在<code>/etc/hosts</code>里把发送方的域名添加到 <code>127.0.0.1</code>这行后面。看上去像这样的：</p>
+<p><img src="/uploads/2017/12/04/65//newup-facd48fa7913d5857e7fb83243db11c7ab.png" alt="/uploads/2017/12/04/65//newup-facd48fa7913d5857e7fb83243db11c7ab.png"></p>
+<h4 id="red-重要！-切记开启服务器25端口，否则将无法收到邮件！"><code>red; 重要！</code> 切记开启服务器25端口，否则将无法收到邮件！</h4>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="58820.html">sendmail 配置</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="khbe1zve.29n.html">css多行文本超出截断显示省略号</a></p>
+</li>
+<li><p><a href="kh4hp4xg.2sb.html">sass变量和继承类写法</a></p>
+</li>
+<li><p><a href="kh4hp4xw.fuh.html">mac 终端运行后台程序如何在终端关闭时继续运行</a></p>
+</li>
+<li><p><a href="kh4hp50h.0q9.html">curl用法</a></p>
+</li>
+<li><p><a href="kh4hp52g.1h.html">nodejs本地双向代理 端口转发</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
+</li>
+<li><p><a href="kh4hp5a0.gjt.html">单页应用的单向数据流的流程图</a></p>
+</li>
+<li><p><a href="kh4hp5by.jnt.html">webpack使用外部资源</a></p>
+</li>
+<li><p><a href="kh4hp5cd.lmo.html">TIME_WAIT过多</a></p>
+</li>
+<li><p><a href="kh4hp5fb.n3u.html">把树莓派的存储空间拓展到整张TF卡中</a></p>
+</li>
+<li><p><a href="88246.html">centos查看最近一次的开机时间</a></p>
+</li>
+<li><p><a href="88225.html">mac搜索局域网内的主机</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88103.html">ie8上Image.onload不触发问题</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58820";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

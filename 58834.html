@@ -1,0 +1,148 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>php5.2.17 curl openssl的配置踩坑</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">php5.2.17 curl openssl的配置踩坑</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #60c06d">php5.2</span><span class="tagz" style="background: #e1bfd7">php</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>这个问题表现为，一旦调用curl去获取https的网址就会爆出502的错误。起初我一直以为是openssl的配置有问题，然后花了一上午在找php5.2 openssl的patch。然并卵。。</p>
+<p>我用这段代码测试curl的功能：</p>
+<pre><code class="language-php">&lt;?php
+
+#phpinfo();die;
+
+//初始化
+$ch = curl_init();
+//设置选项，包括URL
+curl_setopt($ch, CURLOPT_URL, &quot;https://xdelve.com&quot;);
+curl_setopt($ch, CURLOPT_SSLVERSION, 1);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_HEADER, 0);
+//执行并获取HTML文档内容
+$output = curl_exec($ch);
+//释放curl句柄
+curl_close($ch);
+//打印获得的数据
+print_r($output);
+die;
+</code></pre>
+<p>直接命令行调试：</p>
+<pre><code>/website/xdelve/plug/php52/bin/php /website/userdata/site/52test.php52/index.php</code></pre>
+<p>而执行结果一直是 <code>segmentation fault (core dumped)</code>。</p>
+<hr>
+<p>上google搜了一上午，关键字是<code>php 5.2 OpenSSL 502</code>，偶然在一个不起眼的搜索结果中看到了一句话：</p>
+<h3 id="php52版本的curl的加密协议不是openssl二是nss，怎么设置？">php5.2版本的curl的加密协议不是openssl二是NSS，怎么设置？</h3>
+<p><a href="https://community.jiguang.cn/t/php5-2-curl-openssl-nss/10466">原文</a></p>
+<p>再去对比一下phpinfo中的curl信息，果然是NSS，而之前用lnmp一键安装的里面则是OpenSSL。WTF！</p>
+<p>。。。</p>
+<p>带着试试看的心态，我再次google了<code>php 5.2 curl NSS OpenSSL</code>的解决方案。看到了 <a href="http://www.cnblogs.com/showker/p/4706271.html">centos curl版本nss改成openssl</a>。看时间此文有点老了，用的curl库还是35版本的，不过这不影响结果。我按照他的方式重新安装了curl。</p>
+<pre><code class="language-bash">wget http://curl.haxx.se/download/curl-7.35.0.tar.gz
+tar -zxvf  curl-7.35.0.tar.gz
+cd curl-7.35.0
+./configure --prefix=/usr/local/curl --without-nss --with-ssl
+make install</code></pre>
+<p>然后重新编译php5.2.17：</p>
+<pre><code> ./configure --prefix=/website/xdelve/plug/php52 --with-config-file-path=/website/xdelve/plug/php52/etc --with-mysql --with-mysqli=/usr/bin/mysql_config --with-pdo-mysql --with-iconv==/usr/local/libiconv --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --enable-discard-path --enable-magic-quotes --enable-safe-mode --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization --with-curl=/usr/local/curl --enable-mbregex --enable-fastcgi --enable-fpm --enable-force-cgi-redirect --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf --with-openssl --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext --with-mime-magic
+make install</code></pre>
+<p>这次测试代码结果总算正确了。</p>
+<hr>
+<p>此坑踩得我实在吐血，究竟什么时候才可以彻底抛弃php5.2。也许这么不切实际的想法就和什么时候能彻底抛弃ie一样吧。</p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="88094.html">随机取某个概率区间的代码</a></p>
+</li>
+<li><p><a href="58846.html">php session文件过多的问题</a></p>
+</li>
+<li><p><a href="58834.html">php5.2.17 curl openssl的配置踩坑</a></p>
+</li>
+<li><p><a href="58827.html">x64系统编译php5.3报错</a></p>
+</li>
+<li><p><a href="58817.html">无脑破解phpjm加密</a></p>
+</li>
+<li><p><a href="58815.html">php解析ini文件</a></p>
+</li>
+<li><p><a href="58812.html">无聊的刷屏</a></p>
+</li>
+<li><p><a href="58784.html">php switch的问题</a></p>
+</li>
+<li><p><a href="58774.html">PHP使用SMTP发送邮件</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4ut.68c.html">华为等国产手机rem宽度超过实际宽度</a></p>
+</li>
+<li><p><a href="kh4hp4v9.83f.html">安卓文字偏上，文字顶部被遮罩</a></p>
+</li>
+<li><p><a href="kh4hp4vo.i3t.html">word文件命令行打印</a></p>
+</li>
+<li><p><a href="kh4hp4xw.fuh.html">mac 终端运行后台程序如何在终端关闭时继续运行</a></p>
+</li>
+<li><p><a href="kh4hp52g.1h.html">nodejs本地双向代理 端口转发</a></p>
+</li>
+<li><p><a href="kh4hz03h.xh.html">python 用摄像头拍照并写入文件</a></p>
+</li>
+<li><p><a href="kh4hp55c.9dm.html">搜索命令整理</a></p>
+</li>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
+</li>
+<li><p><a href="kh4hp5a0.gjt.html">单页应用的单向数据流的流程图</a></p>
+</li>
+<li><p><a href="88328.html">python下载文件，带进度条控制</a></p>
+</li>
+<li><p><a href="88229.html">mysql导出csv文件</a></p>
+</li>
+<li><p><a href="88128.html">centos7 开放或者关闭端口</a></p>
+</li>
+<li><p><a href="88103.html">ie8上Image.onload不触发问题</a></p>
+</li>
+<li><p><a href="87991.html">数据库清理优化</a></p>
+</li>
+<li><p><a href="87823.html">youku电脑版跳过广告代码</a></p>
+</li>
+<li><p><a href="81007.html">html表格导出csv文件并下载</a></p>
+</li>
+<li><p><a href="79547.html">前端性能观察器</a></p>
+</li>
+<li><p><a href="69351.html">缓存才是优化的终极手段</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58834";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

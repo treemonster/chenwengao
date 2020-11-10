@@ -1,0 +1,156 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>seajs同步加载依赖的实现和弊病</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">seajs同步加载依赖的实现和弊病</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #33d60c">seajs</span><span class="tagz" style="background: #de9b9e">javascript</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>我一向认为seajs不应该用在前端，主要是因为同步加载依赖的做法极大影响用户体验。虽然我不会在自己的项目中使用它，但是对同步加载的实现我还是有点兴趣的。 
+seajs的源码风格并不是很杂乱，基本一眼扫过就可以看明白在做什么。鉴于源代码太长，我使用猜测+搜索的方式来查看。因为我所知道的加载js方法只有<code>createElement(&#39;script&#39;)</code>和<code>ajax+eval</code>两种，所以对于加载依赖的方法我首先尝试搜索<code>createElement</code>这个关键字，在第285行找到了： </p>
+<p><img src="https://storage.xdelve.com/z1.png" alt="seajs-code">  </p>
+<p>但是这些代码并不是我要，因为从这些代码只能看出是把依赖文件用非阻塞方式来加载，与同步加载毫无关联。难道seajs用的是ajax+eval么？我虽然不相信但还是尝试搜索了XMLHttpRequest关键字，结果没找到。</p>
+<p>两条常规道路都堵死了，那么扩展思维，也许require的方法做了一些奇怪的事情。所以我接着搜索了<code>require</code>关键字，我看到416行的正则和后面的替换操作： </p>
+<p><img src="https://storage.xdelve.com/z2.png" alt="seajs-code"> </p>
+<p>到这里终于解开了同步加载的原理，其实是用了javascript-function的toString特性。parseDependencies方法接受参数为function字符串（请看代码第714行），调用之后首先使用正则表达式提取function里的所有依赖文件，在它们全部加载完之后执行function，所以实现了同步依赖。 
+虽然想法看似可行，但是从实现的角度上看seajs并没做好。比如说下面这样的代码均完全符合js语法，也没有违背seajs的规范，但实际上这些代码在seajs中都不会正常工作： </p>
+<pre><code class="language-javascript">define(function(require){
+  // 第一种，连接字符串
+  require(&#39;jque&#39;+&#39;ry&#39;);
+  // 第二种，紧跟在多行注释之后
+  /*jquery*/require(&quot;jquery&quot;);
+  // 第三种，转义字符形式
+  require(&quot;jqu\u0065ry&quot;);
+  // 第四中，转义字符反斜杠解析丢失，资源地址后v参数是空的
+  require(&quot;jquery.js?v=\\\\&quot;);
+});</code></pre>
+<p>也许我所列举的调用方式比较奇葩，但是生产环境和业务流程不会总是循规蹈矩，所以没人能保证不会发生这种情况。 
+除此之外，最根本的问题是seajs的同步加载依赖设计思想完全不符合前端环境。把js模块化的意义，在于降低耦合，提高内聚，不同功能之间不会互相影响。而seajs的加载方式直接反其道而行，下面代码很清楚的反应这个问题： </p>
+<pre><code class="language-javascript">define(function(require){
+  require(&#39;a&#39;).run();
+  require(&#39;b&#39;).run();
+});</code></pre>
+<p>不考虑a,b的内部依赖，仅看上面的两行代码中a和b并无直接关联，因此它们的执行顺序应该和写法无关，任何一个加载完成都应该立即执行，而不需要等待别的模块加载完成。而seajs永远会保证a,b都加载完成再一起执行，如果业务需求必须要b在加载完成之后就执行，那就只能把 <code>require(&#39;b&#39;).run()</code>拆到另一个文件中了。 
+其实requirejs的异步模块加载方式是目前看来最符合前端设计要求的，很多人认为它不好的原因基本是因为不清楚它的工作方式，或者无法理解异步编程的逻辑罢了。 </p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp55s.p7g.html">判断变量是否 0 或者 &#39;0&#39;</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="87823.html">youku电脑版跳过广告代码</a></p>
+</li>
+<li><p><a href="58847.html">解密某个js文件</a></p>
+</li>
+<li><p><a href="58843.html">破解百度云下载链接</a></p>
+</li>
+<li><p><a href="58829.html">让js支持带命名的正则表达式</a></p>
+</li>
+<li><p><a href="58822.html">jshtml模板引擎</a></p>
+</li>
+<li><p><a href="58818.html">json2html源码</a></p>
+</li>
+<li><p><a href="58793.html">读取Blob的内容实体</a></p>
+</li>
+<li><p><a href="58786.html">判断一个object是否HTMLDom</a></p>
+</li>
+<li><p><a href="58781.html">简易命令行解析器</a></p>
+</li>
+<li><p><a href="58780.html">Promise才是javascript的正统队列</a></p>
+</li>
+<li><p><a href="58779.html">callback =&gt; Promise.then</a></p>
+</li>
+<li><p><a href="58777.html">nodejs异步回调的并发控制</a></p>
+</li>
+<li><p><a href="58773.html">低版本IE命名函数表达式bug</a></p>
+</li>
+<li><p><a href="58772.html">让重复调用只有第一次生效</a></p>
+</li>
+<li><p><a href="58771.html">简易JSON函数封装</a></p>
+</li>
+<li><p><a href="58770.html">使用eval来修改上下文的变量</a></p>
+</li>
+<li><p><a href="58767.html">seajs同步加载依赖的实现和弊病</a></p>
+</li>
+<li><p><a href="58766.html">html5页面全屏方法</a></p>
+</li>
+<li><p><a href="58765.html">给滚动条置顶添加过渡动画</a></p>
+</li>
+<li><p><a href="58764.html">m秒内最多n次的问题</a></p>
+</li>
+<li><p><a href="58762.html">让代码扁平化</a></p>
+</li>
+<li><p><a href="58760.html">关于自动加载的问题</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4xg.2sb.html">sass变量和继承类写法</a></p>
+</li>
+<li><p><a href="kh4hp4xw.fuh.html">mac 终端运行后台程序如何在终端关闭时继续运行</a></p>
+</li>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp50y.c3p.html">nginx用域名来转发请求</a></p>
+</li>
+<li><p><a href="kh4hp52g.1h.html">nodejs本地双向代理 端口转发</a></p>
+</li>
+<li><p><a href="kh4hp54d.xb.html">git删除远程分支</a></p>
+</li>
+<li><p><a href="kh4hp5as.pb.html">linux自启动/禁止自启动服务</a></p>
+</li>
+<li><p><a href="kh4hp5bk.27.html">cdn资源列表</a></p>
+</li>
+<li><p><a href="kh4hp5by.jnt.html">webpack使用外部资源</a></p>
+</li>
+<li><p><a href="88328.html">python下载文件，带进度条控制</a></p>
+</li>
+<li><p><a href="88103.html">ie8上Image.onload不触发问题</a></p>
+</li>
+<li><p><a href="87823.html">youku电脑版跳过广告代码</a></p>
+</li>
+<li><p><a href="79547.html">前端性能观察器</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58767";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

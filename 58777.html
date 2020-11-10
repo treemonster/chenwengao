@@ -1,0 +1,273 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>nodejs异步回调的并发控制</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">nodejs异步回调的并发控制</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #de9b9e">javascript</span><span class="tagz" style="background: #65f214">异步回调</span><span class="tagz" style="background: #5a9d75">并发控制</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>nodejs的api设计推崇一切皆异步，然而异步的编程不仅流程控制复杂，而且内存泄露意外的发生可能性更大。异步的任务通常是并行运作的，异步回调意味着在完成任务之前，回调函数会一直堆积在内存中。所以有必要设计一个异步回调的队列机制来避免这种情况。 </p>
+<h4 id="这个队列需要支持的功能如下：">这个队列需要支持的功能如下：#</h4>
+<ol start="0">
+<li>并发执行任务</li>
+</ol>
+<hr>
+<p>  这些任务应该是相互间没有依赖关系的，可以让他们同时运行减少等待时间。通过在队列中设置并发数上限，来避免同时运行的过多。一个常见的例子是网络文件批量上传，每个文件上传过程是没有关联的，但如果不做并发运行的限制，就会出现n个文件同时上传把本地系统资源耗尽（网络阻塞，内存占满）。 
+  0. 顺序执行任务</p>
+<hr>
+<p>如果任务之间存在上下依赖关系，第二个任务成功执行依赖第一个任务的执行结果，那么就要保证他们的运行是顺序的了。比如文件系统操作，一次建立多级目录/a/b/c/d/e/f，实际上被拆分成了六个子任务，依次建立 /a，/a/b，/a/b/c，。。。这六个子任务的顺序不能错，否则无法建立成功。
+  0. 新任务排队</p>
+<hr>
+<p>如果一个新的任务重要性不高于目前队列中的任务，那么应该把这个任务排到队列的尾部等待执行机会。
+  0. 新任务插队</p>
+<hr>
+<p>与其三相反，如果这个任务很重要，那么就把他排到队列的第一个，下一次的执行机会让给这个任务。 </p>
+<ul>
+<li>关于新任务的重要性应该对两种情况综合考虑：<ol start="0">
+<li>这个任务是否必须在其他任务之前执行；</li>
+<li>如果把这个任务堆积到后面是否会造成过多的内存堆积。</li>
+</ol>
+</li>
+</ul>
+<p>因为队列中存在的任务可能有一些是很占用时间的，而新的任务可能不需要很多时间去完成，但是他对内存的要求很大。比如有一个任务需要把网络请求的结果写到本地文件。这个任务通常并不会占用很多时间，但是这样的任务堆积起来对内存的消耗就很大了，必须把他排到队列开头去处理。 </p>
+<p>最终实现的程序如下： </p>
+<pre><code class="language-javascript">&#39;use strict&#39;;
+let getTaskQueue=(SimultaneousMaxCount)=&gt;{ // 参数为并发最大个数
+  let f=(fn)=&gt;fn instanceof Array?fn:[fn];
+  return new(function(){
+    let maxCount=SimultaneousMaxCount||3;
+    let queue=[],currentCount=0;
+    let t=setInterval(()=&gt;{
+      if(queue.length &amp;&amp; currentCount&lt;maxCount){
+        currentCount++;
+        let fn=queue.shift(),
+          n=fn.length,
+          c=()=&gt;fn.shift()(()=&gt;--n?c():currentCount--);
+        c();
+      }
+    },20);
+    // 排队和插队接收参数为数组或者单个function
+    // 数组中的function需要依次执行，整个队列是并发执行的
+    // 排队
+    this.push=(fn)=&gt;queue.push(f(fn));
+    // 插队
+    this.unshift=(fn)=&gt;queue.unshift(f(fn));
+    // 销毁队列
+    this.destory=()=&gt;clearInterval(t);
+    // 返回当前任务个数
+    this.hasTask=()=&gt;currentCount+queue.length;
+  });
+};</code></pre>
+<p>demo程序taskqueuedemo.js，请使用 node --harmony taskqueuedemo来运行查看效果。 </p>
+<pre><code class="language-javascript">&#39;use strict&#39;;
+let getTaskQueue=(SimultaneousMaxCount)=&gt;{
+  let f=(fn)=&gt;fn instanceof Array?fn:[fn];
+  return new(function(){
+    let maxCount=SimultaneousMaxCount||3;
+    let queue=[],currentCount=0;
+    let t=setInterval(()=&gt;{
+      if(queue.length &amp;&amp; currentCount&lt;maxCount){
+        currentCount++;
+        let fn=queue.shift(),
+          n=fn.length,
+          c=()=&gt;fn.shift()(()=&gt;--n?c():currentCount--);
+        c();
+      }
+    },20);
+    this.push=(fn)=&gt;queue.push(f(fn));
+    this.unshift=(fn)=&gt;queue.unshift(f(fn));
+    this.destory=()=&gt;clearInterval(t);
+    this.hasTask=()=&gt;currentCount+queue.length;
+  });
+};
+
+let g=getTaskQueue(3);
+let print=(...a)=&gt;console.log.apply(console,a);
+
+// Task1
+{
+  g.push((completed)=&gt;{
+    print(&#39;Task1 Start..&#39;);
+    setTimeout(()=&gt;{ print(&#39;Task1 completed!&#39;),completed(); },2000);
+  });
+}
+
+// Task2
+{
+  let task2=[(completed)=&gt;{
+    print(&#39;Task2 Start..&#39;);
+    setTimeout(completed,3000);
+  }];&#39;a,b,c,d&#39;.split(&#39;,&#39;).map(a=&gt;{
+    task2.push((completed)=&gt;{
+      print(&#39;Task2=&gt; &#39;,a);
+      setTimeout(completed,1000);
+    });
+  });task2.push((completed)=&gt;{
+    print(&#39;Task2 completed!&#39;);
+    completed();
+  });
+  g.push(task2);
+}
+
+// Task3
+{
+  let task3=[(completed)=&gt;{
+    print(&#39;Task3 Start..&#39;);
+    setImmediate(completed);
+  }];&#39;1,2,3,4&#39;.split(&#39;,&#39;).map(a=&gt;{
+    task3.push((completed)=&gt;{
+      print(&#39;Task3=&gt; &#39;,a);
+      setTimeout(completed,1000);
+    });
+  });task3.push((completed)=&gt;{
+    print(&#39;Task3 completed!&#39;);
+    completed();
+  });
+  g.push(task3);
+}
+
+// Task4
+{
+  g.push((completed)=&gt;{
+    print(&#39;Task4 Start..&#39;);
+    setTimeout(()=&gt;{print(&#39;Task4 completed!&#39;),completed();},3000);
+  });
+}
+
+// When task all completed, destory the queue
+{
+  let c=setInterval(()=&gt;{
+    if(g.hasTask())return;
+    g.destory();
+    clearInterval(c);
+  },1000);
+}
+</code></pre>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp55s.p7g.html">判断变量是否 0 或者 &#39;0&#39;</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="87823.html">youku电脑版跳过广告代码</a></p>
+</li>
+<li><p><a href="58847.html">解密某个js文件</a></p>
+</li>
+<li><p><a href="58843.html">破解百度云下载链接</a></p>
+</li>
+<li><p><a href="58829.html">让js支持带命名的正则表达式</a></p>
+</li>
+<li><p><a href="58822.html">jshtml模板引擎</a></p>
+</li>
+<li><p><a href="58818.html">json2html源码</a></p>
+</li>
+<li><p><a href="58793.html">读取Blob的内容实体</a></p>
+</li>
+<li><p><a href="58786.html">判断一个object是否HTMLDom</a></p>
+</li>
+<li><p><a href="58781.html">简易命令行解析器</a></p>
+</li>
+<li><p><a href="58780.html">Promise才是javascript的正统队列</a></p>
+</li>
+<li><p><a href="58779.html">callback =&gt; Promise.then</a></p>
+</li>
+<li><p><a href="58777.html">nodejs异步回调的并发控制</a></p>
+</li>
+<li><p><a href="58773.html">低版本IE命名函数表达式bug</a></p>
+</li>
+<li><p><a href="58772.html">让重复调用只有第一次生效</a></p>
+</li>
+<li><p><a href="58771.html">简易JSON函数封装</a></p>
+</li>
+<li><p><a href="58770.html">使用eval来修改上下文的变量</a></p>
+</li>
+<li><p><a href="58767.html">seajs同步加载依赖的实现和弊病</a></p>
+</li>
+<li><p><a href="58766.html">html5页面全屏方法</a></p>
+</li>
+<li><p><a href="58765.html">给滚动条置顶添加过渡动画</a></p>
+</li>
+<li><p><a href="58764.html">m秒内最多n次的问题</a></p>
+</li>
+<li><p><a href="58762.html">让代码扁平化</a></p>
+</li>
+<li><p><a href="58760.html">关于自动加载的问题</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4u7.5l8.html">react项目webpack打包时拆分异步加载的文件</a></p>
+</li>
+<li><p><a href="kh4hp4ut.68c.html">华为等国产手机rem宽度超过实际宽度</a></p>
+</li>
+<li><p><a href="kh4hp4vo.i3t.html">word文件命令行打印</a></p>
+</li>
+<li><p><a href="kh4hp4xg.2sb.html">sass变量和继承类写法</a></p>
+</li>
+<li><p><a href="kh4hp4xw.fuh.html">mac 终端运行后台程序如何在终端关闭时继续运行</a></p>
+</li>
+<li><p><a href="kh4hp54u.a47.html">html5 全屏代码</a></p>
+</li>
+<li><p><a href="kh4hp57y.fpf.html">npm设置仓库地址和代理</a></p>
+</li>
+<li><p><a href="kh4hp5ae.oak.html">dd备份/还原</a></p>
+</li>
+<li><p><a href="kh4hp5dm.5i.html">git记住/删除账号密码</a></p>
+</li>
+<li><p><a href="kh4hp5eg.y8e.html"> ssl 证书生成方式</a></p>
+</li>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="88094.html">随机取某个概率区间的代码</a></p>
+</li>
+<li><p><a href="87218.html">感谢beego陪伴我度过那不靠谱的半年</a></p>
+</li>
+<li><p><a href="83845.html">配置mysql ssl连接</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
+</li>
+<li><p><a href="69351.html">缓存才是优化的终极手段</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58777";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

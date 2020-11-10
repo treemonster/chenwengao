@@ -1,0 +1,117 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>php switch的问题</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">php switch的问题</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #e1bfd7">php</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>用惯了js中的switch，习惯的认为php中也应该是用<code>===</code>来比较的，但是实际用了后才发现这种想法错了。 </p>
+<p>为了根据返回的值计算实际对应的参数，我使用了switch结构来写，代码抽离如下： </p>
+<pre><code class="language-php">function getText($code){
+  switch($code){
+    case 0:return &#39;x&#39;;
+    case 1:return &#39;y&#39;;
+    default:return &#39;z&#39;;
+  }
+}
+echo getText(0);
+echo getText(null);</code></pre>
+<p>期待的结果应该是 xz，但是实际上输出却是 xx。我看到这个结果唯一能想到的答案就是switch用了<code>==</code>来判断而不是<code>===</code>，于是我阅读了php手册中<a href="http://php.net/manual/zh/control-structures.switch.php">switch</a>的描述。验证了我的猜想，确实使用的是双等号的松散比较。 </p>
+<p>虽然是php的规范设计，但是用着确实挺蛋疼的，所以我以后应该会避免使用php的switch语法，这个知识点就暂时记下了。。 </p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="88094.html">随机取某个概率区间的代码</a></p>
+</li>
+<li><p><a href="58846.html">php session文件过多的问题</a></p>
+</li>
+<li><p><a href="58834.html">php5.2.17 curl openssl的配置踩坑</a></p>
+</li>
+<li><p><a href="58827.html">x64系统编译php5.3报错</a></p>
+</li>
+<li><p><a href="58817.html">无脑破解phpjm加密</a></p>
+</li>
+<li><p><a href="58815.html">php解析ini文件</a></p>
+</li>
+<li><p><a href="58812.html">无聊的刷屏</a></p>
+</li>
+<li><p><a href="58784.html">php switch的问题</a></p>
+</li>
+<li><p><a href="58774.html">PHP使用SMTP发送邮件</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4u7.5l8.html">react项目webpack打包时拆分异步加载的文件</a></p>
+</li>
+<li><p><a href="kh4hp4v9.83f.html">安卓文字偏上，文字顶部被遮罩</a></p>
+</li>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp50h.0q9.html">curl用法</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp53d.49g.html">jxa运动指令脚本</a></p>
+</li>
+<li><p><a href="kh4hp569.gcj.html">nodejs俄罗斯方块</a></p>
+</li>
+<li><p><a href="kh4hp58c.8w7.html">模拟307跳转情况</a></p>
+</li>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
+</li>
+<li><p><a href="kh4hp5ae.oak.html">dd备份/还原</a></p>
+</li>
+<li><p><a href="kh4hp5b6.kdr.html">树莓派配置wifi热点</a></p>
+</li>
+<li><p><a href="kh4hp5dm.5i.html">git记住/删除账号密码</a></p>
+</li>
+<li><p><a href="kh4hp5eg.y8e.html"> ssl 证书生成方式</a></p>
+</li>
+<li><p><a href="88328.html">python下载文件，带进度条控制</a></p>
+</li>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="88172.html">mysql选取内容导出到文件</a></p>
+</li>
+<li><p><a href="79547.html">前端性能观察器</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58784";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

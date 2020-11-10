@@ -1,0 +1,143 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>滥用的ajax[1]：不考虑报错</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">滥用的ajax[1]：不考虑报错</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #2705a8">ajax</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>上班时候看到别人写的ajax交互代码，简直不堪入目。</p>
+<p>比如这样的代码：</p>
+<pre><code class="language-javascript">// 这种至少考虑到了可能出现的业务逻辑错误
+$.ajax({
+  type: &#39;post&#39;,
+  dataType: &#39;json&#39;,
+  url: baseUri + &#39;forum/reply/listAjax&#39;,
+  data: {
+    channel_id: channel_id,
+    puid: puid,
+    article_id: articleId,
+    page: page,
+    size: size
+  },
+  success: function(data) {
+    if (data &amp;&amp; data.code == 200) {
+      fn &amp;&amp; fn(data);
+    } else {
+      yiban.ui.alert(data.message);
+      return false;
+    }
+  }
+});</code></pre>
+<p>甚至这样的：</p>
+<pre><code class="language-javascript">$.ajax({
+  url: exp.config.ajax.classList,
+  async: false,
+  type: &#39;post&#39;,
+  success: function(data) {
+    data = eval(&quot;(&quot; + data + &quot;)&quot;);
+    for (var i = 0; i &lt; data.data.length; i++) {
+      groupid.push(data.data[i][&#39;eclass_id&#39;]);
+    }
+    groupid = groupid.join(&#39;|&#39;);
+  }
+})</code></pre>
+<hr>
+<p>理想情况下这样的代码可以正常工作，但是web从诞生到现在就是工作于一系列不理想的环境中。网络，从来就是不可靠的。</p>
+<p>先说jquery的ajax，ajax方法把结果分成success和error，http请求成功（status &gt;= 200 &amp;&amp; status &lt; 300 || status === 304）就是success，反之都是error。</p>
+<p>在网络不好的情况下很容易进入error的流程，对用户来说，如果不处理error，那么就会出现一些蛋疼的体验。举个例子，假如ajax发起前，显示一个加载中的遮罩层，而只有在success流程中解除了遮罩。那如果出现错误就会一直卡在加载中，那用户只能刷新页面了。</p>
+<hr>
+<p>合理的写法至少要增加超时限制和错误处理：</p>
+<pre><code class="language-javascript">$.ajax({
+  url:&#39;/sdc&#39;,
+  timeout: 5000 // 设定超时5秒
+})
+.success(function(){console.log(&#39;success&#39;)}) // 请求成功
+.error(function(){console.log(&#39;error&#39;)}) // 请求失败
+.always(function(){console.log(&#39;finally&#39;)}) // 不管成功还是失败，最后都要执行</code></pre>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="58809.html">滥用的ajax[2]：混乱的响应格式</a></p>
+</li>
+<li><p><a href="58808.html">滥用的ajax[1]：不考虑报错</a></p>
+</li>
+<li><p><a href="58788.html">常规ajax请求需要考虑的情况</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4xw.fuh.html">mac 终端运行后台程序如何在终端关闭时继续运行</a></p>
+</li>
+<li><p><a href="kh4hp4zl.csd.html">css3 文字渐变色</a></p>
+</li>
+<li><p><a href="kh4hp501.g4a.html">npm远程服务器某些配置不兼容代理的解决办法</a></p>
+</li>
+<li><p><a href="kh4hp50y.c3p.html">nginx用域名来转发请求</a></p>
+</li>
+<li><p><a href="kh4hp52w.ibe.html">ios13 vpn 能连接但不能传数据问题解决</a></p>
+</li>
+<li><p><a href="kh4hz03h.xh.html">python 用摄像头拍照并写入文件</a></p>
+</li>
+<li><p><a href="kh4hp55s.p7g.html">判断变量是否 0 或者 &#39;0&#39;</a></p>
+</li>
+<li><p><a href="kh4hp58c.8w7.html">模拟307跳转情况</a></p>
+</li>
+<li><p><a href="kh4hp5a0.gjt.html">单页应用的单向数据流的流程图</a></p>
+</li>
+<li><p><a href="kh4hp5ae.oak.html">dd备份/还原</a></p>
+</li>
+<li><p><a href="kh4hp5ct.4ys.html">putty使用http代理连接服务器</a></p>
+</li>
+<li><p><a href="88246.html">centos查看最近一次的开机时间</a></p>
+</li>
+<li><p><a href="88172.html">mysql选取内容导出到文件</a></p>
+</li>
+<li><p><a href="88128.html">centos7 开放或者关闭端口</a></p>
+</li>
+<li><p><a href="88103.html">ie8上Image.onload不触发问题</a></p>
+</li>
+<li><p><a href="88094.html">随机取某个概率区间的代码</a></p>
+</li>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
+</li>
+<li><p><a href="69351.html">缓存才是优化的终极手段</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58808";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

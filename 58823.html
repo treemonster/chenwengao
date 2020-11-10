@@ -1,0 +1,141 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>docker-in-docker 折腾笔记</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">docker-in-docker 折腾笔记</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #05b605">docker</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>docker-in-docker，即在docker容器中启动一个docker容器，从而实现内部的容器可以共享外部的部分指定资源，确保文件系统的隔离。</p>
+<p>最初我用docker做集成环境的目的是为了免去新同事搭建本地环境的麻烦，所以原本我准备直接把这个集成环境拷给同事，他们本地配环境可以简化到两步：</p>
+<ul>
+<li>装vmbox虚拟机</li>
+<li>导入集成环境</li>
+</ul>
+<p>然而随着时间推移这个集合环境里面包含的不宜公开的东西越来越多，所以这个想法就不切实际了。这是我必须配置docker-in-docker的起因。</p>
+<p>我用的是docker官方的centos7镜像，容器内我使用 <code>yum install docker -y</code>安装docker。这一步过程中有一个报错 &lt;font color=red&gt;<em>Failed to get D-Bus connection: Operation not permitted</em>&lt;/font&gt;,不过从结果上看是安装成功了。</p>
+<p>但在启动<code>docker daemon</code>时却报了这些错误：</p>
+<hr>
+<p>&lt;font color=red&gt;ERRO&lt;/font&gt;[0000] There are no more loopback devices available. 
+&lt;font color=red&gt;ERRO&lt;/font&gt;[0000] [graphdriver] prior storage driver &quot;devicemapper&quot; failed: loopback attach failed 
+DEBU[0000] Cleaning up old shm/mqueue mounts: start.<br>&lt;font color=red&gt;FATA&lt;/font&gt;[0000] Error starting daemon: error initializing graphdriver: loopback attach failed </p>
+<hr>
+<p>网上搜了第一个报错原因，然后找到了别人的解决方案：</p>
+<p><a href="http://schnell18.iteye.com/blog/2203452">http://schnell18.iteye.com/blog/2203452</a></p>
+<p>我在tmp目录下建一个loopback.sh，内容如下：</p>
+<pre><code class="language-bash">#!/bin/bash
+ensure_loop(){
+  num=&quot;$1&quot;
+  dev=&quot;/dev/loop$num&quot;
+  if test -b &quot;$dev&quot;; then
+    echo &quot;$dev is a usable loop device.&quot;
+    return 0
+  fi
+
+  echo &quot;Attempting to create $dev for docker ...&quot;
+  if ! mknod -m660 $dev b 7 $num; then
+    echo &quot;Failed to create $dev!&quot; 1&gt;&amp;2
+    return 3
+  fi
+
+  return 0
+}
+
+LOOP_A=$(losetup -f)
+LOOP_A=${LOOP_A#/dev/loop}
+LOOP_B=$(expr $LOOP_A + 1)
+
+ensure_loop $LOOP_A
+ensure_loop $LOOP_B  
+</code></pre>
+<p>执行</p>
+<pre><code class="language-bash">/bin/bash /tmp/loopback.sh</code></pre>
+<p>再此执行docker daemon发现已经成功启动了</p>
+<hr>
+<p>2016/12/21 补充</p>
+<p>在centos7的docker容器内安装之后，只要daemon启动过一次就会导致当前容器无法被导出。实际表现为导出的文件&lt;font color=red&gt;会无限变大直到塞爆硬盘&lt;/font&gt;。</p>
+<p>&lt;del&gt;估计原因是docker inside docker 这种做法导致docker检测文件进入死循环状态，应该是docker的bug。&lt;/del&gt;</p>
+<p>实际原因是docker启动后会创建一个 &lt;font color=red&gt;100GB&lt;/font&gt; 左右的存储池，文件位置在/var/lib/docker/devicemapper/devicemapper/data，所以直接导出就会带着这玩意一起打包。。</p>
+<p>解决方法是把 /var/lib/docker 用一个链接挂载到共享目录下，也就是不要直接把第一层容器作为外部系统存放docker文件。</p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="58823.html">docker-in-docker 折腾笔记</a></p>
+</li>
+<li><p><a href="58800.html">docker使用说明</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="khbe1zve.29n.html">css多行文本超出截断显示省略号</a></p>
+</li>
+<li><p><a href="khalg5ks.g.html">css3自定义滚动条样式</a></p>
+</li>
+<li><p><a href="kh4hp4zl.csd.html">css3 文字渐变色</a></p>
+</li>
+<li><p><a href="kh4hp50y.c3p.html">nginx用域名来转发请求</a></p>
+</li>
+<li><p><a href="kh4hp52g.1h.html">nodejs本地双向代理 端口转发</a></p>
+</li>
+<li><p><a href="kh4hp53d.49g.html">jxa运动指令脚本</a></p>
+</li>
+<li><p><a href="kh4hp54d.xb.html">git删除远程分支</a></p>
+</li>
+<li><p><a href="kh4hp54u.a47.html">html5 全屏代码</a></p>
+</li>
+<li><p><a href="kh4hp5ae.oak.html">dd备份/还原</a></p>
+</li>
+<li><p><a href="kh4hp5cd.lmo.html">TIME_WAIT过多</a></p>
+</li>
+<li><p><a href="kh4hp5ct.4ys.html">putty使用http代理连接服务器</a></p>
+</li>
+<li><p><a href="88180.html">树莓派配置wifi</a></p>
+</li>
+<li><p><a href="88172.html">mysql选取内容导出到文件</a></p>
+</li>
+<li><p><a href="88103.html">ie8上Image.onload不触发问题</a></p>
+</li>
+<li><p><a href="87999.html">bootstrap modal弹框导致ie无法获取焦点</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+<li><p><a href="72645.html">记一次mysql死锁的教训</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58823";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

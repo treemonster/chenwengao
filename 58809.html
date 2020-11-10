@@ -1,0 +1,175 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>滥用的ajax[2]：混乱的响应格式</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">滥用的ajax[2]：混乱的响应格式</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #2705a8">ajax</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>ajax的响应结果应该是什么样的？要回答这个问题，得先看ajax响应不应该是什么样的。</p>
+<p>上一篇文章举例了这样的代码：</p>
+<pre><code class="language-javascript">$.ajax({
+  type: &#39;post&#39;,
+  dataType: &#39;json&#39;,
+  url: baseUri + &#39;forum/reply/listAjax&#39;,
+  data: {
+    channel_id: channel_id,
+    puid: puid,
+    article_id: articleId,
+    page: page,
+    size: size
+  },
+  success: function(data) {
+    if (data &amp;&amp; data.code == 200) {
+      fn &amp;&amp; fn(data);
+    } else {
+      yiban.ui.alert(data.message);
+      return false;
+    }
+  }
+});</code></pre>
+<p>注意到success流程中对data.code进行了判断，并且从语义上大致看出，data.code不是200或者!data的情况下是作为逻辑上的错误流程，而不是成功流程。</p>
+<p>错误的处理居然混合在成功的结果里，并且此处还没有处理网络异常情况，这种逻辑实在太混乱了。</p>
+<p>其发生的根本原因，我认为是ajax接口规则设计不合理导致的。</p>
+<ol start="0">
+<li>不应该把成功和失败的结果混在一起</li>
+</ol>
+<p>ajax请求只有成功或者失败，成功是响应是唯一的，且只包含请求的结果数据程序在成功的流程内进行处理，不应该包含其他干扰要素。失败的响应没有任何数据，只包含状态信息让程序需要在失败的流程内处理。</p>
+<ol start="0">
+<li>网络错误和请求失败应该一并处理</li>
+</ol>
+<p>让$.ajax进入error流程最简单的做法就是让响应状态码变成一个网络异常的状态码，我习惯用403。</p>
+<hr>
+<p>demo范例</p>
+<pre><code class="language-php">&lt;?php
+function json_success(){
+  header(&#39;HTTP/1.1 200 OK&#39;);
+  header(&#39;Content-Type: text/json&#39;);
+  echo &#39;&quot;ok&quot;&#39;;
+}
+
+function json_error(){
+  header(&#39;HTTP/1.1 403 AjaxError&#39;); // 自定义状态字符串，用于区分默认的403状态
+  header(&#39;Content-Type: text/json&#39;);
+  echo &#39;&quot;error&quot;&#39;;
+}
+
+function json_timeout(){
+  sleep(10);
+}
+
+if(isset($_GET[&#39;func&#39;])){
+  call_user_func(&#39;json_&#39;.$_GET[&#39;func&#39;]);
+  exit();
+}
+?&gt;
+&lt;script src=&#39;https://www.xdelve.com/resources/jquery-1.12.0.js&#39;&gt;&lt;/script&gt;
+&lt;script&gt;
+$.ajaxSetup({
+  timeout: 2e3
+});
+function ajax(url){
+  $.ajax(url).success(function(data){
+    console.log(&#39;success: &#39;,url,data); // 请求成功
+  }).fail(function(e){
+    try{
+      if(e.status===0)throw e.statusText; // abort 或 error
+      if(e.status===403)throw e.statusText===&#39;AjaxError&#39;?e.responseJSON||e.responseText:e.statusText; // 自定义错误或默认错误
+    }catch(m){
+      console.log(&#39;error: &#39;,url,m);
+    }
+  })
+}
+
+ajax(&#39;?func=success&#39;);
+ajax(&#39;?func=error&#39;);
+ajax(&#39;?func=timeout&#39;);
+&lt;/script&gt;</code></pre>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="58809.html">滥用的ajax[2]：混乱的响应格式</a></p>
+</li>
+<li><p><a href="58808.html">滥用的ajax[1]：不考虑报错</a></p>
+</li>
+<li><p><a href="58788.html">常规ajax请求需要考虑的情况</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4v9.83f.html">安卓文字偏上，文字顶部被遮罩</a></p>
+</li>
+<li><p><a href="kh4hp4vo.i3t.html">word文件命令行打印</a></p>
+</li>
+<li><p><a href="kh4hp4xg.2sb.html">sass变量和继承类写法</a></p>
+</li>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp50h.0q9.html">curl用法</a></p>
+</li>
+<li><p><a href="kh4hp51g.d79.html">SSL certificate problem: self signed certificate in certificate chain</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hp53u.pjh.html">树莓派实现用pi用户自动登录</a></p>
+</li>
+<li><p><a href="kh4hp58c.8w7.html">模拟307跳转情况</a></p>
+</li>
+<li><p><a href="kh4hp5a0.gjt.html">单页应用的单向数据流的流程图</a></p>
+</li>
+<li><p><a href="kh4hp5ae.oak.html">dd备份/还原</a></p>
+</li>
+<li><p><a href="kh4hp5as.pb.html">linux自启动/禁止自启动服务</a></p>
+</li>
+<li><p><a href="kh4hp5by.jnt.html">webpack使用外部资源</a></p>
+</li>
+<li><p><a href="88328.html">python下载文件，带进度条控制</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="88094.html">随机取某个概率区间的代码</a></p>
+</li>
+<li><p><a href="87218.html">感谢beego陪伴我度过那不靠谱的半年</a></p>
+</li>
+<li><p><a href="72645.html">记一次mysql死锁的教训</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58809";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

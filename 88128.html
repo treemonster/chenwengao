@@ -1,0 +1,120 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>centos7 开放或者关闭端口</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">centos7 开放或者关闭端口</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #cdc872">centos</span><span class="tagz" style="background: #83090a">iptables</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>本文简要记录端口相关操作。</p>
+<ol start="0">
+<li><p>查看iptables状态</p>
+<pre><code class="language-sh">iptables -L</code></pre>
+</li>
+<li><p>开启一个端口立即（临时）生效，-I表示写入到现有规则之前，如果-I换成-A表示写在现有规则之后。顺序很重要，因为有些规则是禁止端口访问的，如果在禁止规则之后添加那么可能就无效了。</p>
+<pre><code class="language-sh">iptables -I INPUT -p tcp -m state --state NEW -m tcp --dport 22 -j ACCEPT</code></pre>
+</li>
+<li><p>关闭一个端口立即（临时）生效</p>
+<pre><code class="language-sh">iptables -D INPUT -p tcp -m state --state NEW -m tcp --dport 22 -j ACCEPT</code></pre>
+</li>
+<li><p>永久生效
+把以上命令写入 <code>/etc/sysconfig/iptables</code>文件，并重启iptables服务</p>
+<pre><code class="language-sh">service iptables restart</code></pre>
+</li>
+</ol>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="88246.html">centos查看最近一次的开机时间</a></p>
+</li>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="88128.html">centos7 开放或者关闭端口</a></p>
+</li>
+<li><p><a href="58849.html">配置vmbox里的centos7静态ip</a></p>
+</li>
+<li><p><a href="58836.html">centos7 静默复制命令踩坑</a></p>
+</li>
+<li><p><a href="58835.html">centos7 安装7z解压客户端</a></p>
+</li>
+<li><p><a href="58806.html">centos7部署samba服务</a></p>
+</li>
+<li><p><a href="58803.html">centos 7安装字体</a></p>
+</li>
+<li><p><a href="58802.html">centos7 Minimal安装桌面</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh8hr1ki.4fs.html">mac ssh透过代理连接</a></p>
+</li>
+<li><p><a href="kh4hp4u7.5l8.html">react项目webpack打包时拆分异步加载的文件</a></p>
+</li>
+<li><p><a href="kh4hp4ya.6e.html">ipsec vpn 添加新账号</a></p>
+</li>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp50h.0q9.html">curl用法</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp55s.p7g.html">判断变量是否 0 或者 &#39;0&#39;</a></p>
+</li>
+<li><p><a href="kh4hp57l.nw.html">mongodb 批量修改字段语句</a></p>
+</li>
+<li><p><a href="kh4hp58c.8w7.html">模拟307跳转情况</a></p>
+</li>
+<li><p><a href="kh4hp58r.537.html">webrtc服务搭建</a></p>
+</li>
+<li><p><a href="kh4hp5ct.4ys.html">putty使用http代理连接服务器</a></p>
+</li>
+<li><p><a href="kh4hp5d7.f8n.html">git配置服务端支持http认证</a></p>
+</li>
+<li><p><a href="kh4hp5eg.y8e.html"> ssl 证书生成方式</a></p>
+</li>
+<li><p><a href="88229.html">mysql导出csv文件</a></p>
+</li>
+<li><p><a href="88181.html">树莓派配置收发邮件</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="88128";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

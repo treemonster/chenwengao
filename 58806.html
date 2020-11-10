@@ -1,0 +1,141 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>centos7部署samba服务</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">centos7部署samba服务</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #65575d">samba</span><span class="tagz" style="background: #cdc872">centos</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>首先yum安装samba服务：</p>
+<pre><code class="language-bash">yum install samba -y</code></pre>
+<p>安装成功后，编辑 /etc/samba/smb.conf设置共享目录：</p>
+<pre><code class="language-conf">[website]
+path = /website
+public = yes             
+writable = yes</code></pre>
+<p>方括号内的名字是共享目录对外访问名称，path是本地路径，public表示任何用户都可以访问，writable表示可写。这里只配置了一个对外目录。</p>
+<hr>
+<p>添加一个用户账号</p>
+<pre><code class="language-bash"># 如果系统中没有这个用户名，则先用useradd添加
+useradd xdelve
+# 添加smb用户账号并设置密码
+smbpasswd -a xdelve
+# 按照提示输入密码即可</code></pre>
+<p>启动命令如下：</p>
+<pre><code class="language-bash">service smb start</code></pre>
+<p>或者直接：</p>
+<pre><code class="language-bash">smbd</code></pre>
+<hr>
+<p>windows上使用 \ip的形式访问此共享服务器，需要输入账号密码验证。</p>
+<p>如果windows连接时候遇到“不允许一个用户使用一个以上用户名与一个服务器或共享资源的多重连接”的报错，则使用以下命令清除连接信息：</p>
+<pre><code class="language-cmd">net use * /del /y</code></pre>
+<p>同时必须关闭所有之前访问共享目录的窗口，否则还是会遇到这个报错。因为这个报错表示已存在其他用户的连接。</p>
+<hr>
+<p>如果报错“Failed to create pipe directory /run/samba/ncalrpc - No such file or directory”，创建此目录：</p>
+<pre><code class="language-bash">mkdir /run/samba/</code></pre>
+<p>如果报错“.../var/log/samba/log.smbd No such file.....”，建立此文件夹：</p>
+<pre><code class="language-bash">mkdir /var/log/samba/</code></pre>
+<hr>
+<p>2016/6/24 补充</p>
+<p>如果按上述配置成功后，windows只能看到共享文件夹，而无法打开的情况，那么原因是selinux的安全策略限制了。解决办法是：</p>
+<pre><code class="language-bash">chcon -R -t samba_share_t /website</code></pre>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="88246.html">centos查看最近一次的开机时间</a></p>
+</li>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="88128.html">centos7 开放或者关闭端口</a></p>
+</li>
+<li><p><a href="58849.html">配置vmbox里的centos7静态ip</a></p>
+</li>
+<li><p><a href="58836.html">centos7 静默复制命令踩坑</a></p>
+</li>
+<li><p><a href="58835.html">centos7 安装7z解压客户端</a></p>
+</li>
+<li><p><a href="58806.html">centos7部署samba服务</a></p>
+</li>
+<li><p><a href="58803.html">centos 7安装字体</a></p>
+</li>
+<li><p><a href="58802.html">centos7 Minimal安装桌面</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4ut.68c.html">华为等国产手机rem宽度超过实际宽度</a></p>
+</li>
+<li><p><a href="kh4hp4xw.fuh.html">mac 终端运行后台程序如何在终端关闭时继续运行</a></p>
+</li>
+<li><p><a href="kh4hp4z5.bct.html">raw.githubusercontent.com DNS被指向127.0.0.1</a></p>
+</li>
+<li><p><a href="kh4hp50h.0q9.html">curl用法</a></p>
+</li>
+<li><p><a href="kh4hp51g.d79.html">SSL certificate problem: self signed certificate in certificate chain</a></p>
+</li>
+<li><p><a href="kh4hp54d.xb.html">git删除远程分支</a></p>
+</li>
+<li><p><a href="kh4hz03h.xh.html">python 用摄像头拍照并写入文件</a></p>
+</li>
+<li><p><a href="kh4hp569.gcj.html">nodejs俄罗斯方块</a></p>
+</li>
+<li><p><a href="kh4hp56p.7c.html">heroku查看app使用时间</a></p>
+</li>
+<li><p><a href="kh4hp58c.8w7.html">模拟307跳转情况</a></p>
+</li>
+<li><p><a href="kh4hp596.lj.html">webrtc泄漏本地ip信息</a></p>
+</li>
+<li><p><a href="kh4hp5bk.27.html">cdn资源列表</a></p>
+</li>
+<li><p><a href="kh4hp5by.jnt.html">webpack使用外部资源</a></p>
+</li>
+<li><p><a href="kh4hp5cd.lmo.html">TIME_WAIT过多</a></p>
+</li>
+<li><p><a href="kh4hp5ct.4ys.html">putty使用http代理连接服务器</a></p>
+</li>
+<li><p><a href="88229.html">mysql导出csv文件</a></p>
+</li>
+<li><p><a href="83845.html">配置mysql ssl连接</a></p>
+</li>
+<li><p><a href="81007.html">html表格导出csv文件并下载</a></p>
+</li>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58806";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

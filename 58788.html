@@ -1,0 +1,111 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>常规ajax请求需要考虑的情况</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">常规ajax请求需要考虑的情况</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #d223e1">jquery</span><span class="tagz" style="background: #2705a8">ajax</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>异步数据交互基本上网站开发都会用到，只要使用jquery的<code>$.ajax</code>，即使是一个完全不懂<code>XMLHttpRequest</code>的前端也能立刻写出一个异步的数据交互。那么现在问题是，ajax究竟需要考虑哪些情况？</p>
+<p>如果是页面跳转，那么所有的数据都是一次性得出的，不存在局部刷新的可能。所以就不需要前端开发人员去考虑异常处理，用户自己就会F5全页面刷新。</p>
+<p>以实际情况为例，用户点击一个链接之后，异步获取内容刷新显示区域。那么至少需要这样写：</p>
+<pre><code>$.ajax({url:&#39;xxx.php&#39;})
+.success(function(){ /* TODO */ });</code></pre>
+<p>如果要求对失败的情况也做一些事情，那么可以增加一个fail方法：</p>
+<pre><code>$.ajax({url:&#39;xxx.php&#39;})
+.success(function(){ /* TODO */ })
+.fail(function(){ /* TODO*/ });</code></pre>
+<p>正如开始所说的，网络是一个不稳定的东西，所以会因为各种原因超时。所以还应该把超时的情况写进去：</p>
+<pre><code>$.ajax({ url:&#39;xxx.php&#39;, timeout:5000 })
+.success(function(){ /* TODO */ })
+.fail(function(){ /* TODO*/ });</code></pre>
+<p>到这里常规的ajax请求就算完成了，所以总结一个完整的交互至少应该考虑三种情况：</p>
+<ol>
+<li>成功 success</li>
+<li>失败 fail</li>
+<li>超时 timeout</li>
+</ol>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="67375.html">jquery获取窗口高度踩坑</a></p>
+</li>
+<li><p><a href="58809.html">滥用的ajax[2]：混乱的响应格式</a></p>
+</li>
+<li><p><a href="58808.html">滥用的ajax[1]：不考虑报错</a></p>
+</li>
+<li><p><a href="58788.html">常规ajax请求需要考虑的情况</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="khbe1zve.29n.html">css多行文本超出截断显示省略号</a></p>
+</li>
+<li><p><a href="kh4hp4wj.uv.html">nginx 子域名对应文件夹</a></p>
+</li>
+<li><p><a href="kh4hp4ya.6e.html">ipsec vpn 添加新账号</a></p>
+</li>
+<li><p><a href="kh4hp4zl.csd.html">css3 文字渐变色</a></p>
+</li>
+<li><p><a href="kh4hp50h.0q9.html">curl用法</a></p>
+</li>
+<li><p><a href="kh4hp52w.ibe.html">ios13 vpn 能连接但不能传数据问题解决</a></p>
+</li>
+<li><p><a href="kh4hp54d.xb.html">git删除远程分支</a></p>
+</li>
+<li><p><a href="kh4hp58c.8w7.html">模拟307跳转情况</a></p>
+</li>
+<li><p><a href="kh4hp58r.537.html">webrtc服务搭建</a></p>
+</li>
+<li><p><a href="kh4hp596.lj.html">webrtc泄漏本地ip信息</a></p>
+</li>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
+</li>
+<li><p><a href="kh4hp5b6.kdr.html">树莓派配置wifi热点</a></p>
+</li>
+<li><p><a href="kh4hp5e1.ou.html">git 设置代理服务器</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88094.html">随机取某个概率区间的代码</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58788";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

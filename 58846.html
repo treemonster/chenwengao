@@ -1,0 +1,122 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>php session文件过多的问题</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">php session文件过多的问题</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #e1bfd7">php</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>php 默认把session文件放在tmp目录下，测试环境没什么影响，但用户多的正式环境很可能因为文件过多导致响应速度慢好几秒。</p>
+<p>临时解决办法是把session文件目录多分几层，因为php设计的时候已经考虑到文件数太多的情况，也支持多级目录存放session文件。</p>
+<p>先用以下脚本创建多级目录：</p>
+<pre><code class="language-sh">    #!/bin/sh
+    dir=&quot;0 1 2 3 4 5 6 7 8 9 a b c d e f g h i j k l m n o p q r s t u v w x y z&quot;
+    for levela in $dir;
+    do
+        for levelb in $dir;
+        do
+            for levelc in $dir;
+            do
+                mkdir -p /tmp/phpsess/$levela/$levelb/$levelc;
+            done
+        done;
+    done
+    chmod -R 777 /tmp/phpsess</code></pre>
+<p>然后修改php.ini</p>
+<pre><code>session.save_path = &quot;3;600;/tmp/phpsess&quot;</code></pre>
+<p>双引号不可以漏，否则分号后面的会被当成注释。</p>
+<p>重新启动php服务发现响应已经基本恢复了。</p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="88094.html">随机取某个概率区间的代码</a></p>
+</li>
+<li><p><a href="58846.html">php session文件过多的问题</a></p>
+</li>
+<li><p><a href="58834.html">php5.2.17 curl openssl的配置踩坑</a></p>
+</li>
+<li><p><a href="58827.html">x64系统编译php5.3报错</a></p>
+</li>
+<li><p><a href="58817.html">无脑破解phpjm加密</a></p>
+</li>
+<li><p><a href="58815.html">php解析ini文件</a></p>
+</li>
+<li><p><a href="58812.html">无聊的刷屏</a></p>
+</li>
+<li><p><a href="58784.html">php switch的问题</a></p>
+</li>
+<li><p><a href="58774.html">PHP使用SMTP发送邮件</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="khbe1zve.29n.html">css多行文本超出截断显示省略号</a></p>
+</li>
+<li><p><a href="kh4hp4xw.fuh.html">mac 终端运行后台程序如何在终端关闭时继续运行</a></p>
+</li>
+<li><p><a href="kh4hp501.g4a.html">npm远程服务器某些配置不兼容代理的解决办法</a></p>
+</li>
+<li><p><a href="kh4hp50y.c3p.html">nginx用域名来转发请求</a></p>
+</li>
+<li><p><a href="kh4hp51g.d79.html">SSL certificate problem: self signed certificate in certificate chain</a></p>
+</li>
+<li><p><a href="kh4hp54d.xb.html">git删除远程分支</a></p>
+</li>
+<li><p><a href="kh4hz03h.xh.html">python 用摄像头拍照并写入文件</a></p>
+</li>
+<li><p><a href="kh4hp55c.9dm.html">搜索命令整理</a></p>
+</li>
+<li><p><a href="kh4hp56p.7c.html">heroku查看app使用时间</a></p>
+</li>
+<li><p><a href="kh4hp5bk.27.html">cdn资源列表</a></p>
+</li>
+<li><p><a href="kh4hp5cd.lmo.html">TIME_WAIT过多</a></p>
+</li>
+<li><p><a href="kh4hp5e1.ou.html">git 设置代理服务器</a></p>
+</li>
+<li><p><a href="88181.html">树莓派配置收发邮件</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+<li><p><a href="72645.html">记一次mysql死锁的教训</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58846";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

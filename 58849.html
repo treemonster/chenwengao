@@ -1,0 +1,137 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>配置vmbox里的centos7静态ip</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">配置vmbox里的centos7静态ip</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #f53a87">vmbox</span><span class="tagz" style="background: #2cbdfd">centos7</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>多个虚拟机的情况下有时候启动之后的ip会变化，这一点很麻烦，因为本地连接的配置信息是写死的ip地址。因此我尝试把系统的ip地址设为静态的。</p>
+<p>首先确定外部真实环境的网关：</p>
+<pre><code class="language-sh">ip addr|grep 192</code></pre>
+<p>输出结果：</p>
+<pre><code>    inet 192.168.43.249 netmask 0xffffff00 broadcast 192.168.43.255
+    inet 192.168.99.1 netmask 0xffffff00 broadcast 192.168.99.255</code></pre>
+<p>前一个是连接的wifi，忽略，后一个是vboxnet0，看名字就知道是虚拟机程序的网卡，所以确定之后绑定的静态ip网卡是这块。</p>
+<p>进入 centos7 系统，运行命令：</p>
+<pre><code class="language-sh">ip addr|grep 192</code></pre>
+<p>输出</p>
+<pre><code>    inet 192.168.43.164/24 brd 192.168.43.255 scope global dynamic enp0s8
+    inet 192.168.99.100/24 brd 192.168.99.255 scope global dynamic enp0s17</code></pre>
+<p>看到 enp0s17 的ip符合vboxnet0的网关，因此是我要修改的网卡。</p>
+<p>进入/etc/sysconfig/network-scripts目录，找找看有没有 <code>ifcfg-enp0s17</code> 这个文件，如果没有，那么就新建一个。</p>
+<p>内容如下：</p>
+<pre><code>TYPE=&quot;Ethernet&quot;
+BOOTPROTO=&quot;static&quot;
+DEFROUTE=&quot;yes&quot;
+IPV4_FAILURE_FATAL=&quot;no&quot;
+IPV6INIT=&quot;yes&quot;
+IPV6_AUTOCONF=&quot;yes&quot;
+IPV6_DEFROUTE=&quot;yes&quot;
+IPV6_FAILURE_FATAL=&quot;no&quot;
+NAME=&quot;enp0s17&quot;
+DEVICE=&quot;enp0s17&quot;
+ONBOOT=&quot;yes&quot;
+PEERDNS=&quot;yes&quot;
+PEERROUTES=&quot;yes&quot;
+IPV6_PEERDNS=&quot;yes&quot;
+IPV6_PEERROUTES=&quot;yes&quot;
+IPV6_PRIVACY=&quot;no&quot;
+
+IPADDR=192.168.99.100
+NETMASK=255.255.255.0
+GATEWAY=192.168.99.1
+DNS1=192.168.99.1
+</code></pre>
+<p>保存并重启network服务：</p>
+<pre><code class="language-sh">service network restart</code></pre>
+<p>成功后检查：</p>
+<pre><code class="language-sh">ip addr|grep 192</code></pre>
+<p>输出：</p>
+<pre><code>    inet 192.168.43.164/24 brd 192.168.43.255 scope global dynamic enp0s8
+    inet 192.168.99.100/24 brd 192.168.99.255 scope global enp0s17
+</code></pre>
+<p>没有dynamic表示已经是静态ip了。</p>
+<p>同样方式配置其他的虚拟机即可。</p>
+<hr>
+<p>如果遇到重启服务报错可以查看日志文件寻找错误原因：</p>
+<pre><code class="language-sh">cat /var/log/messages |grep network</code></pre>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><a href="58849.html">配置vmbox里的centos7静态ip</a></li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp50h.0q9.html">curl用法</a></p>
+</li>
+<li><p><a href="kh4hp50y.c3p.html">nginx用域名来转发请求</a></p>
+</li>
+<li><p><a href="kh4hp54d.xb.html">git删除远程分支</a></p>
+</li>
+<li><p><a href="kh4hp55c.9dm.html">搜索命令整理</a></p>
+</li>
+<li><p><a href="kh4hp56p.7c.html">heroku查看app使用时间</a></p>
+</li>
+<li><p><a href="kh4hp574.hum.html">heroku登陆cli</a></p>
+</li>
+<li><p><a href="kh4hp57y.fpf.html">npm设置仓库地址和代理</a></p>
+</li>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
+</li>
+<li><p><a href="kh4hp5bk.27.html">cdn资源列表</a></p>
+</li>
+<li><p><a href="kh4hp5ct.4ys.html">putty使用http代理连接服务器</a></p>
+</li>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="88172.html">mysql选取内容导出到文件</a></p>
+</li>
+<li><p><a href="88103.html">ie8上Image.onload不触发问题</a></p>
+</li>
+<li><p><a href="81007.html">html表格导出csv文件并下载</a></p>
+</li>
+<li><p><a href="79146.html">linux 批量替换文本内容</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58849";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

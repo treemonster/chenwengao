@@ -1,0 +1,284 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>无脑破解phpjm加密</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">无脑破解phpjm加密</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #2170ad">php加密破解</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p><a href="http://www.phpjm.net/encode.html">phpjm.net</a> 加密的原理是php源码基础上套了几层字符串运算的壳，从而实现看上去好像加密了。不过这种加密方法是没有什么卵用的，因为最终必须通过eval入口解密执行，所以从zend内核里的zend_prepare_string_for_scanning方法上加一个钩子就能dump出原始代码。</p>
+<p>验证我的说法，我找了一个php官网的输出demo，原始代码如下：</p>
+<pre><code class="language-php">&lt;?php
+echo &quot;Hello World&quot;;
+
+echo &quot;This spans
+multiple lines. The newlines will be
+output as well&quot;;
+
+echo &quot;This spans\nmultiple lines. The newlines will be\noutput as well.&quot;;
+
+echo &quot;Escaping characters is done \&quot;Like this\&quot;.&quot;;
+
+// You can use variables inside of an echo statement
+$foo = &quot;foobar&quot;;
+$bar = &quot;barbaz&quot;;
+
+echo &quot;foo is $foo&quot;; // foo is foobar
+
+// You can also use arrays
+$baz = array(&quot;value&quot; =&gt; &quot;foo&quot;);
+
+echo &quot;this is {$baz[&#39;value&#39;]} !&quot;; // this is foo !
+
+// Using single quotes will print the variable name, not the value
+echo &#39;foo is $foo&#39;; // foo is $foo
+
+// If you are not using any other characters, you can just echo variables
+echo $foo;          // foobar
+echo $foo,$bar;     // foobarbarbaz
+
+// Strings can either be passed individually as multiple arguments or
+// concatenated together and passed as a single argument
+echo &#39;This &#39;, &#39;string &#39;, &#39;was &#39;, &#39;made &#39;, &#39;with multiple parameters.&#39;, chr(10);
+echo &#39;This &#39; . &#39;string &#39; . &#39;was &#39; . &#39;made &#39; . &#39;with concatenation.&#39; . &quot;\n&quot;;
+
+echo &lt;&lt;&lt;END
+This uses the &quot;here document&quot; syntax to output
+multiple lines with $variable interpolation. Note
+that the here document terminator must appear on a
+line with just a semicolon. no extra whitespace!
+END;
+
+// Because echo does not behave like a function, the following code is invalid.
+($some_var) ? echo &#39;true&#39; : echo &#39;false&#39;;
+
+// However, the following examples will work:
+($some_var) ? print &#39;true&#39; : print &#39;false&#39;; // print is also a construct, but
+                                            // it behaves like a function, so
+                                            // it may be used in this context.
+echo $some_var ? &#39;true&#39;: &#39;false&#39;; // changing the statement around
+?&gt;</code></pre>
+<p>用phpjm加密后可以得到一个乱码文件，虽然每次加密得到的结果实际上是不一样的，不过这并不是对原始变量的混淆，而是对加密后的壳做的混淆。</p>
+<p>&lt;a href=&#39;/uploadfile/imgs/phpjm1.png&#39; target=&#39;_blank&#39;&gt;&lt;img src=&#39;/uploadfile/imgs/phpjm1.png&#39; style=&#39;max-width:100%;&#39; /&gt;&lt;/a&gt;</p>
+<p>破解的步骤很简单，打开php源码的zend_language_scanner.c文件，找到zend_prepare_string_for_scanning方法，增加3句话打印结果就可以了：</p>
+<pre><code>ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_DC)
+{
+
+  php_printf(filename);php_printf(&quot;\n&quot;);// 打印文件名，同时可以知道是从哪个方法被调用的
+  php_printf(str);php_printf(&quot;\n&quot;); // 打印被执行的代码
+  php_printf(&quot;---------------------\n\n&quot;); // 隔开每次的输出结果
+
+...
+后面省略
+</code></pre>
+<p>编译php环境，然后用php命令行直接执行加密后的文件，就可以找到完整的原始代码了。</p>
+<p>&lt;a href=&#39;/uploadfile/imgs/phpjm2.png&#39; target=&#39;_blank&#39;&gt;&lt;img src=&#39;/uploadfile/imgs/phpjm2.png&#39; style=&#39;max-width:100%;&#39; /&gt;&lt;/a&gt;</p>
+<hr>
+<h4 id="font-colorf00综上所述，非内核级的加密都是扯谈。。font">&lt;font color=&#39;#f00&#39;&gt;综上所述，非内核级的加密都是扯谈。。&lt;/font&gt;</h4>
+<p>--- 2016/10/19 更新 --</p>
+<p>今天在改外卖人后台代码时，发现Mysite.php是用 <a href="http://www.phpjiami.com">http://www.phpjiami.com</a> 加密的，然而坑爹的是之前的方法居然无法解密运行，目测是编译参数的问题。因此我索性重新编译了一个php5.3的解密环境。</p>
+<p>修改同样的地方：</p>
+<pre><code class="language-c">ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_DC)
+{
+    /* enforce two trailing NULLs for flex... */
+    str-&gt;value.str.val = safe_erealloc(str-&gt;value.str.val, 1, str-&gt;value.str.len, ZEND_MMAP_AHEAD);
+
+    memset(str-&gt;value.str.val + str-&gt;value.str.len, 0, ZEND_MMAP_AHEAD);
+
+        // 输出eval的内容
+    php_printf(filename);
+    php_printf(str-&gt;value.str);
+    php_printf(&quot;------\r\n&quot;);
+</code></pre>
+<p>php版本号 5.3.29
+编译参数 ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --enable-fpm --with-fpm-user=www --with-fpm-group=www --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-magic-quotes --enable-safe-mode --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization --with-curl=/usr/local/curl --enable-mbregex --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf --with-openssl --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext --disable-fileinfo</p>
+<p>&lt;font color=red&gt;如果make报错需要修改Makefile，增加EXTRA_LIBS参数，-liconv，写在结尾&lt;/font&gt;</p>
+<p>然后 make &amp;&amp; make install</p>
+<p>最终就得到了一个可解密运行的环境</p>
+<p>解密运行效果如下：</p>
+<pre><code class="language-plain">&lt;meta charset=&#39;utf-8&#39; /&gt;
+
+/home/wwwroot/default/Mysite.php(1) : eval()&#39;d codeif(strpos(__FILE__, dnimoiyv) !== 0){$exitfunc();}------
+/home/wwwroot/default/Mysite.php(1) : eval()&#39;d codeeval(base64_decode($�笠����));------
+/home/wwwroot/default/Mysite.php(1) : eval()&#39;d code(1) : eval()&#39;d code?&gt;&lt;?php @eval(&quot;//Encode by  phpjiami.com,Free user.&quot;); ?&gt;&lt;?php
+
+define(&#39;MYSITE_PATH&#39;,dirname(__file__).DIRECTORY_SEPARATOR);
+
+class Mysite
+{ 
+    public static $app; 
+    public static $_classes = array(&#39;controllers&#39;=&gt;&#39;controllers.*&#39;);
+    public static $_otherclass = array(&#39;class&#39;=&gt;&#39;class.*&#39;);
+
+    public static function createApp($className, $config)
+    {
+        $app = new $className($config); 
+            return $app;
+    }
+
+
+    public static function createWebApp($config = null)
+    {
+        self::$app = self::createApp(&#39;myapp&#39;,$config);
+        return self::$app;
+    } 
+
+    public static function autoload($className)
+    { 
+        if(isset(self::$_coreClasses[$className]))
+        {
+            include(MYSITE_PATH.self::$_coreClasses[$className]); 
+        }else if(isset(self::$_classes))
+        {
+         /*
+            foreach(self::$_classes as $classPath)
+       { 
+             $filePath = hopedir.strtr(strtolower(trim($classPath,&#39;*&#39;)),&#39;.&#39;,&#39;/&#39;).strtolower( $className ) .&#39;.php&#39;;
+                    if(is_file($filePath))
+                    {
+
+                        include($filePath);
+                        return true;
+                    }
+      }*/
+             foreach(self::$_otherclass as $classPath)
+       { 
+
+             $filePath = hopedir.strtr(strtolower(trim($classPath,&#39;*&#39;)),&#39;.&#39;,&#39;/&#39;).strtolower( $className ) .&#39;.php&#39;;
+
+
+                    if(is_file($filePath))
+                    {
+
+                        include($filePath);
+                        return true;
+                    }
+      } 
+        } 
+        return true;
+    }
+
+
+    public static function setClasses($classes)
+    {
+        if(is_string($classes)) self::$_classes += array($classes);
+        if(is_array($classes))  self::$_classes += $classes;
+    }
+    //系统内核所有类文件注册信息
+     public static $_coreClasses = array( 
+        &#39;myapp&#39; =&gt; &#39;application_class.php&#39;,
+        &#39;IUrl&#39;=&gt; &#39;urlmanager_class.php&#39;,
+        &#39;IReq&#39;=&gt;&#39;req_class.php&#39;, 
+        &#39;mysql_class&#39;=&gt;&#39;extend/mysql_class.php&#39;,
+        &#39;page&#39;=&gt;&#39;extend/page.php&#39;, 
+        &#39;phpmailer&#39;=&gt;&#39;extend/class.phpmailer.php&#39;,
+        &#39;SMTP&#39;=&gt;&#39;extend/class.smtp.php&#39;,
+        &#39;config&#39;=&gt;&#39;extend/Config.php&#39;,
+        &#39;ICookie&#39;=&gt;&#39;extend/cookie_class.php&#39;,
+        &#39;ICrypt&#39;=&gt;&#39;extend/crypt_class.php&#39;,
+        &#39;IFile&#39;=&gt;&#39;extend/IFile.php&#39;,
+        &#39;IValidate&#39;=&gt;&#39;extend/IValidate.php&#39;,
+        &#39;IReq&#39;=&gt;&#39;extend/req_class.php&#39;,
+        &#39;Services_JSON&#39;=&gt;&#39;extend/Services_JSON.php&#39;,
+        &#39;ISmtp&#39;=&gt;&#39;extend/smtp_class.php&#39;,
+        &#39;upload&#39;=&gt;&#39;extend/upload.php&#39;,
+        &#39;IString&#39;=&gt;&#39;extend/string_class.php&#39;,
+        &#39;ISession&#39;=&gt;&#39;extend/session_class.php&#39;,
+        &#39;JSON&#39;=&gt;&#39;extend/json_class.php&#39;,
+        &#39;IFilter&#39;=&gt;&#39;extend/filter_class.php&#39;,
+        &#39;IClient&#39;=&gt;&#39;extend/client_class.php&#39;,
+        &#39;Captcha&#39;=&gt;&#39;extend/captcha_class.php&#39; 
+     );
+}
+
+function __autoload($className)
+{
+    Mysite::autoload($className); 
+}
+ ------
+/home/wwwroot/default/Mysite.php(1) : eval()&#39;d code(1) : eval()&#39;d code(1) : eval()&#39;d code//Encode by  phpjiami.com,Free user.------
+
+</code></pre>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><a href="58817.html">无脑破解phpjm加密</a></li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4ut.68c.html">华为等国产手机rem宽度超过实际宽度</a></p>
+</li>
+<li><p><a href="kh4hp4v9.83f.html">安卓文字偏上，文字顶部被遮罩</a></p>
+</li>
+<li><p><a href="kh4hz03h.xh.html">python 用摄像头拍照并写入文件</a></p>
+</li>
+<li><p><a href="kh4hp55s.p7g.html">判断变量是否 0 或者 &#39;0&#39;</a></p>
+</li>
+<li><p><a href="kh4hp574.hum.html">heroku登陆cli</a></p>
+</li>
+<li><p><a href="kh4hp57l.nw.html">mongodb 批量修改字段语句</a></p>
+</li>
+<li><p><a href="kh4hp5a0.gjt.html">单页应用的单向数据流的流程图</a></p>
+</li>
+<li><p><a href="kh4hp5b6.kdr.html">树莓派配置wifi热点</a></p>
+</li>
+<li><p><a href="kh4hp5cd.lmo.html">TIME_WAIT过多</a></p>
+</li>
+<li><p><a href="kh4hp5ct.4ys.html">putty使用http代理连接服务器</a></p>
+</li>
+<li><p><a href="kh4hp5e1.ou.html">git 设置代理服务器</a></p>
+</li>
+<li><p><a href="88246.html">centos查看最近一次的开机时间</a></p>
+</li>
+<li><p><a href="88181.html">树莓派配置收发邮件</a></p>
+</li>
+<li><p><a href="88128.html">centos7 开放或者关闭端口</a></p>
+</li>
+<li><p><a href="88103.html">ie8上Image.onload不触发问题</a></p>
+</li>
+<li><p><a href="87218.html">感谢beego陪伴我度过那不靠谱的半年</a></p>
+</li>
+<li><p><a href="81007.html">html表格导出csv文件并下载</a></p>
+</li>
+<li><p><a href="79146.html">linux 批量替换文本内容</a></p>
+</li>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58817";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

@@ -1,0 +1,189 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>树莓派无源蜂鸣器发声实验</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">树莓派无源蜂鸣器发声实验</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #7fa67b">树莓派</span><span class="tagz" style="background: #c65e1c">无源蜂鸣器</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>在网上找蜂鸣器的发声代码，结果找到的都是有源蜂鸣器的，无源蜂鸣器的只找到一个，而且还是c＋＋写的。蛋疼之余，索性自己尝试用GPIO的PWM功能做了一个发声代码。</p>
+<p>首先需要连接电路，把蜂鸣器的VCC接到3.3v，GND串联一个200欧左右的电阻（以防元件短路，毕竟5块钱的东西）接到0v，I/O串联一个200欧左右的电阻（为了降低声音，蜂鸣器很刺耳的）接到GPIO40。</p>
+<p>如果连接成功，以下代码可以发出声音了。</p>
+<pre><code class="language-python">import time
+import RPi.GPIO as GPIO
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(40, GPIO.OUT)
+
+C_LOW_1=        262
+C_LOW_1_HALF=   277
+C_LOW_2=        294
+C_LOW_2_HALF=   311
+C_LOW_3=        330
+C_LOW_4=        349
+C_LOW_4_HALF=   370
+C_LOW_5=        392
+C_LOW_5_HALF=   415
+C_LOW_6=        440
+C_LOW_6_HALF=   466
+C_LOW_7=        494
+
+C_MID_1=        523
+C_MID_1_HALF=   554
+C_MID_2=        587
+C_MID_2_HALF=   622
+C_MID_3=        659
+C_MID_4=        698
+C_MID_4_HALF=   740
+C_MID_5=        784
+C_MID_5_HALF=   831
+C_MID_6=        880
+C_MID_6_HALF=   932
+C_MID_7=        988
+
+
+C_HIGH_1=        1046
+C_HIGH_1_HALF=   1109
+C_HIGH_2=        1175
+C_HIGH_2_HALF=   1245
+C_HIGH_3=        1318
+C_HIGH_4=        1397
+C_HIGH_4_HALF=   1480
+C_HIGH_5=        1568
+C_HIGH_5_HALF=   1661
+C_HIGH_6=        1769
+C_HIGH_6_HALF=   1865
+C_HIGH_7=        1976
+
+import re
+def playstr(mstr):
+  cp=r&quot;(L|M|H)(H*)(\d)([\d\.]+)(?:;([\d\.]+))*&quot;
+  mstr=re.subn(r&quot;\#.+&quot;,&quot;&quot;,mstr)[0]
+  c=re.findall(cp,mstr)
+  for i in range(0,len(c),1):
+    x=&#39;C_&#39;+{&#39;L&#39;:&#39;LOW&#39;,&#39;M&#39;:&#39;MID&#39;,&#39;H&#39;:&#39;HIGH&#39;}[c[i][0]]+&#39;_&#39;+c[i][2]
+    if c[i][1]: x+=&#39;_HALF&#39;
+    p = GPIO.PWM(40,globals()[x])
+    p.start(80) # dc
+    time.sleep(float(c[i][3]))
+    p.stop()
+    if c[i][4]: time.sleep(float(c[i][4]))
+    else: time.sleep(0.1)
+
+try:
+  playstr(&quot;&quot;&quot;
+
+ #低音
+  L1.3 L2.3 L3.3 L4.3 L5.3 L6.3 L7.3
+ #中音
+  M1.3 M2.3 M3.3 M4.3 M5.3 M6.3 M7.3
+ #高音
+  H1.3 H2.3 H3.3 H4.3 H5.3 H6.3 H7.3
+ #警笛
+  M1.5 L5.6 M1.5 L5.6
+ #一万个舍不得
+  M3.1 M3.2 M3.1 M3.2 M5.2;0M3.2 M2.3;1
+  M2.2;0 M2.2;.2 M2.2;0 M2.3;0 M5.2;0 M2.1 M3.2
+
+  &quot;&quot;&quot;)
+except KeyboardInterrupt:
+  pass
+
+GPIO.cleanup() # 拉完屎擦屁股是一个好习惯
+</code></pre>
+<p>附录：音调对应频率 <a href="http://wenku.baidu.com/link?url=eNVdYbhCs3CDbDgPeJgLIZks8yXlaYPbUOFkK2xbL7tvfKUI8DL2CdqK01qK_Fsti4erg0RUMlUN1Re1pwrBnhTmn1enFthR-RRRHUCYthO">http://wenku.baidu.com/link?url=eNVdYbhCs3CDbDgPeJgLIZks8yXlaYPbUOFkK2xbL7tvfKUI8DL2CdqK01qK_Fsti4erg0RUMlUN1Re1pwrBnhTmn1enFthR-RRRHUCYthO</a></p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp53u.pjh.html">树莓派实现用pi用户自动登录</a></p>
+</li>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
+</li>
+<li><p><a href="kh4hp5b6.kdr.html">树莓派配置wifi热点</a></p>
+</li>
+<li><p><a href="kh4hp5fb.n3u.html">把树莓派的存储空间拓展到整张TF卡中</a></p>
+</li>
+<li><p><a href="88181.html">树莓派配置收发邮件</a></p>
+</li>
+<li><p><a href="88180.html">树莓派配置wifi</a></p>
+</li>
+<li><p><a href="58826.html">树莓派无源蜂鸣器发声实验</a></p>
+</li>
+<li><p><a href="58825.html">找树莓派的内网ip</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh8hr1ki.4fs.html">mac ssh透过代理连接</a></p>
+</li>
+<li><p><a href="kh4hp4ut.68c.html">华为等国产手机rem宽度超过实际宽度</a></p>
+</li>
+<li><p><a href="kh4hp4vo.i3t.html">word文件命令行打印</a></p>
+</li>
+<li><p><a href="kh4hp4xg.2sb.html">sass变量和继承类写法</a></p>
+</li>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp569.gcj.html">nodejs俄罗斯方块</a></p>
+</li>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
+</li>
+<li><p><a href="kh4hp5b6.kdr.html">树莓派配置wifi热点</a></p>
+</li>
+<li><p><a href="kh4hp5by.jnt.html">webpack使用外部资源</a></p>
+</li>
+<li><p><a href="kh4hp5cd.lmo.html">TIME_WAIT过多</a></p>
+</li>
+<li><p><a href="kh4hp5e1.ou.html">git 设置代理服务器</a></p>
+</li>
+<li><p><a href="kh4ib7jk.t1.html">mongodb2.4 添加用户</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88094.html">随机取某个概率区间的代码</a></p>
+</li>
+<li><p><a href="87999.html">bootstrap modal弹框导致ie无法获取焦点</a></p>
+</li>
+<li><p><a href="81007.html">html表格导出csv文件并下载</a></p>
+</li>
+<li><p><a href="79547.html">前端性能观察器</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58826";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

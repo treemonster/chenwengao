@@ -1,0 +1,126 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>win7查看当天第一次开机时间</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">win7查看当天第一次开机时间</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #2360dc">wmi</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>windows总是把一些用得到的功能藏得很深。。比如看开机时间，为了不用再特地进事件管理器找开机时间，我写了一个mshta脚本用于自动获取。</p>
+<p>保存为<code>a.hta</code>。</p>
+<pre><code class="language-html">&lt;!--
+author: treemonster&lt;https://treemonster.github.io/&gt;
+date: 2017-02-22
+--&gt;
+&lt;script language=&quot;Javascript&quot;&gt;
+lastdate=(new Date).getDate();
+lasttime=null;
+function slice(a,b,c){ return Array.prototype.slice.call(a,b,c);}
+window.checktime=function(a){
+  var m;
+  a.replace(/^(....)(..)(..)(..)(..)(..)/g,function(){
+    var a=arguments;
+    if(a[3]==lastdate) return lasttime=a;
+    m=true;
+    a=lasttime;
+    a[4]=a[4]*1+8; // China time zone +8 hours
+    alert(&#39;today open time: &#39;+slice(a,4,7).join(&#39;:&#39;));
+    window.close();
+  });
+  return m;
+};
+&lt;/script&gt;
+
+&lt;script language=&quot;VBScript&quot;&gt;
+Set objWMIService=GetObject(&quot;winmgmts://./root/cimv2&quot;)
+Set li = objWMIService.ExecQuery(&quot;Select * from Win32_NTLogEvent where Logfile=&#39;Security&#39;&quot;,,16)
+For Each EventLogEntry in li
+  if window.checktime(EventLogEntry.TimeGenerated) then
+    exit for
+  end if
+next
+&lt;/script&gt;</code></pre>
+<hr>
+<p>msdn参考（恶心的wmi）：</p>
+<p><a href="https://msdn.microsoft.com/en-us/library/aa394593(v=vs.85).aspx">https://msdn.microsoft.com/en-us/library/aa394593(v=vs.85).aspx</a></p>
+<p><a href="https://msdn.microsoft.com/en-us/library/aa393866(v=vs.85).aspx">https://msdn.microsoft.com/en-us/library/aa393866(v=vs.85).aspx</a></p>
+<p><a href="https://msdn.microsoft.com/en-us/library/system.diagnostics.eventlogentry_properties(v=vs.110).aspx">https://msdn.microsoft.com/en-us/library/system.diagnostics.eventlogentry_properties(v=vs.110).aspx</a></p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><a href="58837.html">win7查看当天第一次开机时间</a></li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4ut.68c.html">华为等国产手机rem宽度超过实际宽度</a></p>
+</li>
+<li><p><a href="kh4hp4wj.uv.html">nginx 子域名对应文件夹</a></p>
+</li>
+<li><p><a href="kh4hp4xg.2sb.html">sass变量和继承类写法</a></p>
+</li>
+<li><p><a href="kh4hp50h.0q9.html">curl用法</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp52g.1h.html">nodejs本地双向代理 端口转发</a></p>
+</li>
+<li><p><a href="kh4hp52w.ibe.html">ios13 vpn 能连接但不能传数据问题解决</a></p>
+</li>
+<li><p><a href="kh4hp54u.a47.html">html5 全屏代码</a></p>
+</li>
+<li><p><a href="kh4hp57l.nw.html">mongodb 批量修改字段语句</a></p>
+</li>
+<li><p><a href="kh4hp58c.8w7.html">模拟307跳转情况</a></p>
+</li>
+<li><p><a href="kh4hp58r.537.html">webrtc服务搭建</a></p>
+</li>
+<li><p><a href="kh4hp596.lj.html">webrtc泄漏本地ip信息</a></p>
+</li>
+<li><p><a href="kh4hp5cd.lmo.html">TIME_WAIT过多</a></p>
+</li>
+<li><p><a href="kh4hp5dm.5i.html">git记住/删除账号密码</a></p>
+</li>
+<li><p><a href="kh4hp5eg.y8e.html"> ssl 证书生成方式</a></p>
+</li>
+<li><p><a href="75739.html">平面旋转</a></p>
+</li>
+<li><p><a href="69351.html">缓存才是优化的终极手段</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58837";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

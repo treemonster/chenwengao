@@ -1,0 +1,140 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>配置mysql ssl连接</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">配置mysql ssl连接</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #81c3b0">mysql</span><span class="tagz" style="background: #f9d5c1">ssl</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><h3 id="0x1-生成ssl的各种密钥：">0x1 生成ssl的各种密钥：</h3>
+<pre><code class="language-sh">mkdir -p /website/userdata/mysql-ca
+cd /website/userdata/mysql-ca
+# 服务端密钥
+openssl genrsa 2048 &gt; ca-key.pem
+openssl req -sha1 -new -x509 -nodes -days 3650 -key ca-key.pem &gt; ca-cert.pem
+openssl req -sha1 -newkey rsa:2048 -days 730 -nodes -keyout server-key.pem &gt; server-req.pem
+openssl rsa -in server-key.pem -out server-key.pem
+openssl x509 -sha1 -req -in server-req.pem -days 730 -CA ca-cert.pem -CAkey ca-key.pem -set_serial 01 &gt; server-cert.pem
+
+# 客户端密钥
+openssl req -sha1 -newkey rsa:2048 -days 730 -nodes -keyout client-key.pem &gt; client-req.pem
+openssl rsa -in client-key.pem -out client-key.pem
+openssl x509 -sha1 -req -in client-req.pem -days 730 -CA ca-cert.pem -CAkey ca-key.pem -set_serial 01 &gt; client-cert.pem</code></pre>
+<h3 id="0x2-修改mysqlcnf">0x2 修改mysql.cnf</h3>
+<pre><code class="language-conf">[client]
+# client节增加这些配置
+ssl-ca=/website/userdata/mysql-ca/ca-cert.pem
+ssl-cert=/website/userdata/mysql-ca/client-cert.pem
+ssl-key=/website/userdata/mysql-ca/client-key.pem
+
+[mysqld]
+# mysqld节增加这些配置
+ssl-cipher=DHE-RSA-AES256-SHA
+ssl-ca=/website/userdata/mysql-ca/ca-cert.pem
+ssl-cert=/website/userdata/mysql-ca/server-cert.pem
+ssl-key=/website/userdata/mysql-ca/server-key.pem
+</code></pre>
+<h3 id="0x3-重启mysqld服务">0x3 重启mysqld服务</h3>
+<pre><code class="language-sh">xdelve service.restart mysqld</code></pre>
+<h3 id="0x4-给root用户ssl连接权限">0x4 给root用户ssl连接权限</h3>
+<pre><code class="language-sh"># 在mysql客户端内操作
+GRANT ALL PRIVILEGES ON *.* TO root@&#39;%&#39; IDENTIFIED BY * REQUIRE SSL;
+flush PRIVILEGES;</code></pre>
+<h3 id="0x5-navicat配置">0x5 navicat配置</h3>
+<p>下载<code>client-cert.pem</code>,<code>ca-cert.pem</code>,<code>client-key.pem</code>这三个文件到本地电脑，编辑mysql连接配置</p>
+<p><img src="/uploads/2017/10/08/86/newup-facb5aff1e3ac44a77cc7446b008fa7ef9.png" alt="/uploads/2017/10/08/86//newup-facb5aff1e3ac44a77cc7446b008fa7ef9.png @400x"></p>
+<p>搞定</p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp51g.d79.html">SSL certificate problem: self signed certificate in certificate chain</a></p>
+</li>
+<li><p><a href="kh4hp5eg.y8e.html"> ssl 证书生成方式</a></p>
+</li>
+<li><p><a href="88229.html">mysql导出csv文件</a></p>
+</li>
+<li><p><a href="88172.html">mysql选取内容导出到文件</a></p>
+</li>
+<li><p><a href="87991.html">数据库清理优化</a></p>
+</li>
+<li><p><a href="83845.html">配置mysql ssl连接</a></p>
+</li>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
+</li>
+<li><p><a href="72645.html">记一次mysql死锁的教训</a></p>
+</li>
+<li><p><a href="61832.html">golang 实现mysql Quote方法</a></p>
+</li>
+<li><p><a href="58819.html">mysql where限制子查询结果</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="khalg5ks.g.html">css3自定义滚动条样式</a></p>
+</li>
+<li><p><a href="kh8hr1ki.4fs.html">mac ssh透过代理连接</a></p>
+</li>
+<li><p><a href="kh4hp4v9.83f.html">安卓文字偏上，文字顶部被遮罩</a></p>
+</li>
+<li><p><a href="kh4hp4ya.6e.html">ipsec vpn 添加新账号</a></p>
+</li>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp4zl.csd.html">css3 文字渐变色</a></p>
+</li>
+<li><p><a href="kh4hp52g.1h.html">nodejs本地双向代理 端口转发</a></p>
+</li>
+<li><p><a href="kh4hp55c.9dm.html">搜索命令整理</a></p>
+</li>
+<li><p><a href="kh4hp58r.537.html">webrtc服务搭建</a></p>
+</li>
+<li><p><a href="kh4hp5ct.4ys.html">putty使用http代理连接服务器</a></p>
+</li>
+<li><p><a href="kh4hp5d7.f8n.html">git配置服务端支持http认证</a></p>
+</li>
+<li><p><a href="88328.html">python下载文件，带进度条控制</a></p>
+</li>
+<li><p><a href="88128.html">centos7 开放或者关闭端口</a></p>
+</li>
+<li><p><a href="87999.html">bootstrap modal弹框导致ie无法获取焦点</a></p>
+</li>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="83845";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

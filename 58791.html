@@ -1,0 +1,190 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>nodejs那恶心的stream.Readable</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">nodejs那恶心的stream.Readable</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #671a0d">nodejs</span><span class="tagz" style="background: #f7b44c">stream</span><span class="tagz" style="background: #500f1c">readable</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>今天在写一个nodejs的服务器组件，由于配置信息需要调用者来设定，所以必须依赖某种外部输入。命令行参数传复杂的数据格式坑太多不想踩；从外部文件读取要由调用者先创建文件然后再删除会增加一些逻辑，所以也不好。最终我决定从stdin直接读取json格式的配置，因此接触到了蛋疼无比的stream.Readable。</p>
+<p>最开始是这样写的：</p>
+<pre><code class="language-javascript">var r=process.stdin;
+var b=new Buffer([]);
+r.on(&#39;data&#39;,function(buf){
+  b=Buffer.concat([b,buf]);
+});
+r.on(&#39;end&#39;,function(){
+  try{
+    var config=JSON.parse(b+&#39;&#39;);
+  }catch(e){
+    // json解析失败，该报错报错
+    console.log(e);
+    process.exit();
+    return;
+  }
+  // 到这里终于获取到了输入stdin的配置内容。。
+  // TODO ...
+});
+</code></pre>
+<p>然后觉得这些代码还缺少必要的错误处理，而且业务逻辑写到读取配置文件的代码段中很难看，于是又改成了下面这样：</p>
+<pre><code class="language-javascript">var p=new Promise(function(resolve,reject){
+  var maxlen=1024; // 读入流的最大程度
+  var timeout=5000; // 等待读取完成的最大时间
+  setTimeout(function(){
+    reject(&#39;timeout&#39;);
+  },timeout);
+
+  var r=process.stdin;
+  var b=new Buffer([]);
+  r.on(&#39;data&#39;,function(buf){
+    b=Buffer.concat([b,buf]);
+    if(b.length&gt;maxlen)reject(&#39;stdin too long&#39;);
+  });
+  r.on(&#39;end&#39;,function(){
+    try{
+      resolve(JSON.parse(b+&#39;&#39;));
+    }catch(e){
+      reject(&#39;stdin format error&#39;);
+    }
+  });
+}).then(function(config){
+  // 正常业务逻辑
+},function(reason){
+  // 报错
+  console.log(reason);
+  process.exit();
+});
+</code></pre>
+<p>到这里功能上已经满足了，但是每次读取流的操作都要写这一坨实在痛苦。所以我对读取的功能进行api设计，并封装成一个名为combine的模块。</p>
+<p>我理想的调用方式如下</p>
+<pre><code class="language-javascript">var combine=require(&#39;combine&#39;);
+
+// 设定必要参数
+combine({ maxlen: 1024, timeout: 5000, type: &#39;json&#39; })
+// 解析输入流
+.parse(process.stdin)
+// 解析完成
+.then(function(config){
+  // 正常业务逻辑
+},function(reason){
+  // 报错
+});</code></pre>
+<p>combine.js代码见 <a href="https://www.xdelve.com/uploads/files/combine.js">https://www.xdelve.com/uploads/files/combine.js</a></p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp50y.c3p.html">nginx用域名来转发请求</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp52g.1h.html">nodejs本地双向代理 端口转发</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hp569.gcj.html">nodejs俄罗斯方块</a></p>
+</li>
+<li><p><a href="kh4hp58r.537.html">webrtc服务搭建</a></p>
+</li>
+<li><p><a href="kh4hp5eg.y8e.html"> ssl 证书生成方式</a></p>
+</li>
+<li><p><a href="58838.html">nodejs建立多级目录</a></p>
+</li>
+<li><p><a href="58821.html">linux 上配置node路径</a></p>
+</li>
+<li><p><a href="58813.html">nodejs处理gb2312编码</a></p>
+</li>
+<li><p><a href="58798.html">nodejs遍历文件夹</a></p>
+</li>
+<li><p><a href="58793.html">读取Blob的内容实体</a></p>
+</li>
+<li><p><a href="58791.html">nodejs那恶心的stream.Readable</a></p>
+</li>
+<li><p><a href="58787.html">Promise复习，nodejs异步建立多级目录</a></p>
+</li>
+<li><p><a href="58783.html">异步并发也要保证原子性</a></p>
+</li>
+<li><p><a href="58781.html">简易命令行解析器</a></p>
+</li>
+<li><p><a href="58780.html">Promise才是javascript的正统队列</a></p>
+</li>
+<li><p><a href="58779.html">callback =&gt; Promise.then</a></p>
+</li>
+<li><p><a href="58778.html">简易转义字符转实体字符方法</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh8hr1ki.4fs.html">mac ssh透过代理连接</a></p>
+</li>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp50h.0q9.html">curl用法</a></p>
+</li>
+<li><p><a href="kh4hp53u.pjh.html">树莓派实现用pi用户自动登录</a></p>
+</li>
+<li><p><a href="kh4hp54u.a47.html">html5 全屏代码</a></p>
+</li>
+<li><p><a href="kh4hp55s.p7g.html">判断变量是否 0 或者 &#39;0&#39;</a></p>
+</li>
+<li><p><a href="kh4hp569.gcj.html">nodejs俄罗斯方块</a></p>
+</li>
+<li><p><a href="kh4hp5a0.gjt.html">单页应用的单向数据流的流程图</a></p>
+</li>
+<li><p><a href="kh4hp5ct.4ys.html">putty使用http代理连接服务器</a></p>
+</li>
+<li><p><a href="kh4hp5dm.5i.html">git记住/删除账号密码</a></p>
+</li>
+<li><p><a href="kh4hp5eg.y8e.html"> ssl 证书生成方式</a></p>
+</li>
+<li><p><a href="kh4hp5fb.n3u.html">把树莓派的存储空间拓展到整张TF卡中</a></p>
+</li>
+<li><p><a href="88328.html">python下载文件，带进度条控制</a></p>
+</li>
+<li><p><a href="88225.html">mac搜索局域网内的主机</a></p>
+</li>
+<li><p><a href="88153.html">猴子选大王算法问题</a></p>
+</li>
+<li><p><a href="87823.html">youku电脑版跳过广告代码</a></p>
+</li>
+<li><p><a href="69351.html">缓存才是优化的终极手段</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58791";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

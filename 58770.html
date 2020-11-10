@@ -1,0 +1,245 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>使用eval来修改上下文的变量</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">使用eval来修改上下文的变量</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #de9b9e">javascript</span><span class="tagz" style="background: #2eed1f">eval</span><span class="tagz" style="background: #2c85db">缩进</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>eval是一个神奇的方法，可以用它来动态执行代码，以此达到常规办法做不到的事情。本文介绍使用eval来获取和修改上下文变量的办法。 </p>
+<p>请先看下面的代码： </p>
+<pre><code class="language-javascript">function A(){
+  var i=0;
+  this.set=function(_i){
+    i=_i;
+  };
+  this.get=function(){
+    return i;
+  };
+}
+
+var a=new A;
+a.set(2);
+console.log(a.get());</code></pre>
+<p>直接用this.*来赋值会导致需要增加一层的缩进。为了减少缩进，通常我会使用prototype来写。但是prototype中的方法获取不到A内部的i，以往我会把var i改成this.i，于是代码就变成了下面这样： </p>
+<pre><code class="language-javascript">function A(){
+  this.i=0;
+}
+A.prototype.set=function(_i){
+  this.i=_i;
+};
+A.prototype.get=function(){
+  return this.i;
+};
+
+var a=new A;
+a.set(2);
+console.log(a.get());</code></pre>
+<p>这样出现了一个问题，A的实例会把i作为属性暴露在外。虽然可以使用其他方式来实现外部代码无法读写i，但是我希望在A内部用局部变量的形式来保护i，这是最初需要实现的逻辑。 </p>
+<p>我想到了eval，它的用途是动态执行代码，而且被执行代码还可以获取到当前环境上下文的所有变量。那么只需要在A内部提供一个执行eval代码的接口给外部，外部代码就能方便的读写内部的东西了。 </p>
+<pre><code class="language-javascript">function A(){
+  var i=0;
+
+  // priv方法用于读写上下文变量
+  this.priv=function(k,v){
+    return eval(k+(arguments.length&gt;1?(&#39;=&#39;+v):&#39;&#39;));
+  };
+}
+A.prototype.set=function(_i){
+  var p=this.priv;
+  p(&#39;i&#39;,_i);
+};
+A.prototype.get=function(){
+  var p=this.priv;
+  return p(&#39;i&#39;);
+};
+
+var a=new A;
+a.set(2);
+console.log(a.get(),a.priv); // 输出2,priv方法
+</code></pre>
+<p>但是到这一步没有完整，因为对外暴露了priv接口，外部程序还是可以对A实例的局部变量i进行读写，所以还需要一个代理层来屏蔽这个接口。 </p>
+<pre><code class="language-javascript">
+function A1(){
+  var a=new A;
+  for(var x in a)
+    // 复制除了priv以外的属性到自身
+    if(x!==&#39;priv&#39;)(function(x,t){
+      t[x]=function(){
+        return a[x].apply(a,arguments);
+      };
+    })(x,this);
+  // 返回的是a对象的影分身，具备a的一切属性，但是把priv给屏蔽了
+};
+
+m=new A1();
+m.set(12);
+console.log(m.get(),m.priv); // 输出12, undefined</code></pre>
+<p>到此算是大功告成了，以下是完整的例子，可以在浏览器控制台查看结果。</p>
+<pre><code class="language-html">&lt;meta charset=&#39;utf-8&#39; /&gt;
+&lt;script&gt;
+function A(){
+  var i=0;
+
+  // priv方法用于读写上下文变量
+  this.priv=function(k,v){
+    return eval(k+(arguments.length&gt;1?(&#39;=&#39;+v):&#39;&#39;));
+  };
+}
+A.prototype.set=function(_i){
+  var p=this.priv;
+  p(&#39;i&#39;,_i);
+};
+A.prototype.get=function(){
+  var p=this.priv;
+  return p(&#39;i&#39;);
+};
+
+function A1(){
+  var a=new A;
+  for(var x in a)
+    // 复制除了priv以外的属性到自身
+    if(x!==&#39;priv&#39;)(function(x,t){
+      t[x]=function(){
+        return a[x].apply(a,arguments);
+      };
+    })(x,this);
+  // 返回的是a对象的影分身，具备a的一切属性，但是把priv给屏蔽了
+};
+
+m=new A1();
+m.set(12);
+console.log(m.get(),m.priv); // 输出12, undefined
+&lt;/script&gt;</code></pre>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp55s.p7g.html">判断变量是否 0 或者 &#39;0&#39;</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="87823.html">youku电脑版跳过广告代码</a></p>
+</li>
+<li><p><a href="58847.html">解密某个js文件</a></p>
+</li>
+<li><p><a href="58843.html">破解百度云下载链接</a></p>
+</li>
+<li><p><a href="58829.html">让js支持带命名的正则表达式</a></p>
+</li>
+<li><p><a href="58822.html">jshtml模板引擎</a></p>
+</li>
+<li><p><a href="58818.html">json2html源码</a></p>
+</li>
+<li><p><a href="58793.html">读取Blob的内容实体</a></p>
+</li>
+<li><p><a href="58786.html">判断一个object是否HTMLDom</a></p>
+</li>
+<li><p><a href="58781.html">简易命令行解析器</a></p>
+</li>
+<li><p><a href="58780.html">Promise才是javascript的正统队列</a></p>
+</li>
+<li><p><a href="58779.html">callback =&gt; Promise.then</a></p>
+</li>
+<li><p><a href="58777.html">nodejs异步回调的并发控制</a></p>
+</li>
+<li><p><a href="58773.html">低版本IE命名函数表达式bug</a></p>
+</li>
+<li><p><a href="58772.html">让重复调用只有第一次生效</a></p>
+</li>
+<li><p><a href="58771.html">简易JSON函数封装</a></p>
+</li>
+<li><p><a href="58770.html">使用eval来修改上下文的变量</a></p>
+</li>
+<li><p><a href="58767.html">seajs同步加载依赖的实现和弊病</a></p>
+</li>
+<li><p><a href="58766.html">html5页面全屏方法</a></p>
+</li>
+<li><p><a href="58765.html">给滚动条置顶添加过渡动画</a></p>
+</li>
+<li><p><a href="58764.html">m秒内最多n次的问题</a></p>
+</li>
+<li><p><a href="58762.html">让代码扁平化</a></p>
+</li>
+<li><p><a href="58760.html">关于自动加载的问题</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="khbe1zve.29n.html">css多行文本超出截断显示省略号</a></p>
+</li>
+<li><p><a href="kh4hp4vo.i3t.html">word文件命令行打印</a></p>
+</li>
+<li><p><a href="kh4hp4zl.csd.html">css3 文字渐变色</a></p>
+</li>
+<li><p><a href="kh4hp501.g4a.html">npm远程服务器某些配置不兼容代理的解决办法</a></p>
+</li>
+<li><p><a href="kh4hp50y.c3p.html">nginx用域名来转发请求</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp54d.xb.html">git删除远程分支</a></p>
+</li>
+<li><p><a href="kh4hp5ae.oak.html">dd备份/还原</a></p>
+</li>
+<li><p><a href="kh4hp5by.jnt.html">webpack使用外部资源</a></p>
+</li>
+<li><p><a href="kh4hp5ct.4ys.html">putty使用http代理连接服务器</a></p>
+</li>
+<li><p><a href="kh4hp5d7.f8n.html">git配置服务端支持http认证</a></p>
+</li>
+<li><p><a href="kh4hp5dm.5i.html">git记住/删除账号密码</a></p>
+</li>
+<li><p><a href="kh4hp5fb.n3u.html">把树莓派的存储空间拓展到整张TF卡中</a></p>
+</li>
+<li><p><a href="88180.html">树莓派配置wifi</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88153.html">猴子选大王算法问题</a></p>
+</li>
+<li><p><a href="87218.html">感谢beego陪伴我度过那不靠谱的半年</a></p>
+</li>
+<li><p><a href="83845.html">配置mysql ssl连接</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58770";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

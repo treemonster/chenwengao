@@ -1,0 +1,171 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>Promise复习，nodejs异步建立多级目录</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">Promise复习，nodejs异步建立多级目录</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #671a0d">nodejs</span><span class="tagz" style="background: #a5a3f0">Promise</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>因为nodejs的mkdir和mkdirSync本身都不能一次性建立多级目录，所以只能自行编写代码了。 </p>
+<p>同步模式的递归建立可以写成这样： </p>
+<pre><code class="language-javascript">var fs=require(&#39;fs&#39;);
+var path=require(&#39;path&#39;);
+function mkdirSync(dir){
+  var dirlist=path.resolve(dir).split(path.sep);
+  var level=0;
+  // 容错建立
+  while(dirlist.length&gt;=level)try{
+    fs.mkdirSync(dirlist.slice(0,level++).join(path.sep));
+  }catch(e){}
+  try{
+    // 判断文件夹是否存在
+    if(!fs.statSync(dir).isDirectory())0();
+  }catch(e){
+    return false; // 建立失败
+  }
+  return true; // 建立成功
+}
+console.log(mkdirSync(&#39;/1/2/3/4/5/6/7/8&#39;)?&#39;success&#39;:&#39;fail&#39;);</code></pre>
+<hr>
+<p>异步模式也是需要依赖递归的，直接使用callback嵌套写法看上去代码很混乱，而使用Promise就很清晰了，因为Promise的thenable如果返回的是Promise对象，会让执行队列等待这个Promise完成。这种方式可以想象成是一个异步的阻塞，既确保了目录建立的顺序，也避免了同步建立导致整个线程被阻塞。 </p>
+<pre><code class="language-javascript">var fs=require(&#39;fs&#39;);
+var path=require(&#39;path&#39;);
+function mkdir(dir){
+  var dirlist=path.resolve(dir).split(path.sep);
+  return function callee(last,level){
+    return dirlist.length&gt;=level?callee(last.then(function(){
+      return new Promise(function(resolve){
+        fs.mkdir(dirlist.slice(0,level).join(path.sep),resolve);
+      });
+    }),level+1):last.then(function(){
+      return new Promise(function(resolve,reject){
+        fs.stat(dir,function(e,stats){
+          if(e || !stats.isDirectory())
+            throw e||&#39;directory not exists&#39;; // 建立失败
+          resolve(); // 建立成功
+        });
+      });
+    });
+  }(Promise.resolve(),0);
+};
+mkdir(&#39;/a/b/c/d/e/f&#39;).then(function(){
+  console.log(&#39;success&#39;);
+},function(){
+  console.log(&#39;fail&#39;);
+});</code></pre>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp52g.1h.html">nodejs本地双向代理 端口转发</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hp569.gcj.html">nodejs俄罗斯方块</a></p>
+</li>
+<li><p><a href="kh4hp58r.537.html">webrtc服务搭建</a></p>
+</li>
+<li><p><a href="kh4hp5eg.y8e.html"> ssl 证书生成方式</a></p>
+</li>
+<li><p><a href="58838.html">nodejs建立多级目录</a></p>
+</li>
+<li><p><a href="58821.html">linux 上配置node路径</a></p>
+</li>
+<li><p><a href="58813.html">nodejs处理gb2312编码</a></p>
+</li>
+<li><p><a href="58798.html">nodejs遍历文件夹</a></p>
+</li>
+<li><p><a href="58793.html">读取Blob的内容实体</a></p>
+</li>
+<li><p><a href="58791.html">nodejs那恶心的stream.Readable</a></p>
+</li>
+<li><p><a href="58787.html">Promise复习，nodejs异步建立多级目录</a></p>
+</li>
+<li><p><a href="58783.html">异步并发也要保证原子性</a></p>
+</li>
+<li><p><a href="58781.html">简易命令行解析器</a></p>
+</li>
+<li><p><a href="58780.html">Promise才是javascript的正统队列</a></p>
+</li>
+<li><p><a href="58779.html">callback =&gt; Promise.then</a></p>
+</li>
+<li><p><a href="58778.html">简易转义字符转实体字符方法</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4v9.83f.html">安卓文字偏上，文字顶部被遮罩</a></p>
+</li>
+<li><p><a href="kh4hp4wj.uv.html">nginx 子域名对应文件夹</a></p>
+</li>
+<li><p><a href="kh4hp4x0.yw.html">pip安装nltk临时使用国内源</a></p>
+</li>
+<li><p><a href="kh4hp4ya.6e.html">ipsec vpn 添加新账号</a></p>
+</li>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp54d.xb.html">git删除远程分支</a></p>
+</li>
+<li><p><a href="kh4hz03h.xh.html">python 用摄像头拍照并写入文件</a></p>
+</li>
+<li><p><a href="kh4hp574.hum.html">heroku登陆cli</a></p>
+</li>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
+</li>
+<li><p><a href="kh4hp5bk.27.html">cdn资源列表</a></p>
+</li>
+<li><p><a href="kh4hp5d7.f8n.html">git配置服务端支持http认证</a></p>
+</li>
+<li><p><a href="88225.html">mac搜索局域网内的主机</a></p>
+</li>
+<li><p><a href="88172.html">mysql选取内容导出到文件</a></p>
+</li>
+<li><p><a href="87823.html">youku电脑版跳过广告代码</a></p>
+</li>
+<li><p><a href="87218.html">感谢beego陪伴我度过那不靠谱的半年</a></p>
+</li>
+<li><p><a href="83845.html">配置mysql ssl连接</a></p>
+</li>
+<li><p><a href="79146.html">linux 批量替换文本内容</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58787";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

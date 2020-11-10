@@ -1,0 +1,135 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>gb2312字符串转utf-8</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">gb2312字符串转utf-8</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #21cc28">golang</span><span class="tagz" style="background: #f2f9de">gb2312</span><span class="tagz" style="background: #e9e2aa">utf-8</span><span class="tagz" style="background: #f3d9a3">编码转换</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>做网站采集的时候见到gb2312这种编码的页面总会很无语。为什么现在还有用gb2312来显示内容的网站，utf-8不是早就统治世界了吗？好在已有成熟的现成解决方案了，我就做一回伸手党吧。</p>
+<p>为了验证确实把gb2312代码转为了utf-8，所以这里先生成一个gb2312内容的文件：</p>
+<pre><code class="language-sh">curl http://www.shanghai.gov.cn/nw2/nw2314/nw2315/nw4411/index.html&gt;sh.txt</code></pre>
+<p>需要安装 <strong>golang.org/x/text</strong> 这个库，不过我没有翻墙工具，所以我从github上下载代码，并放到<strong>src/golang.org/x/text</strong> 目录。</p>
+<pre><code class="language-sh">go get github.com/golang/text</code></pre>
+<p>以下是调试代码，第一次输出的内容中文部分是乱码，延迟3秒输出转换之后的正确内容。</p>
+<pre><code class="language-go">package main
+
+import (
+    &quot;bytes&quot;
+    &quot;golang.org/x/text/encoding/simplifiedchinese&quot;
+    &quot;golang.org/x/text/transform&quot;
+    &quot;io/ioutil&quot;
+    &quot;fmt&quot;
+    &quot;time&quot;
+)
+
+
+func main(){
+  gbkcodes,\_  := ioutil.ReadFile(&quot;sh.txt&quot;)
+  fmt.Println(string(gbkcodes))
+  fmt.Println(&quot;直接转string会乱码↑↑↑↑，稍等3秒见证奇迹。。&quot;)
+  time.Sleep(3e9)
+  t := transform.NewReader(bytes.NewReader(gbkcodes), simplifiedchinese.GBK.NewDecoder())
+  utf8codes,\_ := ioutil.ReadAll(t)
+  fmt.Println(string(utf8codes))
+
+}
+</code></pre>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="87218.html">感谢beego陪伴我度过那不靠谱的半年</a></p>
+</li>
+<li><p><a href="81007.html">html表格导出csv文件并下载</a></p>
+</li>
+<li><p><a href="61832.html">golang 实现mysql Quote方法</a></p>
+</li>
+<li><p><a href="60572.html">golang 限制goroutine并行个数</a></p>
+</li>
+<li><p><a href="60427.html">golang 解压zip文件</a></p>
+</li>
+<li><p><a href="59592.html">gb2312字符串转utf-8</a></p>
+</li>
+<li><p><a href="58854.html">otto踩坑：substr()遇到utf8出错</a></p>
+</li>
+<li><p><a href="58853.html">otto踩坑：vm.Interrupt导致goroutine无限增加</a></p>
+</li>
+<li><p><a href="58844.html">http.ResponseWriter.Header().Set()不是线程安全的！</a></p>
+</li>
+<li><p><a href="58839.html">利用golang的反射实现类似js中的apply方法</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh8hr1ki.4fs.html">mac ssh透过代理连接</a></p>
+</li>
+<li><p><a href="kh4hp4vo.i3t.html">word文件命令行打印</a></p>
+</li>
+<li><p><a href="kh4hp4x0.yw.html">pip安装nltk临时使用国内源</a></p>
+</li>
+<li><p><a href="kh4hp501.g4a.html">npm远程服务器某些配置不兼容代理的解决办法</a></p>
+</li>
+<li><p><a href="kh4hp57y.fpf.html">npm设置仓库地址和代理</a></p>
+</li>
+<li><p><a href="kh4hp58c.8w7.html">模拟307跳转情况</a></p>
+</li>
+<li><p><a href="kh4hp596.lj.html">webrtc泄漏本地ip信息</a></p>
+</li>
+<li><p><a href="kh4hp5as.pb.html">linux自启动/禁止自启动服务</a></p>
+</li>
+<li><p><a href="kh4hp5by.jnt.html">webpack使用外部资源</a></p>
+</li>
+<li><p><a href="kh4hp5cd.lmo.html">TIME_WAIT过多</a></p>
+</li>
+<li><p><a href="kh4hp5e1.ou.html">git 设置代理服务器</a></p>
+</li>
+<li><p><a href="88229.html">mysql导出csv文件</a></p>
+</li>
+<li><p><a href="88180.html">树莓派配置wifi</a></p>
+</li>
+<li><p><a href="88128.html">centos7 开放或者关闭端口</a></p>
+</li>
+<li><p><a href="87823.html">youku电脑版跳过广告代码</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="59592";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

@@ -1,0 +1,168 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>sendmail用nginx做代理</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">sendmail用nginx做代理</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #d0c8b4">sendmail</span><span class="tagz" style="background: #583b7c">centos发邮件</span><span class="tagz" style="background: #63d9e0">nginx代理</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>sendmail收件配置的限制比较繁琐，因此我使用nginx做反向代理控制收邮件。主要控制收件来源的频率，以及流量拦截，否则裸奔的sendmail还是比较危险的。</p>
+<p>首先把sendmail的端口改掉（原本29876的地方写的是smtp）：</p>
+<pre><code>DAEMON_OPTIONS(`Port=29876,Addr=0.0.0.0, Name=MTA)dnl</code></pre>
+<p>修改之后</p>
+<pre><code>m4 /etc/mail/sendmail.mc&gt;/etc/mail/sendmail.cf</code></pre>
+<p>并重启sendmail，sendmail配置可参考 <a href="https://www.xdelve.com/usershare/fb0044daf15b007bda187891b53d9d97/19dw.asp">https://www.xdelve.com/usershare/fb0044daf15b007bda187891b53d9d97/19dw.asp</a></p>
+<p>防火墙开启之后，对外开放的25端口交给nginx，29876作为内部端口使用。</p>
+<p>然后就是nginx的配置了，首先确定nginx的配置信息，核心模块是<code>--with-stream=dynamic</code>,<code>--with-stream_ssl_module</code>,<code>--with-mail=dynamic</code>,<code>--with-mail_ssl_module</code>：</p>
+<p><img src="/uploads/2017/12/05/59//newup-faacf6613ed9dd5a4f74c0c782b5ac44b5.png" alt="/uploads/2017/12/05/59//newup-faacf6613ed9dd5a4f74c0c782b5ac44b5.png"></p>
+<p>nginx的配置文件设置代理信息，暂时只做一个代理，不进行身份验证：</p>
+<p>加上这段，用于代理到内部邮件服务器：</p>
+<pre><code>
+load_module /usr/local/nginx/modules/ngx_stream_module.so;
+
+stream {
+    upstream smtp-server{
+        server xdelve.com:29876 weight=3;
+    }
+
+    server {
+        listen      2525;
+        proxy_pass  smtp-server;
+    }
+}
+
+mail {
+
+    # See /etc/nginx/sites-available/mail_auth
+    auth_http         localhost:8025/mail_auth/;
+
+    proxy             on;
+    proxy_pass_error_message on;
+
+    smtp_auth         none;
+    smtp_capabilities &quot;SIZE 10485760&quot; 8BITMIME ENHANCEDSTATUSCODES DSN ;
+
+
+    ssl        off;
+    xclient    off;
+
+    server {
+        listen     25;
+        protocol   smtp;
+    }
+}
+</code></pre>
+<p>以及这段，我加上了频率限制的条件，一分钟一个ip只允许发送一封邮件，以免被别人不断发送邮件攻击：</p>
+<pre><code>limit_req_zone $binary_remote_addr zone=mailfeq:10m rate=1r/m;
+
+server {
+    listen      8025;
+    server_name localhost;
+    charset     utf-8;
+
+    location ~ /mail_auth/ {
+        limit_req   zone=mailfeq;
+        add_header Auth-Status OK;
+        add_header Auth-Server 127.0.0.1;
+        add_header Auth-Port   2525;
+        empty_gif;
+        break;
+    }
+}
+</code></pre>
+<p>这两段加在对应位置，然后重启nginx即可。</p>
+<p>参考：</p>
+<ol>
+<li><a href="https://qiita.com/aya_eiya/items/dbd2ffff1f07a7bfedd6">https://qiita.com/aya_eiya/items/dbd2ffff1f07a7bfedd6</a></li>
+<li><a href="https://qiita.com/ma3ki/items/44dab8d93423978dd5d9">https://qiita.com/ma3ki/items/44dab8d93423978dd5d9</a></li>
+<li><a href="https://qiita.com/ma3ki/items/ce458f010a732af00179">https://qiita.com/ma3ki/items/ce458f010a732af00179</a></li>
+<li><a href="https://serverfault.com/questions/858067/unknown-directive-stream-in-etc-nginx-nginx-conf86">https://serverfault.com/questions/858067/unknown-directive-stream-in-etc-nginx-nginx-conf86</a></li>
+</ol>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="58820.html">sendmail 配置</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4ut.68c.html">华为等国产手机rem宽度超过实际宽度</a></p>
+</li>
+<li><p><a href="kh4hp4v9.83f.html">安卓文字偏上，文字顶部被遮罩</a></p>
+</li>
+<li><p><a href="kh4hp4wj.uv.html">nginx 子域名对应文件夹</a></p>
+</li>
+<li><p><a href="kh4hp4x0.yw.html">pip安装nltk临时使用国内源</a></p>
+</li>
+<li><p><a href="kh4hp4xg.2sb.html">sass变量和继承类写法</a></p>
+</li>
+<li><p><a href="kh4hp4zl.csd.html">css3 文字渐变色</a></p>
+</li>
+<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+</li>
+<li><p><a href="kh4hz03h.xh.html">python 用摄像头拍照并写入文件</a></p>
+</li>
+<li><p><a href="kh4hp55c.9dm.html">搜索命令整理</a></p>
+</li>
+<li><p><a href="kh4hp57y.fpf.html">npm设置仓库地址和代理</a></p>
+</li>
+<li><p><a href="kh4hp58c.8w7.html">模拟307跳转情况</a></p>
+</li>
+<li><p><a href="kh4hp5by.jnt.html">webpack使用外部资源</a></p>
+</li>
+<li><p><a href="kh4hp5e1.ou.html">git 设置代理服务器</a></p>
+</li>
+<li><p><a href="88181.html">树莓派配置收发邮件</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="87999.html">bootstrap modal弹框导致ie无法获取焦点</a></p>
+</li>
+<li><p><a href="83845.html">配置mysql ssl连接</a></p>
+</li>
+<li><p><a href="75739.html">平面旋转</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+<li><p><a href="72645.html">记一次mysql死锁的教训</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="88206";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

@@ -1,0 +1,131 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>mac 通过快捷键新建文档</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">mac 通过快捷键新建文档</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #140c1f">mac</span><span class="tagz" style="background: #e48a71">新建文件</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>由于mac系统没有自带新建文件的功能，以往我都是先打开一个文本编辑器，再把文件另存为目标位置。今天我尝试用applescript和系统快捷键实现一键新建的操作，省的每次都要这么麻烦。</p>
+<p>首先打开<strong>Automator</strong>，选择新建<strong>服务</strong>：</p>
+<p><img src="/uploads/2017/08/04/54/newup-fad9f1b9e8a182416b3764fda1ccd88bad.png" alt="@800x"></p>
+<p>搜索applescript，选取之后右边会出现代码输入框，把下面的代码贴入输入框：</p>
+<pre><code class="language-applescript">tell application &quot;Finder&quot;
+    try
+        set fd to (folder of the front window)
+        set dir to (POSIX path of (target of the front window as alias))
+    on error
+        set fd to desktop
+        set dir to (POSIX path of (desktop as alias))
+    end try
+    set i to 0
+    set ok to false
+    repeat until ok
+        set fn0 to &quot;untitled&quot;
+        if i &gt; 0 then set fn0 to fn0 &amp; &quot;-&quot; &amp; i
+        set fn0 to fn0 &amp; &quot;.txt&quot;
+        set fn to dir &amp; fn0
+        try
+            set sh to do shell script &quot;cat &quot; &amp; fn
+        on error
+            set ok to true
+        end try
+        set i to i + 1
+    end repeat
+    do shell script &quot;touch &quot; &amp; fn
+    select the file fn0 in fd
+end tell</code></pre>
+<p>代码输入框上面的<strong>服务收到</strong>这一行，切换为<code>没有输入</code>，位于选择<code>Finder</code>。</p>
+<p>保存为 <strong>新建文档</strong>。</p>
+<p><img src="/uploads/2017/08/04/59/newup-fad9844d81d35776d46eaa0e8946e0780d.png" alt="@800x"></p>
+<p>打开系统偏好设置-&gt;键盘-&gt;快捷键设置，找到前面写的新建文档。把快捷键设为 <code>Command+0</code></p>
+<p><img src="/uploads/2017/08/04/66/newup-fa0244b331dd51832301efee2d554e2929.png" alt="@800x"></p>
+<p>之后就可以在任何finder窗口（或桌面）用command+0新建文件了。</p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4xw.fuh.html">mac 终端运行后台程序如何在终端关闭时继续运行</a></p>
+</li>
+<li><p><a href="kh4hp53d.49g.html">jxa运动指令脚本</a></p>
+</li>
+<li><p><a href="88225.html">mac搜索局域网内的主机</a></p>
+</li>
+<li><p><a href="62496.html">mac 通过快捷键新建文档</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4u7.5l8.html">react项目webpack打包时拆分异步加载的文件</a></p>
+</li>
+<li><p><a href="kh4hp4ut.68c.html">华为等国产手机rem宽度超过实际宽度</a></p>
+</li>
+<li><p><a href="kh4hp4vo.i3t.html">word文件命令行打印</a></p>
+</li>
+<li><p><a href="kh4hp4xw.fuh.html">mac 终端运行后台程序如何在终端关闭时继续运行</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp53u.pjh.html">树莓派实现用pi用户自动登录</a></p>
+</li>
+<li><p><a href="kh4hp569.gcj.html">nodejs俄罗斯方块</a></p>
+</li>
+<li><p><a href="kh4hp574.hum.html">heroku登陆cli</a></p>
+</li>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
+</li>
+<li><p><a href="kh4hp5as.pb.html">linux自启动/禁止自启动服务</a></p>
+</li>
+<li><p><a href="kh4hp5b6.kdr.html">树莓派配置wifi热点</a></p>
+</li>
+<li><p><a href="kh4hp5bk.27.html">cdn资源列表</a></p>
+</li>
+<li><p><a href="kh4hp5ct.4ys.html">putty使用http代理连接服务器</a></p>
+</li>
+<li><p><a href="kh4hp5fb.n3u.html">把树莓派的存储空间拓展到整张TF卡中</a></p>
+</li>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="88180.html">树莓派配置wifi</a></p>
+</li>
+<li><p><a href="88172.html">mysql选取内容导出到文件</a></p>
+</li>
+<li><p><a href="81007.html">html表格导出csv文件并下载</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="62496";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

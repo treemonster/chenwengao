@@ -1,0 +1,114 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>数据库清理优化</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">数据库清理优化</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #81c3b0">mysql</span><span class="tagz" style="background: #aa84ec">优化</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>目前数据库我是用了一个缓存功能建立的表结构分为两个，第一个表用做索引，第二个表用做实际数据读写，这两个表用一个唯一的字符串进行关联。删除的过程我不是两边都做删除，为了删除效率，每次我仅对索引的表对应行进行删除，而数据表每隔1小时进行统一删除操作。目前数据量在3w行，大小约为600mb，统一删除时遇到了严重的性能问题，最终考虑了曲线救国的策略分段清理，在此留下记录。</p>
+<p>首先要说的一点是，像我这样简单粗暴的把mysql当做<strong>非关系型数据库</strong>来使用是不合理的，因为这样做对于数据库的读写压力非常大。我这么做仅仅是因为不想额外搞一个redis这样的服务上去罢了。</p>
+<p>生产环境中发现读写效率正常，但清理时目前每次都是在30秒左右，我的删除语句是这样写的：</p>
+<pre><code class="language-sql">delete cms_caches_data.* from cms_caches_data
+  left join cms_caches a on a.data_id=cms_caches_data.data_id
+  where a.data_id is null;</code></pre>
+<p>我已经对这两个表的data_id做了索引，但依然无法避免这个问题，这是因为这个查询必然是全表扫描的。所以我略做思考，优化之后增加了一个限定条件：</p>
+<pre><code class="language-sql">delete c.* from cms_caches_data c
+      left join cms_caches a on a.data_id=c.data_id
+      where UNIX_TIMESTAMP(c.create_time)&amp;`+ch+`=`+ch+` and a.data_id is null;</code></pre>
+<p>其中<code>ch</code>是一个程序内部的变量，我设定其范围是 <code>[1,128]</code>，初始值1，每清理一次这个变量加1。这样做就可以在清理时扫表压力减轻到1/128（128是可以调节的）。如果数据量更大则把128放得更大，实践证明确实有效减少了清理时的数据库压力，几乎能达到瞬间完成。</p>
+<p><img src="/uploads/2017/10/26/72//newup-faaa8f7cfc7e354f1264a30e857f20734f.png" alt="/uploads/2017/10/26/72//newup-faaa8f7cfc7e354f1264a30e857f20734f.png "></p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="88229.html">mysql导出csv文件</a></p>
+</li>
+<li><p><a href="88172.html">mysql选取内容导出到文件</a></p>
+</li>
+<li><p><a href="87991.html">数据库清理优化</a></p>
+</li>
+<li><p><a href="83845.html">配置mysql ssl连接</a></p>
+</li>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
+</li>
+<li><p><a href="72645.html">记一次mysql死锁的教训</a></p>
+</li>
+<li><p><a href="69351.html">缓存才是优化的终极手段</a></p>
+</li>
+<li><p><a href="61832.html">golang 实现mysql Quote方法</a></p>
+</li>
+<li><p><a href="58819.html">mysql where限制子查询结果</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh8hr1ki.4fs.html">mac ssh透过代理连接</a></p>
+</li>
+<li><p><a href="kh4hp4v9.83f.html">安卓文字偏上，文字顶部被遮罩</a></p>
+</li>
+<li><p><a href="kh4hp4xg.2sb.html">sass变量和继承类写法</a></p>
+</li>
+<li><p><a href="kh4hp501.g4a.html">npm远程服务器某些配置不兼容代理的解决办法</a></p>
+</li>
+<li><p><a href="kh4hp52w.ibe.html">ios13 vpn 能连接但不能传数据问题解决</a></p>
+</li>
+<li><p><a href="kh4hp55s.p7g.html">判断变量是否 0 或者 &#39;0&#39;</a></p>
+</li>
+<li><p><a href="kh4hp5ae.oak.html">dd备份/还原</a></p>
+</li>
+<li><p><a href="kh4hp5as.pb.html">linux自启动/禁止自启动服务</a></p>
+</li>
+<li><p><a href="kh4ib7jk.t1.html">mongodb2.4 添加用户</a></p>
+</li>
+<li><p><a href="88229.html">mysql导出csv文件</a></p>
+</li>
+<li><p><a href="88225.html">mac搜索局域网内的主机</a></p>
+</li>
+<li><p><a href="88180.html">树莓派配置wifi</a></p>
+</li>
+<li><p><a href="88172.html">mysql选取内容导出到文件</a></p>
+</li>
+<li><p><a href="88103.html">ie8上Image.onload不触发问题</a></p>
+</li>
+<li><p><a href="87999.html">bootstrap modal弹框导致ie无法获取焦点</a></p>
+</li>
+<li><p><a href="72645.html">记一次mysql死锁的教训</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="87991";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

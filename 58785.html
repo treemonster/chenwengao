@@ -1,0 +1,127 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>判断javascript运行环境</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">判断javascript运行环境</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #5dc984">amd</span><span class="tagz" style="background: #1fbaaf">commonjs</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>自从使用amd规范js编码风格之后，所有的代码我都是以模块方式对外提供接口。因为有些模块代码是nodejs(nodejs原始支持CommonJS规范)和浏览器端通用的，所以每次写到接口的时候都要判断运行上下文对模块定义方式的支持，籍此来兼容不同环境的写法。 </p>
+<p>判断的代码如下，很基础的用法： </p>
+<pre><code class="language-html">&lt;script&gt;
+void function(){
+  switch(true){
+    case typeof define!==&#39;undefined&#39; &amp;&amp; define.amd:
+      console.log(&#39;amd&#39;);
+      break;
+    case typeof module===&#39;object&#39; &amp;&amp; !!module.exports:
+      console.log(&#39;CommonJS&#39;);
+      break;
+    default:
+      throw &#39;unknown context environment&#39;;
+  }
+}();
+&lt;/script&gt;</code></pre>
+<p>然后模块定义的时候就这样写： </p>
+<pre><code class="language-javascript">void function(){
+
+  // 模块功能代码部分
+  // 因为这里讨论的是通用模块，这类模块是不应该存在必须外部依赖的，否则这个模块就是渣，所以不需要用到require的方法
+  // 直接定义exports
+  var exports={test:1};
+  // ...
+
+  switch(true){
+    case typeof define!==&#39;undefined&#39; &amp;&amp; define.amd:
+      console.log(&#39;amd&#39;);
+      define(function(){ return exports; });
+      break;
+    case typeof module===&#39;object&#39; &amp;&amp; !!module.exports:
+      console.log(&#39;CommonJS&#39;);
+      module.exports=exports;
+      break;
+    default:
+      throw &#39;unknown context environment&#39;;
+  }
+}();</code></pre>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><a href="58785.html">判断javascript运行环境</a></li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="kh4hp4wj.uv.html">nginx 子域名对应文件夹</a></p>
+</li>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+</li>
+<li><p><a href="kh4hp52w.ibe.html">ios13 vpn 能连接但不能传数据问题解决</a></p>
+</li>
+<li><p><a href="kh4hz03h.xh.html">python 用摄像头拍照并写入文件</a></p>
+</li>
+<li><p><a href="kh4hp55s.p7g.html">判断变量是否 0 或者 &#39;0&#39;</a></p>
+</li>
+<li><p><a href="kh4hp58r.537.html">webrtc服务搭建</a></p>
+</li>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
+</li>
+<li><p><a href="kh4hp5ae.oak.html">dd备份/还原</a></p>
+</li>
+<li><p><a href="kh4hp5dm.5i.html">git记住/删除账号密码</a></p>
+</li>
+<li><p><a href="kh4hp5fb.n3u.html">把树莓派的存储空间拓展到整张TF卡中</a></p>
+</li>
+<li><p><a href="88246.html">centos查看最近一次的开机时间</a></p>
+</li>
+<li><p><a href="88229.html">mysql导出csv文件</a></p>
+</li>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88128.html">centos7 开放或者关闭端口</a></p>
+</li>
+<li><p><a href="88094.html">随机取某个概率区间的代码</a></p>
+</li>
+<li><p><a href="87218.html">感谢beego陪伴我度过那不靠谱的半年</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58785";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

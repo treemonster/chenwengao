@@ -1,0 +1,152 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>读写分离！拆表！</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">读写分离！拆表！</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #81c3b0">mysql</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>以前数据量小的时候没啥感觉，但是最近由于爬虫的关系，从其他网站抓取来的数据量已经突破200MB。一下子使得mysql的<code>select</code>和<code>update</code>操作慢得不可思议，昨天居然还把内存跑爆了。。</p>
+<p>之前由于为了快速开发，所以数据表建立基本都是很偷懒的方法，文章的信息都放在一个表里，而且也没有加任何索引，所以这个表的结构看上去是这样的：</p>
+<pre><code class="language-sql">CREATE TABLE `cms_contents` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `o_state` int(11) NOT NULL,
+  `source_text` varchar(30) NOT NULL DEFAULT &#39;&#39;,
+  `source_url` varchar(500) NOT NULL DEFAULT &#39;&#39;,
+  `jump_url` varchar(300) NOT NULL,
+  `title` varchar(250) NOT NULL,
+  `summary` varchar(300) NOT NULL,
+  `keywords` varchar(100) NOT NULL,
+  `face` varchar(600) NOT NULL DEFAULT &#39;&#39;,
+  `author` varchar(40) NOT NULL,
+  `view_count` int(11) NOT NULL DEFAULT &#39;0&#39;,
+  `content` longtext NOT NULL,
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+</code></pre>
+<p>其中<code>content</code>字段是作为文章内容，<code>o_state</code>用于标记特殊的类型，其他的则是用于在列表查看时用到的各种输出内容，比如标题啊，关键字啊，描述等等。</p>
+<p>从字段属性来看，<code>content</code>字段是可能很长的，实际长度甚至可能超过其他字段长度总和。把这些东西都放在一个表里就产生了现在mysql各种操作都很慢的现状。因为mysql的各种操作基本都是要扫描整个表的所有行，<strong>一行内容越多，扫描就越慢！</strong></p>
+<p>于是乎我现在采取的策略就是把<code>content</code>这个字段移出来放在另一个表<code>cms_contents_data</code>里，并增加字段<code>data_id</code>去关联这两个表的行。</p>
+<pre><code class="language-sql">CREATE TABLE `cms_contents` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `o_state` int(11) NOT NULL,
+  `source_text` varchar(30) NOT NULL DEFAULT &#39;&#39;,
+  `source_url` varchar(500) NOT NULL DEFAULT &#39;&#39;,
+  `jump_url` varchar(300) NOT NULL,
+  `title` varchar(250) NOT NULL,
+  `summary` varchar(300) NOT NULL,
+  `keywords` varchar(100) NOT NULL,
+  `face` varchar(600) NOT NULL DEFAULT &#39;&#39;,
+  `author` varchar(40) NOT NULL,
+  `view_count` int(11) NOT NULL DEFAULT &#39;0&#39;,
+
+  `data_id` varchar(40) NOT NULL,
+  UNIQUE KEY (`data_id`),
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `cms_contents_data` (
+  `data_id` varchar(40) NOT NULL DEFAULT &#39;&#39;,
+  `content` longtext NOT NULL,
+  PRIMARY KEY (`data_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+</code></pre>
+<p>从而每次<code>insert</code>和<code>update</code>时，<code>cms_contents</code>表和<code>cms_contents_data</code>表都能很快的完成。而做<code>delete</code>时，前者需要找到对应行的时间极大的缩短了，后者则可以异步删除。</p>
+<p>这个方法绝对是有效的，因为目前本站的文档保存和查找速度已经恢复正常了。</p>
+<p><img src="/uploads/2017/08/25/57/newup-fab8df4c4a5cc814463f68e9d4d2774f54.jpg" alt="/uploads/2017/08/25/57//newup-fab8df4c4a5cc814463f68e9d4d2774f54.jpg @200x"></p>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="88229.html">mysql导出csv文件</a></p>
+</li>
+<li><p><a href="88172.html">mysql选取内容导出到文件</a></p>
+</li>
+<li><p><a href="87991.html">数据库清理优化</a></p>
+</li>
+<li><p><a href="83845.html">配置mysql ssl连接</a></p>
+</li>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
+</li>
+<li><p><a href="72645.html">记一次mysql死锁的教训</a></p>
+</li>
+<li><p><a href="61832.html">golang 实现mysql Quote方法</a></p>
+</li>
+<li><p><a href="58819.html">mysql where限制子查询结果</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="khalg5ks.g.html">css3自定义滚动条样式</a></p>
+</li>
+<li><p><a href="kh4hp501.g4a.html">npm远程服务器某些配置不兼容代理的解决办法</a></p>
+</li>
+<li><p><a href="kh4hp52w.ibe.html">ios13 vpn 能连接但不能传数据问题解决</a></p>
+</li>
+<li><p><a href="kh4hp54d.xb.html">git删除远程分支</a></p>
+</li>
+<li><p><a href="kh4hz03h.xh.html">python 用摄像头拍照并写入文件</a></p>
+</li>
+<li><p><a href="kh4hp56p.7c.html">heroku查看app使用时间</a></p>
+</li>
+<li><p><a href="kh4hp57y.fpf.html">npm设置仓库地址和代理</a></p>
+</li>
+<li><p><a href="kh4hp58c.8w7.html">模拟307跳转情况</a></p>
+</li>
+<li><p><a href="kh4hp58r.537.html">webrtc服务搭建</a></p>
+</li>
+<li><p><a href="kh4hp5ct.4ys.html">putty使用http代理连接服务器</a></p>
+</li>
+<li><p><a href="kh4hp5dm.5i.html">git记住/删除账号密码</a></p>
+</li>
+<li><p><a href="kh4hp5eg.y8e.html"> ssl 证书生成方式</a></p>
+</li>
+<li><p><a href="88246.html">centos查看最近一次的开机时间</a></p>
+</li>
+<li><p><a href="88181.html">树莓派配置收发邮件</a></p>
+</li>
+<li><p><a href="88128.html">centos7 开放或者关闭端口</a></p>
+</li>
+<li><p><a href="81007.html">html表格导出csv文件并下载</a></p>
+</li>
+<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="73791";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

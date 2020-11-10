@@ -1,0 +1,128 @@
+<meta charset="utf-8"/>
+<base target='_blank' />
+<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<script src="d406894cfa4abad298d58c7b414562d6.js"></script>
+<script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
+<script src="ccac98ae433a8aa600476534a7176a62.js"></script>
+<link href="172a73b72f7c34c71e23b75fc6b0072c.css" type='text/css' rel='stylesheet' />
+<link href="a07e1e35d2e6f45540bf0cc2f4a6f11d.css" type='text/css' rel='stylesheet' />
+<link href="783dbec16270c788c55c8548f11b13ec.css" type='text/css' rel='stylesheet' />
+
+<title>centos7 静默复制命令踩坑</title>
+
+<body class="readonly github-io">
+<div class='tabc'>
+<div class='datelist-btn white-btn'>展开目录</div>
+<div class="tabsr">
+  <div class="tabsr-title">centos7 静默复制命令踩坑</div>
+  <div class="tabsr-tags"><span class="tagz" style="background: #cdc872">centos</span><span class="tagz" style="background: #9c9531">cp</span></div>
+</div>
+</div>
+<div class='datelist'>
+  <div class='searchdiv'>
+    <div class='datelist-btn-close white-btn'>X</div>
+    <div class="inexport text">
+      陈尼玛的博客
+    </div>
+    <div class="description">记录开发生涯的踩坑经历，用时间来验证成长</div>
+  </div>
+  <div id='lst'></div>
+</div>
+
+<div id="content"><p>我知道复制的命令是cp，而且查了cp命令的参数，-f表示不需要确认直接覆盖已存在的文件。然而使用cp -rfp 复制文件夹的时候却依然要求每次都确认是否继续，这就奇怪了。</p>
+<p>网上得到了一个答案：<a href="http://www.cnblogs.com/wangkongming/p/3999125.html">linux下面覆盖文件，如何实现直接覆盖，不提示</a></p>
+<p>看到这个说法：</p>
+<blockquote>
+<p>服务器上查找后发现在默认的系统中是加了别名如下</p>
+</blockquote>
+<blockquote>
+<p>[root@linuxzgf ~]# alias </p>
+</blockquote>
+<blockquote>
+<p>alias cp=&#39;cp -i&#39;</p>
+</blockquote>
+<blockquote>
+<p>可以看到别人  ，也就是当执行cp的时候，其实执行的是cp -i参数</p>
+</blockquote>
+<p>实际测试果然如此，猜测这种设计的目的是为了防止误操作。</p>
+<p>于是我按照后面的说法，在cp之前加一个斜杠解决了此问题。</p>
+<p>测试代码：</p>
+<pre><code class="language-bash">mkdir a1 a2
+echo xxx&gt;a1/1.txt
+echo yyy&gt;a1/2.txt
+chmod 531 a1/*
+echo aaa&gt;a2/1.txt
+echo bbb&gt;a2/2.txt
+chmod 123 a2/*
+ls -l a2
+\cp -rpf a1/* a2
+ls -l a2</code></pre>
+<blockquote>
+<h3 id="相关文档">相关文档</h3>
+</blockquote>
+<ol>
+<li><p><a href="88246.html">centos查看最近一次的开机时间</a></p>
+</li>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="88128.html">centos7 开放或者关闭端口</a></p>
+</li>
+<li><p><a href="58849.html">配置vmbox里的centos7静态ip</a></p>
+</li>
+<li><p><a href="58836.html">centos7 静默复制命令踩坑</a></p>
+</li>
+<li><p><a href="58835.html">centos7 安装7z解压客户端</a></p>
+</li>
+<li><p><a href="58806.html">centos7部署samba服务</a></p>
+</li>
+<li><p><a href="58803.html">centos 7安装字体</a></p>
+</li>
+<li><p><a href="58802.html">centos7 Minimal安装桌面</a></p>
+</li>
+</ol>
+<blockquote>
+<h3 id="随便看看">随便看看</h3>
+</blockquote>
+<ol>
+<li><p><a href="khbe1zve.29n.html">css多行文本超出截断显示省略号</a></p>
+</li>
+<li><p><a href="kh4hp4u7.5l8.html">react项目webpack打包时拆分异步加载的文件</a></p>
+</li>
+<li><p><a href="kh4hp4wj.uv.html">nginx 子域名对应文件夹</a></p>
+</li>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+</li>
+<li><p><a href="kh4hp55c.9dm.html">搜索命令整理</a></p>
+</li>
+<li><p><a href="kh4hp5eg.y8e.html"> ssl 证书生成方式</a></p>
+</li>
+<li><p><a href="kh4ib7jk.t1.html">mongodb2.4 添加用户</a></p>
+</li>
+<li><p><a href="88225.html">mac搜索局域网内的主机</a></p>
+</li>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="88172.html">mysql选取内容导出到文件</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+</li>
+<li><p><a href="88128.html">centos7 开放或者关闭端口</a></p>
+</li>
+<li><p><a href="79547.html">前端性能观察器</a></p>
+</li>
+<li><p><a href="72645.html">记一次mysql死锁的教训</a></p>
+</li>
+<li><p><a href="69351.html">缓存才是优化的终极手段</a></p>
+</li>
+</ol>
+</div>
+
+<div class="body-mask"></div>
+
+<script>
+var qid="58836";
+var LOGINED=0;
+var IS_FOR_GITHUB_IO=1;
+</script>
+<script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
+</body>

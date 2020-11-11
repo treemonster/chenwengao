@@ -34,7 +34,6 @@
 fields terminated by &#39;,&#39; optionally enclosed by &#39;&quot;&#39; escaped by &#39;&quot;&#39;   
 lines terminated by &#39;\r\n&#39;; </code></pre>
 <p>然后<code>db1.csv</code>文件内就是<code>cms_shopsdata_99114</code>数据表里的数据。但是打开之后发现里面的中文内容变成了乱码：</p>
-<p><img src="/uploads/2017/12/11/98//newup-faab737a2fe6ce702cf6484f0b50054e66.png" alt="paste.png"></p>
 <p>这是因为mysql里存储的字符集是 <code>utf-8</code> ，而导出之后的是 不带 <code>bom</code> 头的文本内容。所以excel解析出问题了，因此解决方法是再导出内容之前补上dom头字节：0xef 0xbb 0xbf。此前还有一篇文章我也提到过bom的问题：<a href="https://www.xdelve.com/usershare/fb0044daf15b007bda187891b53d9d97/1qi7.asp">https://www.xdelve.com/usershare/fb0044daf15b007bda187891b53d9d97/1qi7.asp</a>。</p>
 <p>代码如下：</p>
 <pre><code class="language-sh">echo -e &quot;\uef\ubb\ubf&quot;&gt;db1.bom.csv
@@ -50,37 +49,39 @@ cat db1.csv&gt;&gt;db1.bom.csv</code></pre>
 <h3 id="随便看看">随便看看</h3>
 </blockquote>
 <ol>
-<li><p><a href="kh4hp4u7.5l8.html">react项目webpack打包时拆分异步加载的文件</a></p>
+<li><p><a href="khalg5ks.g.html">css3自定义滚动条样式</a></p>
 </li>
-<li><p><a href="kh4hp4xg.2sb.html">sass变量和继承类写法</a></p>
+<li><p><a href="kh4hp4ut.68c.html">华为等国产手机rem宽度超过实际宽度</a></p>
 </li>
-<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
+<li><p><a href="kh4hp50h.0q9.html">curl用法</a></p>
 </li>
-<li><p><a href="kh4hp52w.ibe.html">ios13 vpn 能连接但不能传数据问题解决</a></p>
+<li><p><a href="kh4hp53u.pjh.html">树莓派实现用pi用户自动登录</a></p>
 </li>
 <li><p><a href="kh4hp569.gcj.html">nodejs俄罗斯方块</a></p>
 </li>
 <li><p><a href="kh4hp57y.fpf.html">npm设置仓库地址和代理</a></p>
 </li>
-<li><p><a href="kh4hp5ae.oak.html">dd备份/还原</a></p>
+<li><p><a href="kh4hp58c.8w7.html">模拟307跳转情况</a></p>
 </li>
-<li><p><a href="kh4hp5by.jnt.html">webpack使用外部资源</a></p>
+<li><p><a href="kh4hp5a0.gjt.html">单页应用的单向数据流的流程图</a></p>
 </li>
 <li><p><a href="kh4hp5d7.f8n.html">git配置服务端支持http认证</a></p>
 </li>
-<li><p><a href="kh4hp5eg.y8e.html"> ssl 证书生成方式</a></p>
+<li><p><a href="kh4hp5dm.5i.html">git记住/删除账号密码</a></p>
 </li>
 <li><p><a href="kh4hp5fb.n3u.html">把树莓派的存储空间拓展到整张TF卡中</a></p>
 </li>
 <li><p><a href="88328.html">python下载文件，带进度条控制</a></p>
 </li>
-<li><p><a href="88225.html">mac搜索局域网内的主机</a></p>
+<li><p><a href="88180.html">树莓派配置wifi</a></p>
 </li>
-<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
 </li>
-<li><p><a href="88103.html">ie8上Image.onload不触发问题</a></p>
+<li><p><a href="88096.html">简易版事件封装</a></p>
 </li>
-<li><p><a href="75653.html">判断点是否在多边形内</a></p>
+<li><p><a href="88094.html">随机取某个概率区间的代码</a></p>
+</li>
+<li><p><a href="81007.html">html表格导出csv文件并下载</a></p>
 </li>
 </ol>
 </div>

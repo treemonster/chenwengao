@@ -37,7 +37,7 @@
 <p>虽然可实现目的内部函数有很多，比如compile_file，zend_stream_fixup等，但并不是任何一个都可以利用的。因为zend的代码中有一种指针函数，这类函数可被外部插件进行hook，在此类函数基础上修改代码，若传入参数包含了解密后的内容的，那么结果都不用想了。</p>
 <p>最终实现分两部分，产生加密文件和解密运行。产生加密文件的代码用php来写，而解密运行则编译进zend内核。</p>
 <hr>
-<h4 id="我选择以下-font-colorff00003处font-进行修改：">我选择以下 &lt;font color=&#39;#ff0000&#39;&gt;3处&lt;/font&gt; 进行修改：</h4>
+<h4 id="我选择以下3处进行修改：">我选择以下3处进行修改：</h4>
 <h5 id="1-自定义加密解密算法">1. 自定义加密解密算法</h5>
 <p>写在 open_file_for_scanning 方法之上</p>
 <pre><code>
@@ -238,6 +238,8 @@ $b=new Bootstrap;$b-&gt;_initAutoload();
 $j=new Json2html;
 echo $j-&gt;render(&#39;{{a}}x{{b}}&#39;,[&#39;a&#39;=&gt;&#39;A&#39;,&#39;b&#39;=&gt;&#39;BB&#39;]);
 </code></pre>
+<hr>
+<h3 id="实际上这样编译的程序，通过var_dump依然可以输出原始php内容，当时没考虑到，现在已经跟php告别了所以就不研究了，以后也许还会用上？">实际上这样编译的程序，通过var_dump依然可以输出原始php内容，当时没考虑到，现在已经跟php告别了所以就不研究了，以后也许还会用上？</h3>
 <blockquote>
 <h3 id="相关文档">相关文档</h3>
 <p>暂无</p>
@@ -246,43 +248,39 @@ echo $j-&gt;render(&#39;{{a}}x{{b}}&#39;,[&#39;a&#39;=&gt;&#39;A&#39;,&#39;b&#39
 <h3 id="随便看看">随便看看</h3>
 </blockquote>
 <ol>
-<li><p><a href="khalg5ks.g.html">css3自定义滚动条样式</a></p>
+<li><p><a href="kh4hp4xg.2sb.html">sass变量和继承类写法</a></p>
 </li>
-<li><p><a href="kh4hp4ut.68c.html">华为等国产手机rem宽度超过实际宽度</a></p>
+<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
 </li>
-<li><p><a href="kh4hp4wj.uv.html">nginx 子域名对应文件夹</a></p>
+<li><p><a href="kh4hp501.g4a.html">npm远程服务器某些配置不兼容代理的解决办法</a></p>
 </li>
-<li><p><a href="kh4hp4xw.fuh.html">mac 终端运行后台程序如何在终端关闭时继续运行</a></p>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
 </li>
-<li><p><a href="kh4hp50h.0q9.html">curl用法</a></p>
+<li><p><a href="kh4hp569.gcj.html">nodejs俄罗斯方块</a></p>
 </li>
-<li><p><a href="kh4hp51g.d79.html">SSL certificate problem: self signed certificate in certificate chain</a></p>
-</li>
-<li><p><a href="kh4hp53d.49g.html">jxa运动指令脚本</a></p>
-</li>
-<li><p><a href="kh4hp55c.9dm.html">搜索命令整理</a></p>
-</li>
-<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
-</li>
-<li><p><a href="kh4hp5a0.gjt.html">单页应用的单向数据流的流程图</a></p>
+<li><p><a href="kh4hp5bk.27.html">cdn资源列表</a></p>
 </li>
 <li><p><a href="kh4hp5cd.lmo.html">TIME_WAIT过多</a></p>
 </li>
-<li><p><a href="kh4hp5d7.f8n.html">git配置服务端支持http认证</a></p>
+<li><p><a href="kh4hp5fb.n3u.html">把树莓派的存储空间拓展到整张TF卡中</a></p>
 </li>
-<li><p><a href="88229.html">mysql导出csv文件</a></p>
+<li><p><a href="88246.html">centos查看最近一次的开机时间</a></p>
 </li>
-<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
 </li>
-<li><p><a href="88153.html">猴子选大王算法问题</a></p>
+<li><p><a href="88181.html">树莓派配置收发邮件</a></p>
 </li>
-<li><p><a href="88096.html">简易版事件封装</a></p>
+<li><p><a href="88128.html">centos7 开放或者关闭端口</a></p>
+</li>
+<li><p><a href="88094.html">随机取某个概率区间的代码</a></p>
+</li>
+<li><p><a href="87999.html">bootstrap modal弹框导致ie无法获取焦点</a></p>
 </li>
 <li><p><a href="87991.html">数据库清理优化</a></p>
 </li>
-<li><p><a href="87218.html">感谢beego陪伴我度过那不靠谱的半年</a></p>
+<li><p><a href="87823.html">youku电脑版跳过广告代码</a></p>
 </li>
-<li><p><a href="83845.html">配置mysql ssl连接</a></p>
+<li><p><a href="81007.html">html表格导出csv文件并下载</a></p>
 </li>
 </ol>
 </div>

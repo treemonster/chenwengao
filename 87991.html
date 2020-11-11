@@ -1,5 +1,4 @@
 <meta charset="utf-8"/>
-<base target='_blank' />
 <meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
 <script src="d406894cfa4abad298d58c7b414562d6.js"></script>
 <script src="91620078a585e5bdb8800b8a10c6713f.js"></script>
@@ -30,7 +29,10 @@
   <div id='lst'></div>
 </div>
 
-<div id="content"><p>目前数据库我是用了一个缓存功能建立的表结构分为两个，第一个表用做索引，第二个表用做实际数据读写，这两个表用一个唯一的字符串进行关联。删除的过程我不是两边都做删除，为了删除效率，每次我仅对索引的表对应行进行删除，而数据表每隔1小时进行统一删除操作。目前数据量在3w行，大小约为600mb，统一删除时遇到了严重的性能问题，最终考虑了曲线救国的策略分段清理，在此留下记录。</p>
+<div id='loading1'>加载中<span></span></div>
+
+<div id="content">
+<div id="content2"><p>目前数据库我是用了一个缓存功能建立的表结构分为两个，第一个表用做索引，第二个表用做实际数据读写，这两个表用一个唯一的字符串进行关联。删除的过程我不是两边都做删除，为了删除效率，每次我仅对索引的表对应行进行删除，而数据表每隔1小时进行统一删除操作。目前数据量在3w行，大小约为600mb，统一删除时遇到了严重的性能问题，最终考虑了曲线救国的策略分段清理，在此留下记录。</p>
 <p>首先要说的一点是，像我这样简单粗暴的把mysql当做<strong>非关系型数据库</strong>来使用是不合理的，因为这样做对于数据库的读写压力非常大。我这么做仅仅是因为不想额外搞一个redis这样的服务上去罢了。</p>
 <p>生产环境中发现读写效率正常，但清理时目前每次都是在30秒左右，我的删除语句是这样写的：</p>
 <pre><code class="language-sql">delete cms_caches_data.* from cms_caches_data
@@ -67,51 +69,52 @@
 <h3 id="随便看看">随便看看</h3>
 </blockquote>
 <ol>
-<li><p><a href="khbe1zve.29n.html">css多行文本超出截断显示省略号</a></p>
-</li>
 <li><p><a href="khalg5ks.g.html">css3自定义滚动条样式</a></p>
 </li>
-<li><p><a href="kh4hp4vo.i3t.html">word文件命令行打印</a></p>
+<li><p><a href="kh4hp4v9.83f.html">安卓文字偏上，文字顶部被遮罩</a></p>
 </li>
-<li><p><a href="kh4hp4xw.fuh.html">mac 终端运行后台程序如何在终端关闭时继续运行</a></p>
+<li><p><a href="kh4hp4xg.2sb.html">sass变量和继承类写法</a></p>
 </li>
-<li><p><a href="kh4hp4yo.gfd.html">nodejs 长连接</a></p>
-</li>
-<li><p><a href="kh4hp50y.c3p.html">nginx用域名来转发请求</a></p>
-</li>
-<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
-</li>
-<li><p><a href="kh4hp52g.1h.html">nodejs本地双向代理 端口转发</a></p>
-</li>
-<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+<li><p><a href="kh4hp4z5.bct.html">raw.githubusercontent.com DNS被指向127.0.0.1</a></p>
 </li>
 <li><p><a href="kh4hp53u.pjh.html">树莓派实现用pi用户自动登录</a></p>
 </li>
 <li><p><a href="kh4hp54u.a47.html">html5 全屏代码</a></p>
 </li>
-<li><p><a href="kh4hp56p.7c.html">heroku查看app使用时间</a></p>
+<li><p><a href="kh4hp55s.p7g.html">判断变量是否 0 或者 &#39;0&#39;</a></p>
 </li>
-<li><p><a href="kh4hp5as.pb.html">linux自启动/禁止自启动服务</a></p>
+<li><p><a href="kh4hp57l.nw.html">mongodb 批量修改字段语句</a></p>
 </li>
-<li><p><a href="kh4hp5bk.27.html">cdn资源列表</a></p>
+<li><p><a href="kh4hp58c.8w7.html">模拟307跳转情况</a></p>
 </li>
-<li><p><a href="kh4hp5cd.lmo.html">TIME_WAIT过多</a></p>
+<li><p><a href="kh4hp5by.jnt.html">webpack使用外部资源</a></p>
 </li>
-<li><p><a href="kh4hp5eg.y8e.html"> ssl 证书生成方式</a></p>
+<li><p><a href="kh4hp5fb.n3u.html">把树莓派的存储空间拓展到整张TF卡中</a></p>
+</li>
+<li><p><a href="88328.html">python下载文件，带进度条控制</a></p>
+</li>
+<li><p><a href="88225.html">mac搜索局域网内的主机</a></p>
+</li>
+<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+</li>
+<li><p><a href="88180.html">树莓派配置wifi</a></p>
+</li>
+<li><p><a href="88157.html">replace2正则扩展方法</a></p>
 </li>
 <li><p><a href="88128.html">centos7 开放或者关闭端口</a></p>
 </li>
-<li><p><a href="79146.html">linux 批量替换文本内容</a></p>
+<li><p><a href="73791.html">读写分离！拆表！</a></p>
 </li>
 </ol>
+
+</div>
+<div id="SOHUCS" sid="87991" ></div>
 </div>
 
 <div class="body-mask"></div>
 
-<script>
-var qid="87991";
-var LOGINED=0;
-var IS_FOR_GITHUB_IO=1;
+<script type="text/javascript">
+window.dd_qid="87991";
 </script>
 <script src="3287a981a890e10d9ffc6af37b73ff89.js"></script>
 </body>

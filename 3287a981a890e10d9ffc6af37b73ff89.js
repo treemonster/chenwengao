@@ -769,7 +769,7 @@ function update_dd_ls(dd_ls, has_last_dd) {
       str += `<div class='date'>${d1._cyear}/${d1._cmonth < 10 ? '0' + d1._cmonth : d1._cmonth}</div>`;
     }
 
-    str += `<a data-id="${d1.id}" href="${IS_DEBUG ? '?id=' + d1.id + '&loadGithubPage=yes' : d1.id + '.html'}" class='dtitle ${d1.id === qid ? 'dtitle-active' : ''}'>${d1.title}</a>`;
+    str += `<a data-id="${d1.id}" href="${IS_DEBUG ? '?id=' + d1.id + '&loadGithubPage=yes' : d1.id + '.html'}" class='dtitle ${d1.id === dd_qid ? 'dtitle-active' : ''}'>${d1.title}</a>`;
   }
 
   if (has_last_dd) lst.innerHTML += str;else lst.innerHTML = str || `<div class='empty'>没有内容</div>`;
@@ -778,6 +778,20 @@ function update_dd_ls(dd_ls, has_last_dd) {
 $.getScript(IS_DEBUG ? 'marked2.cjs?id=_&do=menulist' : 'menulist.all.js?' + Date.now()).then(function (_) {
   update_dd_ls(menulistAll);
 });
+
+function reflesh_cy() {
+  var appid = 'cyv9pom35';
+  var conf = 'd6c8b1e7944bef3d81664b4a5efe42ad';
+  window.changyan = undefined;
+  window.cyan = undefined;
+  $.getScript("https://cy-cdn.kuaizhan.com/upload/changyan.js", function (_) {
+    window.changyan.api.config({
+      appid,
+      conf
+    });
+  });
+}
+
 $(document).on('click', 'a.dtitle:not(.dtitle-active),#content a', function (e) {
   var href = $(this).attr('href');
   var murl = /^(?:\?id=([^&]+)&loadGithubPage=yes|([^/]+?)\.html)$/;
@@ -788,9 +802,10 @@ $(document).on('click', 'a.dtitle:not(.dtitle-active),#content a', function (e) 
   $('.dtitle[data-id="' + id + '"]').addClass('dtitle-active');
   $('.datelist').removeClass('show');
   e.preventDefault();
+  loading1.className = 'show';
 
   (function _callee(_) {
-    var str;
+    var str, t1, i;
     return regeneratorRuntime.async(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -801,22 +816,44 @@ $(document).on('click', 'a.dtitle:not(.dtitle-active),#content a', function (e) 
 
           case 3:
             str = _context.sent;
-            $('#content').html(str.match(/<div id="content">([\s\S]+)<div class="body-mask"/)[1]);
+            $('#content2').html(str.match(/<div id="content2">([\s\S]+)<\/div>\s*<div id="SOHUCS"/)[1]);
+            $('#SOHUCS').attr('sid', str.match(/<div id="SOHUCS" sid="([^"]+)"/)[1]);
+            reflesh_cy();
             $('.tabsr').html(str.match(/<div class="tabsr">([\s\S]+?<\/div>)\s*<\/div>/)[1]);
-            _context.next = 11;
+            t1 = $('#content').scrollTop();
+            i = 1;
+
+          case 10:
+            if (!(i <= 10)) {
+              _context.next = 17;
+              break;
+            }
+
+            $('#content').scrollTop(Math.sin((1 - i / 10) * Math.PI / 2) * t1);
+            _context.next = 14;
+            return regeneratorRuntime.awrap(sleep(16));
+
+          case 14:
+            i++;
+            _context.next = 10;
             break;
 
-          case 8:
-            _context.prev = 8;
+          case 17:
+            loading1.className = '';
+            _context.next = 23;
+            break;
+
+          case 20:
+            _context.prev = 20;
             _context.t0 = _context["catch"](0);
             location = href;
 
-          case 11:
+          case 23:
           case "end":
             return _context.stop();
         }
       }
-    }, null, null, [[0, 8]], Promise);
+    }, null, null, [[0, 20]], Promise);
   })();
 
   return false;
@@ -855,3 +892,4 @@ searchtitle.onkeyup = simpledebounce(function _callee2(_) {
     }
   }, null, null, null, Promise);
 }, 100);
+reflesh_cy();

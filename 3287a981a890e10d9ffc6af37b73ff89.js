@@ -839,3 +839,19 @@ $('.datelist-btn').on('click', function (_) {
 $('.datelist-btn-close').on('click', function (_) {
   $('.datelist').removeClass('show');
 });
+searchtitle.onkeyup = simpledebounce(function _callee2(_) {
+  return regeneratorRuntime.async(function _callee2$(_context2) {
+    while (1) {
+      switch (_context2.prev = _context2.next) {
+        case 0:
+          update_dd_ls(menulistAll.filter(function (a) {
+            return a.title.indexOf(searchtitle.value) > -1;
+          }), 0);
+
+        case 1:
+        case "end":
+          return _context2.stop();
+      }
+    }
+  }, null, null, null, Promise);
+}, 100);

@@ -376,6 +376,26 @@
   .inexport .btn-initga {
     background: #349268 !important;
     color: #fff !important; }
+  .inexport .btn-gitio {
+    display: none;
+    background: #ecb11b !important;
+    color: #fff !important;
+    cursor: pointer; }
+    .inexport .btn-gitio.run span {
+      display: inline-block; }
+    .inexport .btn-gitio span {
+      display: none;
+      font-size: 1px;
+      width: 10px;
+      height: 5px;
+      -webkit-animation: circle 1s infinite linear;
+              animation: circle 1s infinite linear;
+      background: #fff;
+      top: 2px;
+      position: relative;
+      margin-left: 5px;
+      border-radius: 0;
+      padding: 0; }
   .inexport .link-space {
     background: transparent;
     text-decoration: underline;
@@ -753,3 +773,6 @@ body.win-middle .newlink, body.win-middle .dellink, body.win-middle #contentDL, 
   height: 0 !important;
   width: 0 !important;
   overflow: hidden !important; }
+
+.win-large .btn-gitio {
+  display: inline-block; }

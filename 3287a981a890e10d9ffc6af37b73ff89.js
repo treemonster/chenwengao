@@ -782,13 +782,57 @@ $.getScript(IS_DEBUG ? 'marked2.cjs?id=_&do=menulist' : 'menulist.all.js?' + Dat
 function reflesh_cy() {
   var appid = 'cyv9pom35';
   var conf = 'd6c8b1e7944bef3d81664b4a5efe42ad';
+  $('#SOHUCS').addClass('hide-cy');
   window.changyan = undefined;
   window.cyan = undefined;
-  $.getScript("https://cy-cdn.kuaizhan.com/upload/changyan.js", function (_) {
-    window.changyan.api.config({
-      appid,
-      conf
-    });
+  $.getScript("https://cy-cdn.kuaizhan.com/upload/changyan.js", function _callee(_) {
+    return regeneratorRuntime.async(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            window.changyan.api.config({
+              appid,
+              conf
+            });
+
+          case 1:
+            _context.next = 3;
+            return regeneratorRuntime.awrap(sleep(500));
+
+          case 3:
+            _context.prev = 3;
+
+            if (!window.changyan.rendered) {
+              _context.next = 6;
+              break;
+            }
+
+            return _context.abrupt("break", 12);
+
+          case 6:
+            _context.next = 10;
+            break;
+
+          case 8:
+            _context.prev = 8;
+            _context.t0 = _context["catch"](3);
+
+          case 10:
+            _context.next = 1;
+            break;
+
+          case 12:
+            $('#SOHUCS').find('div[id]').each(function (i, e) {
+              if ((e.id + '').match(/^MZAD.*/)) $(e).addClass('hide-anyway');
+            });
+            $('#SOHUCS').removeClass('hide-cy');
+
+          case 14:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, null, null, [[3, 8]], Promise);
   });
 }
 
@@ -804,18 +848,18 @@ $(document).on('click', 'a.dtitle:not(.dtitle-active),#content a', function (e) 
   e.preventDefault();
   loading1.className = 'show';
 
-  (function _callee(_) {
+  (function _callee2(_) {
     var str, t1, i;
-    return regeneratorRuntime.async(function _callee$(_context) {
+    return regeneratorRuntime.async(function _callee2$(_context2) {
       while (1) {
-        switch (_context.prev = _context.next) {
+        switch (_context2.prev = _context2.next) {
           case 0:
-            _context.prev = 0;
-            _context.next = 3;
+            _context2.prev = 0;
+            _context2.next = 3;
             return regeneratorRuntime.awrap(xhr(href));
 
           case 3:
-            str = _context.sent;
+            str = _context2.sent;
             $('#content2').html(str.match(/<div id="content2">([\s\S]+)<\/div>\s*<div id="SOHUCS"/)[1]);
             $('#SOHUCS').attr('sid', str.match(/<div id="SOHUCS" sid="([^"]+)"/)[1]);
             reflesh_cy();
@@ -825,32 +869,32 @@ $(document).on('click', 'a.dtitle:not(.dtitle-active),#content a', function (e) 
 
           case 10:
             if (!(i <= 10)) {
-              _context.next = 17;
+              _context2.next = 17;
               break;
             }
 
             $('#content').scrollTop(Math.sin((1 - i / 10) * Math.PI / 2) * t1);
-            _context.next = 14;
+            _context2.next = 14;
             return regeneratorRuntime.awrap(sleep(16));
 
           case 14:
             i++;
-            _context.next = 10;
+            _context2.next = 10;
             break;
 
           case 17:
             loading1.className = '';
-            _context.next = 23;
+            _context2.next = 23;
             break;
 
           case 20:
-            _context.prev = 20;
-            _context.t0 = _context["catch"](0);
+            _context2.prev = 20;
+            _context2.t0 = _context2["catch"](0);
             location = href;
 
           case 23:
           case "end":
-            return _context.stop();
+            return _context2.stop();
         }
       }
     }, null, null, [[0, 20]], Promise);
@@ -876,10 +920,10 @@ $('.datelist-btn').on('click', function (_) {
 $('.datelist-btn-close').on('click', function (_) {
   $('.datelist').removeClass('show');
 });
-searchtitle.onkeyup = simpledebounce(function _callee2(_) {
-  return regeneratorRuntime.async(function _callee2$(_context2) {
+searchtitle.onkeyup = simpledebounce(function _callee3(_) {
+  return regeneratorRuntime.async(function _callee3$(_context3) {
     while (1) {
-      switch (_context2.prev = _context2.next) {
+      switch (_context3.prev = _context3.next) {
         case 0:
           update_dd_ls(menulistAll.filter(function (a) {
             return a.title.indexOf(searchtitle.value) > -1;
@@ -887,7 +931,7 @@ searchtitle.onkeyup = simpledebounce(function _callee2(_) {
 
         case 1:
         case "end":
-          return _context2.stop();
+          return _context3.stop();
       }
     }
   }, null, null, null, Promise);

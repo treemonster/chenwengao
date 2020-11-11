@@ -74,8 +74,8 @@
   display: none;
 }
 .dtitle:not(.dtitle-active):hover {
-  background: #eee;
-  color: #000;
+  background: #eee !important;
+  color: #000 !important;
   box-shadow: 0 0 10px #fff;
   width: 100%;
   font-size: 15px;
@@ -83,7 +83,9 @@
   opacity: 1;
 }
 .dtitle-active {
-  opacity: 0.5;
+  opacity: 0.5 !important;
+  color: #fff !important;
+  cursor: default;
 }
 .dtitle .del {
   color: #fff;

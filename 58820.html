@@ -41,7 +41,7 @@
 <p>如果仅用于局域网内的邮件收发，那么到这一步已经可以正常工作了。其他人要发邮件，目标邮箱 user@ip 就可以发出去了。</p>
 <p>如果需要作为外网的接收邮件服务器使用，则还需要配置dns的MX记录。因为sendmail本身只负责监听端口收发邮件，未添加MX记录时，其他邮件服务器无法解析域名对应的服务器了。（不过直接用ip发是可以的，但应该没人会这么做）</p>
 <p>添加MX记录在买域名的网站上可以在线编辑，如果不支持在线搞么也不要买了他们家的域名了。</p>
-<p><img src="?do=loadimg&id=58820&img=58820$khcqeh80.e4h.png" alt="image.png"></p>
+<p><img src="010b7676eaa8b49d012e1c99fb98ef9f" alt="image.png"></p>
 <p>修改/etc/mail/sendmail.mc，把下面这两行之前的dnl去掉</p>
 <pre><code>DAEMON_OPTIONS(`Port=smtp,Addr=0.0.0.0, Name=MTA)dnl
 
@@ -52,7 +52,7 @@ DAEMON_OPTIONS(`Port=submission, Name=MSA, M=Ea)dnl</code></pre>
 <hr>
 <h4 id="2017-12-04补充">2017-12-04补充</h4>
 <p>如果遇到启动慢或者发送慢的情况，多半是<code>sendmail</code>解析发送方域名的问题，可以在<code>/etc/hosts</code>里把发送方的域名添加到 <code>127.0.0.1</code>这行后面。看上去像这样的：</p>
-<p><img src="?do=loadimg&id=58820&img=58820$khcqeuj6.fvr.png" alt="image.png"></p>
+<p><img src="6c151ab2a0a76e51be2af35b3ed19d83" alt="image.png"></p>
 <h4 id="red-重要！-切记开启服务器25端口，否则将无法收到邮件！"><code>red; 重要！</code> 切记开启服务器25端口，否则将无法收到邮件！</h4>
 <blockquote>
 <h3 id="相关文档">相关文档</h3>
@@ -64,41 +64,41 @@ DAEMON_OPTIONS(`Port=submission, Name=MSA, M=Ea)dnl</code></pre>
 <h3 id="随便看看">随便看看</h3>
 </blockquote>
 <ol>
-<li><p><a href="kh4hp4vo.i3t.html">word文件命令行打印</a></p>
-</li>
 <li><p><a href="kh4hp4x0.yw.html">pip安装nltk临时使用国内源</a></p>
 </li>
-<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
+<li><p><a href="kh4hp4xw.fuh.html">mac 终端运行后台程序如何在终端关闭时继续运行</a></p>
 </li>
-<li><p><a href="kh4i04i8.s1n.html">nodejs socks5</a></p>
+<li><p><a href="kh4hp50h.0q9.html">curl用法</a></p>
 </li>
-<li><p><a href="kh4hp55c.9dm.html">搜索命令整理</a></p>
+<li><p><a href="kh4hp50y.c3p.html">nginx用域名来转发请求</a></p>
 </li>
-<li><p><a href="kh4hp569.gcj.html">nodejs俄罗斯方块</a></p>
+<li><p><a href="kh4hp51g.d79.html">SSL certificate problem: self signed certificate in certificate chain</a></p>
 </li>
-<li><p><a href="kh4hp57y.fpf.html">npm设置仓库地址和代理</a></p>
+<li><p><a href="kh4hp55s.p7g.html">判断变量是否 0 或者 &#39;0&#39;</a></p>
 </li>
-<li><p><a href="kh4hp5a0.gjt.html">单页应用的单向数据流的流程图</a></p>
+<li><p><a href="kh4hp56p.7c.html">heroku查看app使用时间</a></p>
 </li>
-<li><p><a href="kh4hp5ae.oak.html">dd备份/还原</a></p>
+<li><p><a href="kh4hp596.lj.html">webrtc泄漏本地ip信息</a></p>
 </li>
-<li><p><a href="kh4hp5by.jnt.html">webpack使用外部资源</a></p>
+<li><p><a href="kh4hp5as.pb.html">linux自启动/禁止自启动服务</a></p>
 </li>
-<li><p><a href="kh4hp5ct.4ys.html">putty使用http代理连接服务器</a></p>
+<li><p><a href="kh4hp5bk.27.html">cdn资源列表</a></p>
 </li>
-<li><p><a href="88246.html">centos查看最近一次的开机时间</a></p>
+<li><p><a href="kh4ib7jk.t1.html">mongodb2.4 添加用户</a></p>
 </li>
 <li><p><a href="88225.html">mac搜索局域网内的主机</a></p>
 </li>
-<li><p><a href="88157.html">replace2正则扩展方法</a></p>
+<li><p><a href="88180.html">树莓派配置wifi</a></p>
 </li>
-<li><p><a href="87991.html">数据库清理优化</a></p>
+<li><p><a href="88172.html">mysql选取内容导出到文件</a></p>
+</li>
+<li><p><a href="88153.html">猴子选大王算法问题</a></p>
+</li>
+<li><p><a href="88096.html">简易版事件封装</a></p>
+</li>
+<li><p><a href="83845.html">配置mysql ssl连接</a></p>
 </li>
 <li><p><a href="79547.html">前端性能观察器</a></p>
-</li>
-<li><p><a href="75653.html">判断点是否在多边形内</a></p>
-</li>
-<li><p><a href="69351.html">缓存才是优化的终极手段</a></p>
 </li>
 </ol>
 </div>

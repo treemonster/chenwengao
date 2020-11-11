@@ -747,7 +747,8 @@ try {
   Function("r", "regeneratorRuntime = r")(runtime);
 }
 
-$('code').each(function (i, code) {
+var IS_DEBUG = location.href.match(/loadGithubPage=/);
+$('code[language]').each(function (i, code) {
   return hljs.highlightBlock(code);
 });
 var dd_ls_all = [];
@@ -768,20 +769,73 @@ function update_dd_ls(dd_ls, has_last_dd) {
       str += `<div class='date'>${d1._cyear}/${d1._cmonth < 10 ? '0' + d1._cmonth : d1._cmonth}</div>`;
     }
 
-    str += `<span data-id="${d1.id}" class='dtitle ${d1.id === qid ? 'dtitle-active' : ''}'>${d1.title}
-      <span class='del' data-id="${d1.id}" data-title="${d1.title}">删除</span>
-    </span>`;
+    str += `<a data-id="${d1.id}" href="${IS_DEBUG ? '?id=' + d1.id + '&loadGithubPage=yes' : d1.id + '.html'}" class='dtitle ${d1.id === qid ? 'dtitle-active' : ''}'>${d1.title}</a>`;
   }
 
   if (has_last_dd) lst.innerHTML += str;else lst.innerHTML = str || `<div class='empty'>没有内容</div>`;
 }
 
-$.getScript('/menulist.all.js?' + Date.now()).then(function (_) {
+$.getScript(IS_DEBUG ? 'marked2.cjs?id=_&do=menulist' : 'menulist.all.js?' + Date.now()).then(function (_) {
   update_dd_ls(menulistAll);
-  $('.datelist').scrollTop($('.dtitle-active').offset().top);
 });
-$(document).on('click', '.dtitle:not(.dtitle-active)', function (e) {
+$(document).on('click', 'a.dtitle:not(.dtitle-active),#content a', function (e) {
+  var href = $(this).attr('href');
+  var murl = /^(?:\?id=([^&]+)&loadGithubPage=yes|([^/]+?)\.html)$/;
+  var id = href.match(murl);
+  if (!id) return;
+  id = id[1] || id[2];
+  $('.dtitle-active').removeClass('dtitle-active');
+  $('.dtitle[data-id="' + id + '"]').addClass('dtitle-active');
+  $('.datelist').removeClass('show');
   e.preventDefault();
-  location = $(this).attr('data-id') + '.html';
+
+  (function _callee(_) {
+    var str;
+    return regeneratorRuntime.async(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            _context.prev = 0;
+            _context.next = 3;
+            return regeneratorRuntime.awrap(xhr(href));
+
+          case 3:
+            str = _context.sent;
+            $('#content').html(str.match(/<div id="content">([\s\S]+)<div class="body-mask"/)[1]);
+            $('.tabsr').html(str.match(/<div class="tabsr">([\s\S]+?<\/div>)\s*<\/div>/)[1]);
+            _context.next = 11;
+            break;
+
+          case 8:
+            _context.prev = 8;
+            _context.t0 = _context["catch"](0);
+            location = href;
+
+          case 11:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, null, null, [[0, 8]], Promise);
+  })();
+
   return false;
+});
+$(document).on('click', 'a.dtitle.dtitle-active', function (e) {
+  e.preventDefault();
+  return false;
+});
+$(window).on('resize', function (_) {
+  $(document.body).removeClass('win-min win-middle win-large');
+  var s = innerWidth;
+  var x = 'win-min';
+  if (s > 920) x = 'win-middle';
+  if (s > 1280) x = 'win-large';
+  $(document.body).addClass(x);
+}).resize();
+$('.datelist-btn').on('click', function (_) {
+  $('.datelist').addClass('show');
+});
+$('.datelist-btn-close').on('click', function (_) {
+  $('.datelist').removeClass('show');
 });

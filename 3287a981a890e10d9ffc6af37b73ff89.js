@@ -778,6 +778,7 @@ function update_dd_ls(dd_ls, has_last_dd) {
 
 $.getScript('/menulist.all.js?' + Date.now()).then(function (_) {
   update_dd_ls(menulistAll);
+  $('.datelist').scrollTop($('.dtitle-active').offset().top);
 });
 $(document).on('click', '.dtitle:not(.dtitle-active)', function (e) {
   e.preventDefault();

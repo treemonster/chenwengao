@@ -378,9 +378,19 @@
     color: #fff !important; }
   .inexport .btn-gitio {
     display: none;
-    background: #ecb11b !important;
     color: #fff !important;
-    cursor: pointer; }
+    cursor: pointer;
+    font-size: 13px;
+    box-shadow: 0 0 10px #fff;
+    margin: 5px 10px 0 0;
+    padding: 3px 10px; }
+    .inexport .btn-gitio.locked {
+      opacity: .8;
+      cursor: not-allowed; }
+    .inexport .btn-gitio.all {
+      background: #ecb11b !important; }
+    .inexport .btn-gitio.new {
+      background: #ec1bac !important; }
     .inexport .btn-gitio.run span {
       display: inline-block; }
     .inexport .btn-gitio span {
@@ -774,5 +784,14 @@ body.win-middle .newlink, body.win-middle .dellink, body.win-middle #contentDL, 
   width: 0 !important;
   overflow: hidden !important; }
 
-.win-large .btn-gitio {
+.win-large:not(.readonly) .btn-gitio {
   display: inline-block; }
+
+.win-large:not(.readonly) .searchdiv {
+  height: 175px; }
+
+.win-large:not(.readonly) #search {
+  top: 125px; }
+
+.win-large:not(.readonly) .datelist {
+  padding-top: 170px; }

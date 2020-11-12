@@ -775,7 +775,16 @@ function update_dd_ls(dd_ls, has_last_dd) {
   if (has_last_dd) lst.innerHTML += str;else lst.innerHTML = str || `<div class='empty'>没有内容</div>`;
 }
 
+try {
+  window.menulistAll = JSON.parse(localStorage.getItem('menulistAll'));
+  update_dd_ls(menulistAll);
+} catch (e) {}
+
 $.getScript(IS_DEBUG ? 'marked2.cjs?id=_&do=menulist' : 'menulist.all.js?' + Date.now()).then(function (_) {
+  try {
+    localStorage.setItem('menulistAll', JSON.stringify(menulistAll));
+  } catch (e) {}
+
   update_dd_ls(menulistAll);
 });
 
@@ -855,10 +864,11 @@ $(document).on('click', 'a.dtitle:not(.dtitle-active),#content a', function (e) 
         switch (_context2.prev = _context2.next) {
           case 0:
             _context2.prev = 0;
-            _context2.next = 3;
+            history.pushState('', '', href);
+            _context2.next = 4;
             return regeneratorRuntime.awrap(xhr(href));
 
-          case 3:
+          case 4:
             str = _context2.sent;
             $('#content2').html(str.match(/<div id="content2">([\s\S]+)<\/div>\s*<div id="SOHUCS"/)[1]);
             $('#SOHUCS').attr('sid', str.match(/<div id="SOHUCS" sid="([^"]+)"/)[1]);
@@ -867,37 +877,37 @@ $(document).on('click', 'a.dtitle:not(.dtitle-active),#content a', function (e) 
             t1 = $('#content').scrollTop();
             i = 1;
 
-          case 10:
+          case 11:
             if (!(i <= 10)) {
-              _context2.next = 17;
+              _context2.next = 18;
               break;
             }
 
             $('#content').scrollTop(Math.sin((1 - i / 10) * Math.PI / 2) * t1);
-            _context2.next = 14;
+            _context2.next = 15;
             return regeneratorRuntime.awrap(sleep(16));
 
-          case 14:
+          case 15:
             i++;
-            _context2.next = 10;
+            _context2.next = 11;
             break;
 
-          case 17:
+          case 18:
             loading1.className = '';
-            _context2.next = 23;
+            _context2.next = 24;
             break;
 
-          case 20:
-            _context2.prev = 20;
+          case 21:
+            _context2.prev = 21;
             _context2.t0 = _context2["catch"](0);
             location = href;
 
-          case 23:
+          case 24:
           case "end":
             return _context2.stop();
         }
       }
-    }, null, null, [[0, 20]], Promise);
+    }, null, null, [[0, 21]], Promise);
   })();
 
   return false;
@@ -920,20 +930,42 @@ $('.datelist-btn').on('click', function (_) {
 $('.datelist-btn-close').on('click', function (_) {
   $('.datelist').removeClass('show');
 });
-searchtitle.onkeyup = simpledebounce(function _callee3(_) {
+var updateMenu = simpledebounce(function _callee3(key) {
   return regeneratorRuntime.async(function _callee3$(_context3) {
     while (1) {
       switch (_context3.prev = _context3.next) {
         case 0:
+          $('.datelist').addClass('show');
           update_dd_ls(menulistAll.filter(function (a) {
-            return a.title.indexOf(searchtitle.value) > -1;
+            return (a.title + '\n' + a.tags).indexOf(key) > -1;
           }), 0);
 
-        case 1:
+        case 2:
         case "end":
           return _context3.stop();
       }
     }
   }, null, null, null, Promise);
 }, 100);
-reflesh_cy();
+
+searchtitle.onkeyup = function (_) {
+  updateMenu(searchtitle.value);
+};
+
+$(document).on('click', '.tagz', function () {
+  updateMenu(searchtitle.value = $(this).text());
+});
+$(window).load(function _callee4(_) {
+  return regeneratorRuntime.async(function _callee4$(_context4) {
+    while (1) {
+      switch (_context4.prev = _context4.next) {
+        case 0:
+          reflesh_cy();
+
+        case 1:
+        case "end":
+          return _context4.stop();
+      }
+    }
+  }, null, null, null, Promise);
+});

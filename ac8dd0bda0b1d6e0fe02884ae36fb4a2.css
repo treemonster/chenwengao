@@ -439,7 +439,10 @@
     color: #fff;
     width: 100%;
     margin: 5px 10px;
-    margin-top: 10px; }
+    margin-top: 10px;
+    position: relative;
+    overflow: auto;
+    height: 50px; }
 
 body.readonly .dtitle .del {
   display: none !important; }
@@ -728,11 +731,14 @@ body.win-middle .newlink, body.win-middle .dellink, body.win-middle #contentDL, 
 .github-io .datelist {
   padding-top: 150px; }
 
+.github-io .inexport.text {
+  right: 0 !important; }
+
 .description {
   color: #ddd;
   position: absolute;
   top: 70px;
-  left: 0;
+  left: 20px;
   right: 10px;
   overflow: hidden;
   height: 20px;
@@ -783,6 +789,16 @@ body.win-middle .newlink, body.win-middle .dellink, body.win-middle #contentDL, 
   height: 0 !important;
   width: 0 !important;
   overflow: hidden !important; }
+
+.module-cmt-float-bar {
+  display: none !important; }
+
+#loading_cy {
+  font-size: 20px;
+  text-align: center;
+  background: #eee;
+  padding: 30px 0;
+  display: none; }
 
 .win-large:not(.readonly) .btn-gitio {
   display: inline-block; }

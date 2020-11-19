@@ -747,7 +747,7 @@ try {
   Function("r", "regeneratorRuntime = r")(runtime);
 }
 
-var IS_DEBUG = location.href.match(/loadGithubPage=/);
+var IS_DEBUG = location.href.match(/\/\:app\:\/marked2ga\/githubio/);
 $('code[language]').each(function (i, code) {
   return hljs.highlightBlock(code);
 });
@@ -769,7 +769,7 @@ function update_dd_ls(dd_ls, has_last_dd) {
       str += `<div class='date'>${d1._cyear}/${d1._cmonth < 10 ? '0' + d1._cmonth : d1._cmonth}</div>`;
     }
 
-    str += `<a data-id="${d1.id}" href="${IS_DEBUG ? '?id=' + d1.id + '&loadGithubPage=yes' : d1.id + '.html'}" class='dtitle ${d1.id === dd_qid ? 'dtitle-active' : ''}'>${d1.title}</a>`;
+    str += `<a data-id="${d1.id}" href="${IS_DEBUG ? '?id=' + d1.id : d1.id + '.html'}" class='dtitle ${d1.id === dd_qid ? 'dtitle-active' : ''}'>${d1.title}</a>`;
   }
 
   if (has_last_dd) lst.innerHTML += str;else lst.innerHTML = str || `<div class='empty'>没有内容</div>`;
@@ -780,7 +780,7 @@ try {
   update_dd_ls(menulistAll);
 } catch (e) {}
 
-$.getScript(IS_DEBUG ? 'marked2.cjs?id=_&do=menulist' : 'menulist.all.js?' + Date.now()).then(function (_) {
+$.getScript(IS_DEBUG ? '/:app:/marked2ga/menulist' : 'menulist.all.js?' + Date.now()).then(function (_) {
   try {
     localStorage.setItem('menulistAll', JSON.stringify(menulistAll));
   } catch (e) {}
@@ -789,8 +789,10 @@ $.getScript(IS_DEBUG ? 'marked2.cjs?id=_&do=menulist' : 'menulist.all.js?' + Dat
 });
 
 function reflesh_cy() {
-  var appid = 'cyv9pom35';
-  var conf = 'd6c8b1e7944bef3d81664b4a5efe42ad';
+  var appid = window.CY_APPID;
+  var conf = window.CY_CONF;
+  if (!appid || !conf) return;
+  $('#loading_cy').show();
   $('#SOHUCS').addClass('hide-cy');
   window.changyan = undefined;
   window.cyan = undefined;
@@ -831,12 +833,13 @@ function reflesh_cy() {
             break;
 
           case 12:
+            $('#loading_cy').hide();
             $('#SOHUCS').find('div[id]').each(function (i, e) {
               if ((e.id + '').match(/^MZAD.*/)) $(e).addClass('hide-anyway');
             });
             $('#SOHUCS').removeClass('hide-cy');
 
-          case 14:
+          case 15:
           case "end":
             return _context.stop();
         }
@@ -847,7 +850,7 @@ function reflesh_cy() {
 
 $(document).on('click', 'a.dtitle:not(.dtitle-active),#content a', function (e) {
   var href = $(this).attr('href');
-  var murl = /^(?:\?id=([^&]+)&loadGithubPage=yes|([^/]+?)\.html)$/;
+  var murl = /^(?:\?id=([^&]+)|([^/]+?)\.html)/;
   var id = href.match(murl);
   if (!id) return;
   id = id[1] || id[2];

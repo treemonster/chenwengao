@@ -193,6 +193,8 @@ module.exports=Marked2GaController
   return await markedstr(str)
 </code></pre>
 <p>这次再用ab命令测试，问题已经解决了。</p>
+<p>有感而发，就是因为我<font color="blue">完全贯彻了mvc架构的分层理念</font>，这次排查问题才能顺藤摸瓜非常轻松地解决了。实际上这些被封装方法的背后还有数据库查询，界面输出等功能逻辑，如果全部写在一起的混乱代码，靠这种排除法的方式来查就会相当麻烦。</p>
+<p>网上搜了一些nodejs内存泄漏的排查方式，最靠谱的是<font color="red">借助代码侵入方法导出内存使用快照，然后用chrome开发者工具来定位内存占用时间最长的代码</font>。以后有机会我也试试看吧，问题复杂的时候不失为一种快捷的方法。</p>
 <blockquote>
 <h3 id="相关文档">相关文档</h3>
 <p>暂无</p>
@@ -201,41 +203,39 @@ module.exports=Marked2GaController
 <h3 id="随便看看">随便看看</h3>
 </blockquote>
 <ol>
-<li><p><a href="kh4hp4v9.83f.html">安卓文字偏上，文字顶部被遮罩</a></p>
+<li><p><a href="khd18njm.lhb.html">cnpm 立即同步</a></p>
+</li>
+<li><p><a href="khalg5ks.g.html">css3自定义滚动条样式</a></p>
+</li>
+<li><p><a href="kh4hp4u7.5l8.html">react项目webpack打包时拆分异步加载的文件</a></p>
+</li>
+<li><p><a href="kh4hp4vo.i3t.html">word文件命令行打印</a></p>
+</li>
+<li><p><a href="kh4hp4wj.uv.html">nginx 子域名对应文件夹</a></p>
+</li>
+<li><p><a href="kh4hp4xw.fuh.html">mac 终端运行后台程序如何在终端关闭时继续运行</a></p>
+</li>
+<li><p><a href="kh4hp4z5.bct.html">raw.githubusercontent.com DNS被指向127.0.0.1</a></p>
 </li>
 <li><p><a href="kh4hp50h.0q9.html">curl用法</a></p>
 </li>
-<li><p><a href="kh4hp52g.1h.html">nodejs本地双向代理 端口转发</a></p>
+<li><p><a href="kh4hp51y.hzp.html">npm包命令行调用</a></p>
 </li>
-<li><p><a href="kh4hp53d.49g.html">jxa运动指令脚本</a></p>
+<li><p><a href="kh4hp55c.9dm.html">搜索命令整理</a></p>
 </li>
-<li><p><a href="kh4hz03h.xh.html">python 用摄像头拍照并写入文件</a></p>
+<li><p><a href="kh4hp59l.y0i.html">树莓派 3B/3B+ usb启动</a></p>
 </li>
-<li><p><a href="kh4hp55s.p7g.html">判断变量是否 0 或者 &#39;0&#39;</a></p>
+<li><p><a href="kh4hp5a0.gjt.html">单页应用的单向数据流的流程图</a></p>
 </li>
-<li><p><a href="kh4hp57y.fpf.html">npm设置仓库地址和代理</a></p>
-</li>
-<li><p><a href="kh4hp596.lj.html">webrtc泄漏本地ip信息</a></p>
-</li>
-<li><p><a href="kh4hp5as.pb.html">linux自启动/禁止自启动服务</a></p>
-</li>
-<li><p><a href="kh4hp5cd.lmo.html">TIME_WAIT过多</a></p>
+<li><p><a href="kh4hp5e1.ou.html">git 设置代理服务器</a></p>
 </li>
 <li><p><a href="kh4ib7jk.t1.html">mongodb2.4 添加用户</a></p>
 </li>
-<li><p><a href="88328.html">python下载文件，带进度条控制</a></p>
+<li><p><a href="88128.html">centos7 开放或者关闭端口</a></p>
 </li>
-<li><p><a href="88206.html">sendmail用nginx做代理</a></p>
+<li><p><a href="87823.html">youku电脑版跳过广告代码</a></p>
 </li>
-<li><p><a href="88096.html">简易版事件封装</a></p>
-</li>
-<li><p><a href="88094.html">随机取某个概率区间的代码</a></p>
-</li>
-<li><p><a href="83845.html">配置mysql ssl连接</a></p>
-</li>
-<li><p><a href="79146.html">linux 批量替换文本内容</a></p>
-</li>
-<li><p><a href="75739.html">平面旋转</a></p>
+<li><p><a href="81007.html">html表格导出csv文件并下载</a></p>
 </li>
 </ol>
 

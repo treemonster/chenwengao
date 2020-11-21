@@ -748,9 +748,6 @@ try {
 }
 
 var IS_DEBUG = location.href.match(/\/\:app\:\/marked2ga\/githubio/);
-$('code[language]').each(function (i, code) {
-  return hljs.highlightBlock(code);
-});
 var dd_ls_all = [];
 
 function update_dd_ls(dd_ls, has_last_dd) {
@@ -789,6 +786,9 @@ $.getScript(IS_DEBUG ? '/:app:/marked2ga/menulist' : 'menulist.all.js?' + Date.n
 });
 
 function reflesh_cy() {
+  $('code[class]').each(function (i, code) {
+    return hljs.highlightBlock(code);
+  });
   var appid = window.CY_APPID;
   var conf = window.CY_CONF;
   if (!appid || !conf) return;
